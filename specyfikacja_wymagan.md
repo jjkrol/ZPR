@@ -1,13 +1,21 @@
 Specyfikacja wymagań
 ===
-Przeglądarka zdjęć
-prosta, szybka, minimalistyczna, intuicyjna
+### Ogólna
 
-1. Przeglądanie zdjęć, (lewo prawo)
+Przeglądarka zdjęć o prostym i intuicyjnym interfejsie, pozwalająca na efektywne zarządzanie zdjęciami i ich edycję. Program ma oferować przede wszystkim najpotrzebniejsze funkcje niezbędne do obróbki fotografii, rezygnując z mniej popularnych opcji na rzecz zwiększenia wydajności funkcji podstawowych. 
+Aplikacja będzie miała dostępny interfejs umożliwiający proste dodawanie wtyczek, które pozwolą rozszerzyć oferowane funkcje, przede wszystkim pod względem edycji zdjęć.
+
+### Rozwinięcie szczegółowe 1
+
+#### Funkcjonalne
+
+1. Przeglądanie
   - powiększanie?
-2. Organizacja zdjęć, zaznaczanie
-  - wg. systemu plików
-  - własna (tagi)
+  - obsługa formatu jpg, z możliwością łatwego dopisania obsługi innych typów plików
+2. Zarządzanie 
+  - zaznaczanie
+  - organizacja wg. systemu plików
+  - organizacja własna (tagi)
 3. edycja
   - np. wyostrzanie, obroty, edycja metadanych
 4. wtyczki (także edycja zorganizowana na takiej zasadzie)
@@ -19,4 +27,9 @@ prosta, szybka, minimalistyczna, intuicyjna
   - znajdowanie duplikatów (ew. wsteczne wyszukiwanie)
   - edytuj w ... (gimp)
   - zapis zdjęć przy wyjściu (za zgodą)
-6. obsługa formatu jpg, z możliwością łatwego dopisania obsługi innych typów plików
+
+#### Niefunkcjonalne
+
+1. szybkość
+2. niezawodność
+3. ?
