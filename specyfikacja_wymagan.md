@@ -33,3 +33,10 @@ Aplikacja będzie miała dostępny interfejs umożliwiający proste dodawanie wt
 1. szybkość
 2. niezawodność
 3. ?
+
+### TODO
+1. Model przypadków użycia:
+  - ogólne
+  - szczegółowe
+  - diagramy?
+2. 

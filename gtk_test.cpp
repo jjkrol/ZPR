@@ -3,6 +3,8 @@
 
 //kompilacja dla ciekawskich:
 //g++ -o gtk_test gtk_test.cpp `pkg-config --libs --cflags gtk+-2.0`
+//lub scons
+//lub rake
 
 #include <gtk/gtk.h>
 
