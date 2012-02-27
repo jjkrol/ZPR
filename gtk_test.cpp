@@ -1,3 +1,9 @@
+//wiem, ze ten kod strasznie wyglada, ale to zabawy na razie ;-)
+//mc
+
+//kompilacja dla ciekawskich:
+//g++ -o gtk_test gtk_test.cpp `pkg-config --libs --cflags gtk+-2.0`
+
 #include <gtk/gtk.h>
 
 static void hello(GtkWidget *widget, gpointer data) {
