@@ -1,0 +1,77 @@
+\hypertarget{classPhoto}{\section{Photo Class Reference}
+\label{classPhoto}\index{Photo@{Photo}}
+}
+
+
+{\ttfamily \#include $<$photo.\-hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPhoto_ae30ff25941bf9aba469eb08f838a666a}{Photo} (boost\-::filesystem\-::path argument\-Path)
+\item 
+virtual \hyperlink{classPhoto_a1bf707fc71f95a3aa3464bd4e339afd0}{$\sim$\-Photo} ()
+\item 
+void \hyperlink{classPhoto_a8e86e62d0ac46bf94e16391a373a4abc}{get\-Thumbnail} ()
+\item 
+void \hyperlink{classPhoto_a9796448b191e7696f9024a86fa4d02c9}{get\-Image} ()
+\item 
+boost\-::filesystem\-::path \hyperlink{classPhoto_ab369ad720923dda4db65996cd2844859}{get\-Path} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A class representing a single photo. Main features (most to be yet implemented)\-:
+\begin{DoxyItemize}
+\item a real photo (file or db entry) has {\itshape only one\/} object representing it. this means that you can't have two \hyperlink{classPhoto}{Photo} objects representing an image with the same id/path. This implies some manipulations in constructor (similar to singleton maybe?)
+\item providing thumbnails and full image
+\item changing tags
+\item moving and deleting the photo
+\item placing effects on the photo and getting effect previews of certain size 
+\end{DoxyItemize}
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classPhoto_ae30ff25941bf9aba469eb08f838a666a}{\index{Photo@{Photo}!Photo@{Photo}}
+\index{Photo@{Photo}!Photo@{Photo}}
+\subsubsection[{Photo}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Photo\-::\-Photo} (
+\begin{DoxyParamCaption}
+\item[{boost\-::filesystem\-::path}]{argument\-Path}
+\end{DoxyParamCaption}
+)}}\label{classPhoto_ae30ff25941bf9aba469eb08f838a666a}
+\hypertarget{classPhoto_a1bf707fc71f95a3aa3464bd4e339afd0}{\index{Photo@{Photo}!$\sim$\-Photo@{$\sim$\-Photo}}
+\index{$\sim$\-Photo@{$\sim$\-Photo}!Photo@{Photo}}
+\subsubsection[{$\sim$\-Photo}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf Photo\-::$\sim$\-Photo} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classPhoto_a1bf707fc71f95a3aa3464bd4e339afd0}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classPhoto_a9796448b191e7696f9024a86fa4d02c9}{\index{Photo@{Photo}!get\-Image@{get\-Image}}
+\index{get\-Image@{get\-Image}!Photo@{Photo}}
+\subsubsection[{get\-Image}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf Photo\-::get\-Image} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classPhoto_a9796448b191e7696f9024a86fa4d02c9}
+\hypertarget{classPhoto_ab369ad720923dda4db65996cd2844859}{\index{Photo@{Photo}!get\-Path@{get\-Path}}
+\index{get\-Path@{get\-Path}!Photo@{Photo}}
+\subsubsection[{get\-Path}]{\setlength{\rightskip}{0pt plus 5cm}boost\-::filesystem\-::path {\bf Photo\-::get\-Path} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classPhoto_ab369ad720923dda4db65996cd2844859}
+\hypertarget{classPhoto_a8e86e62d0ac46bf94e16391a373a4abc}{\index{Photo@{Photo}!get\-Thumbnail@{get\-Thumbnail}}
+\index{get\-Thumbnail@{get\-Thumbnail}!Photo@{Photo}}
+\subsubsection[{get\-Thumbnail}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf Photo\-::get\-Thumbnail} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classPhoto_a8e86e62d0ac46bf94e16391a373a4abc}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{photo_8hpp}{photo.\-hpp}\item 
+src/\hyperlink{photo_8cpp}{photo.\-cpp}\end{DoxyCompactItemize}

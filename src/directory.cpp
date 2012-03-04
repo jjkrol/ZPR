@@ -1,11 +1,13 @@
+/** \class Directory
+ * A class representing a single directory, providing its photos and subdirectories.
+ */
 #include "../include/directory.hpp"
 
 using namespace boost::filesystem;
 using namespace std;
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
-  //caution, no error handling!
-
+  /// There is no error handling in case the provided path is a file
   if(exists(directoryPath) && is_directory(directoryPath)){
 
     vector<path> directoryContents;
