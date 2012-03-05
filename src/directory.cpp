@@ -17,11 +17,12 @@ Directory::Directory(path inputPath):directoryPath(inputPath){
     for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
 
       if(is_directory(*it)){
+        //TODO change to check for subfolders in getSubdirectories
         subdirectories.push_back(new Directory(*it));
       }
       else{
         if( (*it).extension()==".jpg" ) // right now we only use jpg
-          photos.push_back(new Photo(*it));
+          photos.push_back(Photo::initialize(*it));
       }
 
     } //for

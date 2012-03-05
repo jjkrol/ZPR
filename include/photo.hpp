@@ -1,17 +1,32 @@
 #pragma once
 
 #include <boost/filesystem.hpp>
+#include <map>
 
 class Photo {
 
   public:
-    Photo (boost::filesystem::path argumentPath);
+    static Photo * initialize(boost::filesystem::path argumentPath);
     virtual ~Photo () { };
 
     void getThumbnail();
     void getImage();
     boost::filesystem::path getPath();
 
+    /* to be added:
+     * deleteFromDatabase()
+     * deleteCompletely
+     * save()
+     * move()
+     * addTag()
+     * deleteTag()
+     * getTags()
+     * putEffect()
+     * getEffectPreview(EffectParams, Size)
+     * undoEffect() ??
+     */
+
   private:
+    Photo (boost::filesystem::path argumentPath);
     boost::filesystem::path photoPath;
 };

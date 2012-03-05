@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char* argv[]){
   path p (argv[1]);
   if (!is_directory(p)){
-    Photo* myphoto = new Photo(p);
+    Photo* myphoto = Photo::initialize(p);
     std::cout<<"Sciezka: "<<myphoto->getPath() << std::endl;
   }
   else{

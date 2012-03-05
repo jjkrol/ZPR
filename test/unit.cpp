@@ -10,9 +10,11 @@ using namespace boost::filesystem;
 BOOST_AUTO_TEST_SUITE( testSuite )
 
   BOOST_AUTO_TEST_CASE( photoClassTest ) {
-    Photo* myphoto = new Photo("test/zdj.jpg");
     path p("test/zdj.jpg");
+    Photo* myphoto = Photo::initialize(p);
     BOOST_CHECK(myphoto->getPath() == p );
+    //double initialization
+    BOOST_CHECK(Photo::initialize(p) == Photo::initialize(p));
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
