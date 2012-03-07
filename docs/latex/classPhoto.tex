@@ -8,8 +8,6 @@
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\hyperlink{classPhoto_ae30ff25941bf9aba469eb08f838a666a}{Photo} (boost\-::filesystem\-::path argument\-Path)
-\item 
 virtual \hyperlink{classPhoto_a1bf707fc71f95a3aa3464bd4e339afd0}{$\sim$\-Photo} ()
 \item 
 void \hyperlink{classPhoto_a8e86e62d0ac46bf94e16391a373a4abc}{get\-Thumbnail} ()
@@ -17,6 +15,11 @@ void \hyperlink{classPhoto_a8e86e62d0ac46bf94e16391a373a4abc}{get\-Thumbnail} ()
 void \hyperlink{classPhoto_a9796448b191e7696f9024a86fa4d02c9}{get\-Image} ()
 \item 
 boost\-::filesystem\-::path \hyperlink{classPhoto_ab369ad720923dda4db65996cd2844859}{get\-Path} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classPhoto}{Photo} $\ast$ \hyperlink{classPhoto_a0ed71e4b83a3e12c3d0c0048b1de767f}{initialize} (boost\-::filesystem\-::path argument\-Path)
 \end{DoxyCompactItemize}
 
 
@@ -31,13 +34,6 @@ A class representing a single photo. Main features (most to be yet implemented)\
 \end{DoxyItemize}
 
 \subsection{Constructor \& Destructor Documentation}
-\hypertarget{classPhoto_ae30ff25941bf9aba469eb08f838a666a}{\index{Photo@{Photo}!Photo@{Photo}}
-\index{Photo@{Photo}!Photo@{Photo}}
-\subsubsection[{Photo}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Photo\-::\-Photo} (
-\begin{DoxyParamCaption}
-\item[{boost\-::filesystem\-::path}]{argument\-Path}
-\end{DoxyParamCaption}
-)}}\label{classPhoto_ae30ff25941bf9aba469eb08f838a666a}
 \hypertarget{classPhoto_a1bf707fc71f95a3aa3464bd4e339afd0}{\index{Photo@{Photo}!$\sim$\-Photo@{$\sim$\-Photo}}
 \index{$\sim$\-Photo@{$\sim$\-Photo}!Photo@{Photo}}
 \subsubsection[{$\sim$\-Photo}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf Photo\-::$\sim$\-Photo} (
@@ -69,7 +65,14 @@ A class representing a single photo. Main features (most to be yet implemented)\
 {}
 \end{DoxyParamCaption}
 )}}\label{classPhoto_a8e86e62d0ac46bf94e16391a373a4abc}
-
+\hypertarget{classPhoto_a0ed71e4b83a3e12c3d0c0048b1de767f}{\index{Photo@{Photo}!initialize@{initialize}}
+\index{initialize@{initialize}!Photo@{Photo}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Photo} $\ast$ {\bf Photo\-::initialize} (
+\begin{DoxyParamCaption}
+\item[{boost\-::filesystem\-::path}]{argument\-Path}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}\label{classPhoto_a0ed71e4b83a3e12c3d0c0048b1de767f}
+photos are saved in a map indexed by paths, so you can't initialize two instances of the same photo. 
 
 The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
 \item 

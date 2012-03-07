@@ -7,13 +7,14 @@ class Photo {
 
   public:
     static Photo * initialize(boost::filesystem::path argumentPath);
-    virtual ~Photo () { };
+    ~Photo ();
 
     void getThumbnail();
     void getImage();
     boost::filesystem::path getPath();
 
     /* to be added:
+     * copying constructor
      * deleteFromDatabase()
      * deleteCompletely
      * save()

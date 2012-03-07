@@ -5,38 +5,43 @@
 
 using namespace boost::filesystem;
 using namespace std;
+/* TODO
+ * add cached directories
+ * add private get directory content
+ */
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
   /// There is no error handling in case the provided path is a file
   if(exists(directoryPath) && is_directory(directoryPath)){
-
-    vector<path> directoryContents;
-
-    copy(directory_iterator(directoryPath), directory_iterator(), back_inserter(directoryContents));
-
-    for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-
-      if(is_directory(*it)){
-        //TODO change to check for subfolders in getSubdirectories
-        subdirectories.push_back(new Directory(*it));
-      }
-      else{
-        if( (*it).extension()==".jpg" ) // right now we only use jpg
-          photos.push_back(Photo::initialize(*it));
-      }
-
-    } //for
-
+    // everythings ok
   }
-
-
 }
 
-std::vector <Directory*> Directory::getSubdirectories(){
+vector <Directory*> Directory::getSubdirectories(){
+    vector<path> directoryContents = getDirectoryContents();
+    for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+      if(is_directory(*it)){
+        subdirectories.push_back(new Directory(*it));
+      }
+    } 
   return subdirectories;
 }
 
-std::vector<Photo*> Directory::getPhotos(){
+vector <Directory*> Directory::getCachedSubdirectories(){
+  return subdirectories;
+}
+
+vector<Photo*> Directory::getPhotos(){
+    vector<path> directoryContents = getDirectoryContents();
+    for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+      if(!is_directory(*it)){
+        if( (*it).extension()==".jpg" ) // right now we only use jpg
+          photos.push_back(Photo::initialize(*it));
+      }
+    } 
+  return photos;
+}
+vector<Photo*> Directory::getCachedPhotos(){
   return photos;
 }
 
@@ -44,4 +49,8 @@ path Directory::getPath(){
   return directoryPath;
 }
 
-
+vector<path> Directory::getDirectoryContents(){
+    vector<path> directoryContents;
+    copy(directory_iterator(directoryPath), directory_iterator(), back_inserter(directoryContents));
+    return directoryContents;
+}

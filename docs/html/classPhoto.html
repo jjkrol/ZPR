@@ -92,7 +92,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">Photo Class Reference</div>  </div>
 </div><!--header-->
@@ -104,11 +105,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae30ff25941bf9aba469eb08f838a666a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhoto.html#ae30ff25941bf9aba469eb08f838a666a">Photo</a> (boost::filesystem::path argumentPath)</td></tr>
 <tr class="memitem:a1bf707fc71f95a3aa3464bd4e339afd0"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhoto.html#a1bf707fc71f95a3aa3464bd4e339afd0">~Photo</a> ()</td></tr>
 <tr class="memitem:a8e86e62d0ac46bf94e16391a373a4abc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhoto.html#a8e86e62d0ac46bf94e16391a373a4abc">getThumbnail</a> ()</td></tr>
 <tr class="memitem:a9796448b191e7696f9024a86fa4d02c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhoto.html#a9796448b191e7696f9024a86fa4d02c9">getImage</a> ()</td></tr>
 <tr class="memitem:ab369ad720923dda4db65996cd2844859"><td class="memItemLeft" align="right" valign="top">boost::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhoto.html#ab369ad720923dda4db65996cd2844859">getPath</a> ()</td></tr>
+<tr><td colspan="2"><h2><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a0ed71e4b83a3e12c3d0c0048b1de767f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classPhoto.html">Photo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhoto.html#a0ed71e4b83a3e12c3d0c0048b1de767f">initialize</a> (boost::filesystem::path argumentPath)</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>A class representing a single photo. Main features (most to be yet implemented):</p>
@@ -120,23 +123,6 @@ Public Member Functions</h2></td></tr>
 <li>placing effects on the photo and getting effect previews of certain size </li>
 </ul>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ae30ff25941bf9aba469eb08f838a666a"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classPhoto.html#ae30ff25941bf9aba469eb08f838a666a">Photo::Photo</a> </td>
-          <td>(</td>
-          <td class="paramtype">boost::filesystem::path&#160;</td>
-          <td class="paramname"><em>argumentPath</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a1bf707fc71f95a3aa3464bd4e339afd0"></a>
 <div class="memitem">
 <div class="memproto">
@@ -202,6 +188,24 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0ed71e4b83a3e12c3d0c0048b1de767f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPhoto.html">Photo</a> * <a class="el" href="classPhoto.html#a0ed71e4b83a3e12c3d0c0048b1de767f">Photo::initialize</a> </td>
+          <td>(</td>
+          <td class="paramtype">boost::filesystem::path&#160;</td>
+          <td class="paramname"><em>argumentPath</em></td><td>)</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>photos are saved in a map indexed by paths, so you can't initialize two instances of the same photo. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>include/<a class="el" href="photo_8hpp_source.html">photo.hpp</a></li>
 <li>src/<a class="el" href="photo_8cpp.html">photo.cpp</a></li>
@@ -210,7 +214,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Mar 4 2012 23:41:27 for ZPR by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Mar 5 2012 10:32:08 for ZPR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.0
 </small></address>

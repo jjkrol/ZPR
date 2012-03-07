@@ -16,12 +16,12 @@ using namespace std;
 
 
 Photo* Photo::initialize(boost::filesystem::path argumentPath){
-/// photos are saved in a map indexed by paths, so you can't initialize
-/// two instances of the same photo.
+  /// photos are saved in a map indexed by paths, so you can't initialize
+  /// two instances of the same photo.
 
-static std::map<boost::filesystem::path, Photo*> initializedPhotos;
+  static std::map<boost::filesystem::path, Photo*> initializedPhotos;
 
-map<boost::filesystem::path, Photo*>::iterator foundPhoto = initializedPhotos.find(argumentPath);
+  map<boost::filesystem::path, Photo*>::iterator foundPhoto = initializedPhotos.find(argumentPath);
 
   if ( foundPhoto != initializedPhotos.end() ){
     return (*foundPhoto).second;
@@ -32,7 +32,13 @@ map<boost::filesystem::path, Photo*>::iterator foundPhoto = initializedPhotos.fi
     return createdPhoto; 
   }
 }
+
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
+}
+
+Photo::~Photo(){
+  static std::map<boost::filesystem::path, Photo*> initializedPhotos;
+  initializedPhotos.erase(photoPath);
 }
 
 void Photo::getThumbnail(){
@@ -46,5 +52,5 @@ void Photo::getImage(){
 boost::filesystem::path Photo::getPath(){
   // temporary function, to be deleted later 
   // accessing photos through direct path is not advised
- return photoPath;
+  return photoPath;
 }
