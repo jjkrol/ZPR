@@ -10,9 +10,11 @@
  *  - moving and deleting the photo
  *  - placing effects on the photo and getting effect previews of certain size
  */
+#include "../include/photo.hpp"
+
+using namespace boost::gil;
 using namespace std;
 
-#include "../include/photo.hpp"
 
 
 Photo* Photo::initialize(boost::filesystem::path argumentPath){
@@ -45,8 +47,12 @@ void Photo::getThumbnail(){
 
 }
 
-void Photo::getImage(){
+rgb16_image_t Photo::getImage(){
+  //TODO optimisation
+  //TODO image type
 
+  jpeg_read_image(photoPath.string(), image);
+  return image;
 }
 
 boost::filesystem::path Photo::getPath(){
