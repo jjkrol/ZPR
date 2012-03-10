@@ -1,4 +1,3 @@
-///currently rubbish
 #include "../include/core.hpp"
 
 using namespace boost::filesystem;
