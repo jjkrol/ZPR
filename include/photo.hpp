@@ -15,6 +15,7 @@ class Photo {
     void getThumbnail();
     boost::gil::rgb16_image_t getImage();
     boost::filesystem::path getPath();
+    std::string getFilename();
     /* to be added:
      * copying constructor
      * deleteFromDatabase()
@@ -32,5 +33,4 @@ class Photo {
   private:
     Photo (boost::filesystem::path argumentPath);
     boost::filesystem::path photoPath;
-    boost::gil::rgb16_image_t image;
 };

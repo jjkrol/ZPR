@@ -2,7 +2,7 @@
 # scons - for simple build
 # scons test - for building tests
 
-CCFLAGS = '-Wall -pedantic `pkg-config --cflags gtkmm-3.0`'
+CCFLAGS = '-Wall -pedantic `pkg-config --cflags gtkmm-3.0` -ljpeg'
 LINKFLAGS = '`pkg-config --libs gtkmm-3.0`  -lboost_filesystem -lboost_system -ljpeg'
 
 env = Environment(CCFLAGS = CCFLAGS, LINKFLAGS = LINKFLAGS)

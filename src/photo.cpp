@@ -47,10 +47,10 @@ void Photo::getThumbnail(){
 
 }
 
-rgb16_image_t Photo::getImage(){
+rgb8_image_t Photo::getImage(){
   //TODO optimisation
   //TODO image type
-
+  rgb8_image_t image;
   jpeg_read_image(photoPath.string(), image);
   return image;
 }
@@ -59,4 +59,8 @@ boost::filesystem::path Photo::getPath(){
   // temporary function, to be deleted later 
   // accessing photos through direct path is not advised
   return photoPath;
+}
+
+string Photo::getFilename(){
+  return photoPath.filename().string();
 }
