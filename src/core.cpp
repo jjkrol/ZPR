@@ -5,6 +5,7 @@ using namespace boost::filesystem;
 using namespace std;
 
 int main(int argc, char* argv[]){
+
   path p (argv[1]);
   if (!is_directory(p)){
     Photo* myphoto = Photo::initialize(p);
@@ -18,3 +19,5 @@ int main(int argc, char* argv[]){
     }
   }
 }
+
+

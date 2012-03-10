@@ -16,6 +16,10 @@ class Directory {
     std::vector<Photo*> getPhotos();
     std::vector<Photo*> getCachedPhotos();
     boost::filesystem::path getPath();
+/* to be added:
+ * 
+ *
+ */
 
   private:
     std::vector<boost::filesystem::path> getDirectoryContents();
