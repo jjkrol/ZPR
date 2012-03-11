@@ -12,10 +12,13 @@ program = env.Program('unit_test', \
   source = [
     'test/unit.cpp', 
     'src/directory.cpp',
-    'src/photo.cpp'
+    'src/photo.cpp',
+    'src/disk.cpp'
     ])
 test_alias = Alias('unit_test', [program], program[0].path)
 AlwaysBuild(test_alias)
 
 env.Program(target = 'core',
-   source = ["src/core.cpp", "src/directory.cpp", "src/photo.cpp" ])
+   source = ["src/core.cpp", "src/directory.cpp", "src/photo.cpp", 
+    'src/disk.cpp'
+ ])

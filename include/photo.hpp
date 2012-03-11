@@ -13,7 +13,7 @@ class Photo {
     ~Photo ();
 
     void getThumbnail();
-    boost::gil::rgb16_image_t getImage();
+    boost::gil::rgb8_image_t getImage();
     boost::filesystem::path getPath();
     std::string getFilename();
     /* to be added:
