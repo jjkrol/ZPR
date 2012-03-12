@@ -1,31 +1,20 @@
-/** \class
+/** \class Disk
  * A disk class providing an adapter to the disk space.
  */
-#include<boost/filesystem.hpp>
-#include"../include/photo.hpp"
-#include"../include/directory.hpp"
-
-class Disk {
-public:
-  Disk ();
-  virtual ~Disk (){};
-  std::vector<Photo*> getPhotosFromDirectory(boost::filesystem::path p);
-  std::vector<Directory*> getSubdirectories(boost::filesystem::path p);
-
-private:
-  /* data */
-};
-
+#include "../include/disk.hpp"
 using namespace boost::filesystem;
+using namespace std;
 
 Disk::Disk(){
 
 }
 
-std::vector<Photo*> getPhotosFromDirectory(path p){
-
+vector<Photo*> getPhotosFromDirectory(path p){
+  vector<Photo*> photos;
+  return photos;
 }
 
-std::vector<Directory*> getSubdirectories(path p){
-
+vector<Directory*> getSubdirectories(path p){
+  vector<Directory*> directories;
+  return directories;
 }

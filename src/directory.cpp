@@ -11,9 +11,9 @@ using namespace std;
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
   /// There is no error handling in case the provided path is a file
+  //TODO implement error handling
   if(exists(directoryPath) && is_directory(directoryPath)){
-    getPhotos();
-    photoIterator = photos.begin();
+    //ok
   }
 }
 
@@ -28,12 +28,7 @@ vector <Directory*> Directory::getSubdirectories(){
   return subdirectories;
 }
 
-vector <Directory*> Directory::getCachedSubdirectories(){
-  return subdirectories;
-}
-
 vector<Photo*> Directory::getPhotos(){
-
   vector<path> directoryContents = getDirectoryContents();
   photos.clear();
   for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
@@ -42,10 +37,6 @@ vector<Photo*> Directory::getPhotos(){
         photos.push_back(Photo::initialize(*it));
 
   } 
-  photoIterator = photos.begin();
-  return photos;
-}
-vector<Photo*> Directory::getCachedPhotos(){
   return photos;
 }
 
@@ -53,23 +44,11 @@ path Directory::getPath(){
   return directoryPath;
 }
 
-Photo* Directory::getCurrentPhoto(){
-  return *photoIterator;
+string Directory::getName(){
+  return directoryPath.filename().string();
 }
 
-Photo* Directory::getNextPhoto(){
-  if(++photoIterator != photos.end())
-    return *(photoIterator);
-  else
-    return *(--photoIterator);
-}
-
-Photo* Directory::getPreviousPhoto(){
-  if(photoIterator != photos.begin())
-    return *(--photoIterator);
-  else
-    return *(photoIterator);
-}
+//private methods
 
 vector<path> Directory::getDirectoryContents(){
   vector<path> directoryContents;
@@ -78,6 +57,3 @@ vector<path> Directory::getDirectoryContents(){
   return directoryContents;
 }
 
-string Directory::getName(){
-  return directoryPath.filename().string();
-}

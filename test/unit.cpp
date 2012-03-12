@@ -35,22 +35,11 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     std::vector<Directory*> subdirs = myTestDir->getSubdirectories();
     Directory* alpha = subdirs[0];
     BOOST_REQUIRE(alpha->getName() == "alpha");
-    Photo* currentPhoto = alpha->getCurrentPhoto();
-    BOOST_CHECK(currentPhoto->getFilename() == "1.jpg");
-    BOOST_CHECK(alpha->getNextPhoto()->getFilename() == "2.jpg");
-    BOOST_CHECK(alpha->getNextPhoto()->getFilename() == "3.jpg");
-    BOOST_CHECK(alpha->getNextPhoto()->getFilename() == "4.jpg");
-    BOOST_CHECK(alpha->getNextPhoto()->getFilename() == "4.jpg");
-    BOOST_CHECK(alpha->getPreviousPhoto()->getFilename() == "3.jpg");
 
     Directory* beta = subdirs[1];
     BOOST_REQUIRE(beta->getName() == "beta");
-    currentPhoto = beta->getCurrentPhoto();
-    BOOST_CHECK(currentPhoto->getFilename() == "1.jpg");
-    BOOST_CHECK(beta->getNextPhoto()->getFilename() == "1.jpg");
-    BOOST_CHECK(beta->getPreviousPhoto()->getFilename() == "1.jpg");
 
-    BOOST_CHECK(myTestDir->getCachedSubdirectories().size() == 3);
+    BOOST_CHECK(myTestDir->getSubdirectories().size() == 3);
     BOOST_CHECK(myTestDir->getPhotos().size() == 1);
 
   }
