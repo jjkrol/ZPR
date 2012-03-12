@@ -48,6 +48,32 @@ string Directory::getName(){
   return directoryPath.filename().string();
 }
 
+/** this method is better than checking the size of getPhotos, because it does not
+ * initialize new Photo objects
+ */
+bool Directory::hasPhotos(){
+  vector<path> directoryContents = getDirectoryContents();
+  if(directoryContents.size() == 0)
+    return false;
+  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+    if(!is_directory(*it))
+      return true;
+  }
+
+  return false;
+}
+
+bool Directory::hasSubdirectories(){
+  vector<path> directoryContents = getDirectoryContents();
+  if(directoryContents.size() == 0)
+    return false;
+  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+    if(is_directory(*it))
+      return true;
+  }
+  return false;
+}
+
 //private methods
 
 vector<path> Directory::getDirectoryContents(){

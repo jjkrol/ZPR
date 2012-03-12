@@ -15,6 +15,8 @@ class Directory {
     std::vector<Photo*> getPhotos();
     boost::filesystem::path getPath();
     std::string getName();
+    bool hasPhotos();
+    bool hasSubdirectories();
 
   private:
     std::vector<boost::filesystem::path> getDirectoryContents();

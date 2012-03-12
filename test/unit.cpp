@@ -18,18 +18,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
-    /* test directory scheme:
-     * -alpha
-     *  -1.jpg
-     *  -2.jpg
-     *  -3.jpg
-     *  -4.jpg
-     * -beta
-     *  -1.jpg
-     * -charlie
-     *  -1.jpg
-     * -1.jpg
-     */
     path p("test/test_tree");
     Directory* myTestDir = new Directory(p);
     std::vector<Directory*> subdirs = myTestDir->getSubdirectories();
@@ -38,8 +26,16 @@ BOOST_AUTO_TEST_SUITE( testSuite )
 
     Directory* beta = subdirs[1];
     BOOST_REQUIRE(beta->getName() == "beta");
+    BOOST_CHECK(beta->hasPhotos() == true);
+    BOOST_CHECK(beta->hasSubdirectories() == false);
 
-    BOOST_CHECK(myTestDir->getSubdirectories().size() == 3);
+    Directory* delta = subdirs[3];
+    BOOST_REQUIRE(delta->getName() == "delta");
+    BOOST_CHECK(delta->hasPhotos() == false);
+    BOOST_CHECK(beta->hasSubdirectories() == false);
+
+    BOOST_CHECK(myTestDir->hasSubdirectories() == true);
+    BOOST_CHECK(myTestDir->getSubdirectories().size() == 4);
     BOOST_CHECK(myTestDir->getPhotos().size() == 1);
 
   }
