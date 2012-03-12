@@ -3,11 +3,25 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
-#include "../include/directory.hpp"
-#include "../include/photo.hpp"
+#include "../include/core.hpp"
 using namespace boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( testSuite )
+
+  BOOST_AUTO_TEST_CASE( coreClassTest ){
+    CoreController* core = new CoreController();
+    core->startApplication("test.cfg");
+    Directory* workDir = core->getDirectoryTree();
+    BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
+
+  //  BOOST_CHECK(workDir->getPath()=="/");
+
+    std::vector<Directory*> subdirs = workDir->getSubdirectories();
+    Directory* alpha = subdirs[0];
+    BOOST_REQUIRE(alpha->getName() == "alpha");
+//    BOOST_CHECK(alpha->getPath() == "/alpha");
+
+  }
 
   BOOST_AUTO_TEST_CASE( photoClassTest ) {
     path p("test/zdj.jpg");

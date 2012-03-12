@@ -43,8 +43,10 @@ Photo::~Photo(){
   initializedPhotos.erase(photoPath);
 }
 
-void Photo::getThumbnail(){
-
+rgb8_image_t Photo::getThumbnail(){
+  rgb8_image_t image;
+  jpeg_read_image(photoPath.string(), image);
+  return image;
 }
 
 rgb8_image_t Photo::getImage(){

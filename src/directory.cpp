@@ -7,6 +7,7 @@ using namespace boost::filesystem;
 using namespace std;
 /* TODO
  * create a singleton-like class, (one path - one object) ?
+ * make paths relative
  */
 
 Directory::Directory(path inputPath):directoryPath(inputPath){

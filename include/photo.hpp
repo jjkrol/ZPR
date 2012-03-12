@@ -12,23 +12,10 @@ class Photo {
     static Photo * initialize(boost::filesystem::path argumentPath);
     ~Photo ();
 
-    void getThumbnail();
+    boost::gil::rgb8_image_t getThumbnail();
     boost::gil::rgb8_image_t getImage();
     boost::filesystem::path getPath();
     std::string getFilename();
-    /* to be added:
-     * copying constructor
-     * deleteFromDatabase()
-     * deleteCompletely
-     * save()
-     * move()
-     * addTag()
-     * deleteTag()
-     * getTags()
-     * putEffect()
-     * getEffectPreview(EffectParams, Size)
-     * undoEffect() ??
-     */
 
   private:
     Photo (boost::filesystem::path argumentPath);
