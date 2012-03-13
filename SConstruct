@@ -12,7 +12,8 @@ env.Program(
     'src/photo.cpp',
     'src/disk.cpp',
     'src/core.cpp',
-    'src/configurationManager.cpp'
+    'src/configurationManager.cpp',
+    'src/gui.cpp'
     ])
 program = env.Program('unit_test', \
   source = [
@@ -21,7 +22,8 @@ program = env.Program('unit_test', \
     'src/photo.cpp',
     'src/disk.cpp',
     'src/core.cpp',
-    'src/configurationManager.cpp'
+    'src/configurationManager.cpp',
+    'src/gui.cpp'
     ])
 test_alias = Alias('unit_test', [program], program[0].path)
 AlwaysBuild(test_alias)
