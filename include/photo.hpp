@@ -14,8 +14,9 @@ class Photo {
 
     boost::gil::rgb8_image_t getThumbnail();
     boost::gil::rgb8_image_t getImage();
+
     boost::filesystem::path getPath();
-    std::string getFilename();
+    boost::filesystem::path getFilename();
 
   private:
     Photo (boost::filesystem::path argumentPath);

@@ -1,27 +1,27 @@
-#include "../include/core.hpp"
+/** \class CoreController
+ * A class acting as a main application controller
+ * responsible for initialization
+ */
 
-using namespace boost::property_tree;
-using namespace std;
+#include "../include/core.hpp"
 
 CoreController::CoreController(){
 
 }
 
-void CoreController::startApplication(string forcedConfigPath=""){
-string configurationPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
-read_xml(configurationPath, configurationTree);
-libraryDirectoryPath = boost::filesystem::path(configurationTree.get<string>("library.directory"));
-
+void CoreController::startApplication(std::string forcedConfigPath=""){
+  std::string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
+  configManager = new ConfigurationManager(boost::filesystem::path(configPath));
 }
 
 Directory* CoreController::getDirectoryTree(){
-  return new Directory(libraryDirectoryPath);
+  return new Directory("");
 }
 
 boost::filesystem::path CoreController::getLibraryDirectoryPath(){
-  return libraryDirectoryPath;
+  return boost::filesystem::path(configManager->getStringValue("library.directory"));
 }
 
-ptree CoreController::getConfiguration(){
-  return configurationTree;
+boost::property_tree::ptree CoreController::getConfiguration(){
+  return configManager->getConfigurationTree();
 }

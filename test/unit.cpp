@@ -11,15 +11,8 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   BOOST_AUTO_TEST_CASE( coreClassTest ){
     CoreController* core = new CoreController();
     core->startApplication("test.cfg");
-    Directory* workDir = core->getDirectoryTree();
+
     BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
-
-  //  BOOST_CHECK(workDir->getPath()=="/");
-
-    std::vector<Directory*> subdirs = workDir->getSubdirectories();
-    Directory* alpha = subdirs[0];
-    BOOST_REQUIRE(alpha->getName() == "alpha");
-//    BOOST_CHECK(alpha->getPath() == "/alpha");
 
   }
 
@@ -32,11 +25,16 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
-    path p("test/test_tree");
-    Directory* myTestDir = new Directory(p);
+    CoreController* core = new CoreController();
+    core->startApplication("test.cfg");
+
+    Directory* myTestDir = core->getDirectoryTree();
+    BOOST_CHECK(myTestDir->getPath()=="/");
     std::vector<Directory*> subdirs = myTestDir->getSubdirectories();
+
     Directory* alpha = subdirs[0];
     BOOST_REQUIRE(alpha->getName() == "alpha");
+    BOOST_CHECK(alpha->getPath() == "/alpha/");
 
     Directory* beta = subdirs[1];
     BOOST_REQUIRE(beta->getName() == "beta");
@@ -46,7 +44,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     Directory* delta = subdirs[3];
     BOOST_REQUIRE(delta->getName() == "delta");
     BOOST_CHECK(delta->hasPhotos() == false);
-    BOOST_CHECK(beta->hasSubdirectories() == false);
+    BOOST_CHECK(delta->hasSubdirectories() == false);
 
     BOOST_CHECK(myTestDir->hasSubdirectories() == true);
     BOOST_CHECK(myTestDir->getSubdirectories().size() == 4);

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "photo.hpp"
+#include "disk.hpp"
 
 class Directory {
 
@@ -13,13 +14,15 @@ class Directory {
 
     std::vector<Directory*> getSubdirectories();
     std::vector<Photo*> getPhotos();
-    boost::filesystem::path getPath();
-    std::string getName();
+
     bool hasPhotos();
     bool hasSubdirectories();
 
+    boost::filesystem::path getPath();
+    std::string getName();
+
   private:
-    std::vector<boost::filesystem::path> getDirectoryContents();
+    Disk* disk;
     boost::filesystem::path directoryPath;
     std::vector<Photo*> photos;
     std::vector<Directory*> subdirectories;

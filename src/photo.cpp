@@ -25,7 +25,7 @@ Photo* Photo::initialize(boost::filesystem::path argumentPath){
 
   map<boost::filesystem::path, Photo*>::iterator foundPhoto = initializedPhotos.find(argumentPath);
 
-  if ( foundPhoto != initializedPhotos.end() ){
+  if (foundPhoto != initializedPhotos.end()){
     return (*foundPhoto).second;
   }
   else{
@@ -36,6 +36,7 @@ Photo* Photo::initialize(boost::filesystem::path argumentPath){
 }
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
+
 }
 
 Photo::~Photo(){
@@ -58,11 +59,9 @@ rgb8_image_t Photo::getImage(){
 }
 
 boost::filesystem::path Photo::getPath(){
-  // temporary function, to be deleted later 
-  // accessing photos through direct path is not advised
   return photoPath;
 }
 
-string Photo::getFilename(){
-  return photoPath.filename().string();
+boost::filesystem::path Photo::getFilename(){
+  return photoPath.filename();
 }

@@ -7,42 +7,46 @@ using namespace boost::filesystem;
 using namespace std;
 /* TODO
  * create a singleton-like class, (one path - one object) ?
- * make paths relative
+ * make appending paths look better
  */
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
   /// There is no error handling in case the provided path is a file
   //TODO implement error handling
+  disk = new Disk();
   if(exists(directoryPath) && is_directory(directoryPath)){
-    //ok
+
   }
 }
 
 vector <Directory*> Directory::getSubdirectories(){
-  vector<path> directoryContents = getDirectoryContents();
+  vector<path> subdirFilenames = disk->getSubdirectories(directoryPath);
+
   subdirectories.clear();
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(is_directory(*it)){
-      subdirectories.push_back(new Directory(*it));
-    }
-  } 
+
+  for(vector<path>::iterator it = subdirFilenames.begin(); it!=subdirFilenames.end(); it++){
+    path subdirPath = directoryPath;
+    subdirectories.push_back(new Directory(subdirPath/=path("/")/=(*it)));
+  }
+
   return subdirectories;
 }
 
 vector<Photo*> Directory::getPhotos(){
-  vector<path> directoryContents = getDirectoryContents();
-  photos.clear();
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(!is_directory(*it))
-      if( (*it).extension()==".jpg" ) // right now we only use jpg
-        photos.push_back(Photo::initialize(*it));
+  vector<path> photoFilenames = disk->getPhotos(directoryPath);
 
-  } 
+  photos.clear();
+
+  for(vector<path>::iterator it = photoFilenames.begin(); it!=photoFilenames.end(); it++){
+    path photoPath = directoryPath;
+    photos.push_back(Photo::initialize(photoPath/=path("/")/=(*it)));
+  }
+
   return photos;
 }
 
 path Directory::getPath(){
-  return directoryPath;
+  return path(directoryPath.string()+"/"); //TODO find a way to fix this, that's awful
 }
 
 string Directory::getName(){
@@ -53,34 +57,12 @@ string Directory::getName(){
  * initialize new Photo objects
  */
 bool Directory::hasPhotos(){
-  vector<path> directoryContents = getDirectoryContents();
-  if(directoryContents.size() == 0)
-    return false;
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(!is_directory(*it))
-      return true;
-  }
-
-  return false;
+  return disk->hasPhotos(directoryPath);
 }
 
+/** this method is better than checking the size of getSubdirectories, because it does not
+ * initialize new Directory objects
+ */
 bool Directory::hasSubdirectories(){
-  vector<path> directoryContents = getDirectoryContents();
-  if(directoryContents.size() == 0)
-    return false;
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(is_directory(*it))
-      return true;
-  }
-  return false;
+  return disk->hasSubdirectories(directoryPath);
 }
-
-//private methods
-
-vector<path> Directory::getDirectoryContents(){
-  vector<path> directoryContents;
-  copy(directory_iterator(directoryPath), directory_iterator(), back_inserter(directoryContents));
-  sort(directoryContents.begin(), directoryContents.end());
-  return directoryContents;
-}
-
