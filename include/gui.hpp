@@ -14,9 +14,23 @@ class GUI {
   private:
     Gtk::Main kit;
     Gtk::Window *main_window;
-    Gtk::Box *box;
+
+    //containers and menubar
+    Gtk::Grid *grid;
+    Gtk::Box *left_box, *right_box, *bottom_box;
+    Gtk::MenuBar *menu;
+
+    //left side widgets
+    Gtk::Button *library_button;
+    Gtk::Notebook *notebook;
+
+    //right side widgets
+    Gtk::Button *open_button, *fit_button;
+    Gtk::Button *left_button, *right_button;
+    Gtk::Label *filename_label;
+    Gtk::Label *basic_label, *colors_label, *effects_label;
     Gtk::Image *image;
-    Gtk::Button *button;
+
   public:
     GUI(int argc, char *argv[]);
     void createMainWindow();

@@ -12,7 +12,8 @@ env.Program(
     'src/photo.cpp',
     'src/disk.cpp',
     'src/core.cpp',
-    'src/configurationManager.cpp'
+    'src/configurationManager.cpp',
+    'src/gui.cpp'
     ])
 program = env.Program('unit_test', \
   source = [
