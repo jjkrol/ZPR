@@ -31,8 +31,13 @@ class GUI {
     Gtk::Label *basic_label, *colors_label, *effects_label;
     Gtk::Image *image;
 
+    //methods for handling signals
+    void onOpenImage();
+    void onFitImage();
+
   public:
     GUI(int argc, char *argv[]);
+    ~GUI();
     void createMainWindow();
 };
 
