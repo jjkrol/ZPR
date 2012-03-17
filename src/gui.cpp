@@ -16,12 +16,13 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
 
   //creating widgets
   image = new Gtk::Image();
+  image_window = new Gtk::ScrolledWindow();
   menu = new Gtk::MenuBar();
   library_button = new Gtk::Button("Back to library");
-  open_button = new Gtk::Button("Open Image...");
-  fit_button = new Gtk::Button("Fit");
-  left_button = new Gtk::Button("Left");
-  right_button = new Gtk::Button("Right");
+  open_button = new Gtk::Button(Gtk::Stock::OPEN);
+  fit_button = new Gtk::Button(Gtk::Stock::ZOOM_FIT);
+  left_button = new Gtk::Button(Gtk::Stock::GO_BACK);
+  right_button = new Gtk::Button(Gtk::Stock::GO_FORWARD);
   filename_label = new Gtk::Label("");
   basic_label = new Gtk::Label("Basic editing");
   colors_label = new Gtk::Label("Colors modification");
@@ -37,7 +38,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   bottom_box = new Gtk::Box();
   bottom_box->set_hexpand(true);
   bottom_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-  bottom_box->set_spacing(2);
+  bottom_box->set_spacing(1);
   bottom_box->pack_start(*left_button, false, false);
   bottom_box->pack_start(*right_button, false, false);
   bottom_box->pack_start(*filename_label, true, true);
@@ -49,7 +50,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   right_box->set_vexpand(true);
   right_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
   right_box->set_spacing(4);
-  right_box->pack_start(*image, true, true);
+  right_box->pack_start(*image_window, true, true);
   right_box->pack_start(*bottom_box, false, false);
 
   left_box = new Gtk::Box();
@@ -64,6 +65,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   grid->attach(*left_box, 0, 2, 1, 1);
   grid->attach(*right_box, 1, 2, 1, 1);
 
+  image_window->add(*image);
   main_window->add(*grid);
 }
 
@@ -91,8 +93,8 @@ GUI::~GUI() {
 //function connects signals and shows main window
 void GUI::createMainWindow() {
   //connecting buttons signals to functions
-  open_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::onOpenImage));
-  fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::onFitImage));
+  open_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::openImage));
+  fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
 
   //showing widgets
   main_window->show_all_children();
@@ -101,7 +103,7 @@ void GUI::createMainWindow() {
 }
 
 //function creates file open dialog and sets image source
-void GUI::onOpenImage() {
+void GUI::openImage() {
   //file choose dialog
   Gtk::FileChooserDialog dialog("Open image", Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
@@ -117,6 +119,7 @@ void GUI::onOpenImage() {
     case Gtk::RESPONSE_ACCEPT:
       image->set(dialog.get_filename());
       filename_label->set_text(dialog.get_filename());
+      fitImage();
       break;
     default:
       break;
@@ -125,12 +128,29 @@ void GUI::onOpenImage() {
   dialog.hide();
 }
 
-//function for fitting image into Gtk::Image widget (not working yet)
-void GUI::onFitImage() {
+//method for fitting image into Gtk::Image widget
+void GUI::fitImage() {
+  //checking if fitting image is needed
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = image->get_pixbuf();
-  if(pixbuf) {
-    Gdk::Rectangle rectangle = image->get_allocation();
-    pixbuf->scale_simple(rectangle.get_width(), rectangle.get_height(), Gdk::INTERP_BILINEAR);
-    image->set(pixbuf);
+  Gdk::Rectangle rectangle = image_window->get_allocation();
+  if(rectangle.get_width() > pixbuf->get_width() &&
+     rectangle.get_height() > pixbuf->get_height()) return;
+  if(!pixbuf) return;
+
+  //calculating desired width and height
+  int width, height;
+  float widget_raito = (float)rectangle.get_width() / (float)rectangle.get_height();
+  float image_raito = (float)pixbuf->get_width() / (float)pixbuf->get_height();
+
+  if(widget_raito >= image_raito) {
+    height = rectangle.get_height() - 4;
+    width = height * image_raito;
+  } else {
+    width = rectangle.get_width() - 4;
+    height = width / image_raito;
   }
+
+  //image resizing
+  pixbuf = pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
+  image->set(pixbuf);
 }

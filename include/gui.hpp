@@ -18,6 +18,7 @@ class GUI {
     //containers and menubar
     Gtk::Grid *grid;
     Gtk::Box *left_box, *right_box, *bottom_box;
+    Gtk::ScrolledWindow *image_window;
     Gtk::MenuBar *menu;
 
     //left side widgets
@@ -32,8 +33,8 @@ class GUI {
     Gtk::Image *image;
 
     //methods for handling signals
-    void onOpenImage();
-    void onFitImage();
+    void openImage();
+    void fitImage();
 
   public:
     GUI(int argc, char *argv[]);
