@@ -55,9 +55,8 @@ int SQLiteConnector::sendQuery(const char *query) {
   sqlite3_close(database);
 }
 
-int main() {
-  //DBConnector *reference = SQLiteConnector::Instance();
-  DBConnector *sqlconnector = DBConnectorFactory::Instance("dupa");
-  sqlconnector->sendQuery("CREATE TABLE a (b INTEGER, c INTEGER);");
-  return 0;
-}
+//int main() {
+////  DBConnector *sqlconnector = DBConnectorFactory::Instance(" ");
+////  sqlconnector->sendQuery("CREATE TABLE a (b INTEGER, c INTEGER);");
+////  return 0;
+////}
