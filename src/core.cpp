@@ -5,13 +5,13 @@
 
 #include "../include/core.hpp"
 
-CoreController::CoreController(){
+CoreController* CoreController::initialize(bool enableGui, std::string forcedConfigPath){
+  static CoreController* instance;
+  if(instance == NULL){
+    instance = new CoreController(enableGui, forcedConfigPath);
+  }
 
-}
-
-void CoreController::startApplication(std::string forcedConfigPath=""){
-  std::string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
-  configManager = new ConfigurationManager(boost::filesystem::path(configPath));
+  return instance;
 }
 
 Directory* CoreController::getDirectoryTree(){
@@ -25,3 +25,17 @@ boost::filesystem::path CoreController::getLibraryDirectoryPath(){
 boost::property_tree::ptree CoreController::getConfiguration(){
   return configManager->getConfigurationTree();
 }
+
+CoreController::CoreController(bool enableGui, std::string forcedConfigPath){
+
+  std::string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
+  configManager = ConfigurationManager::initialize(boost::filesystem::path(configPath));
+
+  if(enableGui){
+    int argc=0;
+    char ** argv =NULL; 
+    GUI gui(argc, argv);
+    gui.createMainWindow();
+  }
+}
+

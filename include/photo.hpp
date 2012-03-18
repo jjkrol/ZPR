@@ -19,6 +19,8 @@ class Photo {
     boost::filesystem::path getFilename();
 
   private:
+    Photo& operator=(const Photo&);
+    Photo( const Photo&);
     Photo (boost::filesystem::path argumentPath);
     boost::filesystem::path photoPath;
 };

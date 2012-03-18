@@ -5,10 +5,13 @@
 
 using namespace boost::filesystem;
 using namespace std;
-/* TODO
- * create a singleton-like class, (one path - one object) ?
- * make appending paths look better
+
+/** 
+ * \TODO create a singleton-like class, (one path - one object) ?
+ * \TODO make appending paths look better
+ * \TODO add error handling to constructor
  */
+class CoreController;
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
   /// There is no error handling in case the provided path is a file
@@ -19,11 +22,16 @@ Directory::Directory(path inputPath):directoryPath(inputPath){
   }
 }
 
+Directory::~Directory(){
+  delete disk;
+}
+
 vector <Directory*> Directory::getSubdirectories(){
-  vector<path> subdirFilenames = disk->getSubdirectories(directoryPath);
+  vector<path> subdirFilenames = disk->getSubdirectoriesPaths(directoryPath);
 
   subdirectories.clear();
 
+  //create a vector of pointers to Directory Objects
   for(vector<path>::iterator it = subdirFilenames.begin(); it!=subdirFilenames.end(); it++){
     path subdirPath = directoryPath;
     subdirectories.push_back(new Directory(subdirPath/=path("/")/=(*it)));
@@ -33,10 +41,11 @@ vector <Directory*> Directory::getSubdirectories(){
 }
 
 vector<Photo*> Directory::getPhotos(){
-  vector<path> photoFilenames = disk->getPhotos(directoryPath);
+  vector<path> photoFilenames = disk->getPhotosPaths(directoryPath);
 
   photos.clear();
 
+  //create vector of pointers to Photo objects
   for(vector<path>::iterator it = photoFilenames.begin(); it!=photoFilenames.end(); it++){
     path photoPath = directoryPath;
     photos.push_back(Photo::initialize(photoPath/=path("/")/=(*it)));

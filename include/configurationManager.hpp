@@ -7,14 +7,17 @@
 class ConfigurationManager {
 
 public:
-  ConfigurationManager (boost::filesystem::path);
-  ~ConfigurationManager (){};
+  static ConfigurationManager* initialize(boost::filesystem::path configFilePath);
 
   std::string getStringValue(std::string);
   boost::property_tree::ptree getConfigurationTree();
   void putConfiguration(boost::property_tree::ptree);
 
 private:
+  ConfigurationManager (boost::filesystem::path);
+  ConfigurationManager& operator= (ConfigurationManager&);
+  ConfigurationManager (ConfigurationManager&);
+  ~ConfigurationManager (){};
   boost::filesystem::path       configFilePath;
   boost::property_tree::ptree   configTree;
 };

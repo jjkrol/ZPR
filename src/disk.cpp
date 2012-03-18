@@ -3,14 +3,16 @@
  */
 
 #include "../include/disk.hpp"
+
 using namespace boost::filesystem;
 using namespace std;
 
 Disk::Disk(){
-  libraryDirectoryPath = "./test/test_tree"; //FIXME shouldn't be hardcoded
+  CoreController * core = CoreController::initialize();
+  libraryDirectoryPath = core->getLibraryDirectoryPath();
 }
 
-vector <path> Disk::getSubdirectories(path directoryPath){
+vector <path> Disk::getSubdirectoriesPaths(path directoryPath){
   vector<path> subdirectories;
 
   path absolutePath = makeAbsolutePath(directoryPath);
@@ -24,7 +26,7 @@ vector <path> Disk::getSubdirectories(path directoryPath){
   return subdirectories;
 }
 
-vector<path> Disk::getPhotos(path directoryPath){
+vector<path> Disk::getPhotosPaths(path directoryPath){
   vector<path> photos;
 
   path absolutePath = makeAbsolutePath(directoryPath);
@@ -41,46 +43,22 @@ vector<path> Disk::getPhotos(path directoryPath){
 }
 
 bool Disk::hasPhotos(path directoryPath){
-  if(getPhotos(directoryPath).size() == 0)
+  if(getPhotosPaths(directoryPath).size() == 0)
     return false;
   else
     return true;
-/*
-  path absolutePath = makeAbsolutePath(directoryPath);
-  vector<path> directoryContents = getDirectoryContents(absolutePath);
-
-  if(directoryContents.size() == 0)
-    return false;
-
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(!is_directory(*it))
-      return true;
-  }
-
-  return false;*/
 }
 
 bool Disk::hasSubdirectories(path directoryPath){
-  if(getSubdirectories(directoryPath).size() == 0)
+  if(getSubdirectoriesPaths(directoryPath).size() == 0)
     return false;
   else
     return true;
-/*  path absolutePath = makeAbsolutePath(directoryPath);
-  vector<path> directoryContents = getDirectoryContents(absolutePath);
-
-  if(directoryContents.size() == 0)
-    return false;
-
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(is_directory(*it))
-      return true;
-  }
-
-  return false;*/
 }
 
 //private methods
 
+// returns content of given directory (all files)
 vector<path> Disk::getDirectoryContents(path directoryPath){
   vector<path> directoryContents;
   copy(directory_iterator(directoryPath), directory_iterator(), back_inserter(directoryContents));
@@ -90,5 +68,4 @@ vector<path> Disk::getDirectoryContents(path directoryPath){
 
 path Disk::makeAbsolutePath(path relativePath){
   return path(libraryDirectoryPath.string() + relativePath.string());
-  //  return libraryDirectoryPath.append(relativePath);
 }

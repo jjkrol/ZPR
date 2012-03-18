@@ -5,12 +5,13 @@
 
 #include "photo.hpp"
 #include "disk.hpp"
+class Disk;
 
 class Directory {
 
   public:
     Directory (boost::filesystem::path);
-    virtual ~Directory () { };
+    ~Directory ();
 
     std::vector<Directory*> getSubdirectories();
     std::vector<Photo*> getPhotos();

@@ -1,9 +1,7 @@
 #include <iostream>
-#include "include/gui.hpp"
+#include "include/core.hpp"
 
 int main(int argc, char *argv[]) {
-  GUI gui(argc, argv);
-  gui.createMainWindow();
-
+  CoreController::initialize();
   return 0;
 }

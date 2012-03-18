@@ -7,8 +7,15 @@
 
 using namespace boost::property_tree;
 
-ConfigurationManager::ConfigurationManager(boost::filesystem::path configFilePath) : configFilePath(configFilePath){
-  read_xml(configFilePath.string(), configTree);
+ConfigurationManager* ConfigurationManager::initialize(boost::filesystem::path configFilePath){
+
+  static ConfigurationManager * instance;
+
+  if(instance == NULL){
+    instance = new ConfigurationManager(configFilePath);
+  }
+
+  return instance;
 }
 
 std::string ConfigurationManager::getStringValue(std::string key){
@@ -17,4 +24,8 @@ std::string ConfigurationManager::getStringValue(std::string key){
 
 ptree ConfigurationManager::getConfigurationTree(){
   return configTree;
+}
+
+ConfigurationManager::ConfigurationManager(boost::filesystem::path configFilePath) : configFilePath(configFilePath){
+  read_xml(configFilePath.string(), configTree);
 }
