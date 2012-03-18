@@ -1,5 +1,5 @@
 CCFLAGS = '-Wall -pedantic `pkg-config --cflags gtkmm-3.0`'
-LINKFLAGS = '`pkg-config --libs gtkmm-3.0`  -lboost_filesystem -lboost_system -ljpeg'
+LINKFLAGS = '`pkg-config --libs gtkmm-3.0`  -lboost_filesystem -lboost_system -ljpeg -lsqlite3'
 
 env = Environment(CCFLAGS = CCFLAGS, LINKFLAGS = LINKFLAGS)
 env.Append(LIBS=File('/usr/lib/libboost_unit_test_framework.a'))
@@ -13,7 +13,8 @@ env.Program(
     'src/disk.cpp',
     'src/core.cpp',
     'src/configurationManager.cpp',
-    'src/gui.cpp'
+    'src/gui.cpp',
+    'src/dbConnector.cpp'
     ])
 program = env.Program('unit_test', \
   source = [
