@@ -31,20 +31,30 @@ public:
 };
 
 
-/*! @class DBConnector
+/*! @interface DBConnector
  *  Interface providing functions for communication with databases.
 */
 class DBConnector {
 public:
-  virtual int sendQuery(const char *query) = 0;
-  /*! @fn virtual int sendQuery(const char*) = 0;
+  //enum State {
+    //OPEN_OK = 0x00,
+  //};
+
+  virtual bool open(const char *filename) = 0;
+  virtual int sendQuery(char *query) = 0;
+  virtual void close() = 0;
+
+/*! @fn virtual int sendQuery(const char*) = 0;
    *  @brief For testing purposes.
    *  @warning Should be commented or removed in final version!
    *  @returns 0 if something went wrong
   */
 };
-
+////////////////////////////////////////////////////////////////////////
+//Concrete versions of DBConnector Interface
+////////////////////////////////////////////////////////////////////////
 /*! @class SQLiteConnector
+  * @implements DBConnector
   * @brief Concrete version of DBConnector. Uses SQLite Database.
   *
   * Must declare DBConnectorFactory as a friend. Must provide
@@ -54,8 +64,11 @@ public:
 class SQLiteConnector : public DBConnector{
   friend class DBConnectorFactory;
 public:
-  int sendQuery(const char *query);
+  int sendQuery(char *query);
+  bool open(const char *filename);
+  void close();
 private:
+  sqlite3 *database;
   static DBConnector *instance;
   static DBConnector* Instance();
 };
