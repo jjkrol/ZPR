@@ -1,15 +1,12 @@
-/** \class ConfigurationManager
- * A class responsible for handling configuration and providing access
- * to its individual values
- */
 
 #include "../include/configurationManager.hpp"
 
 using namespace boost::property_tree;
 
+ConfigurationManager * ConfigurationManager::instance = NULL;
+
 ConfigurationManager* ConfigurationManager::initialize(boost::filesystem::path configFilePath){
 
-  static ConfigurationManager * instance;
 
   if(instance == NULL){
     instance = new ConfigurationManager(configFilePath);

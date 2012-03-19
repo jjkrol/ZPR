@@ -1,6 +1,3 @@
-/** \class Disk
- * A disk class providing an adapter to the disk space.
- */
 
 #include "../include/disk.hpp"
 

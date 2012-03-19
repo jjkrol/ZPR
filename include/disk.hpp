@@ -6,17 +6,20 @@
 
 #include "photo.hpp"
 
+/** @class Disk
+ *  @brief A class providing an adapter to the disk space.
+ */
 class Disk {
 
   public:
     Disk ();
     virtual ~Disk (){};
 
-    std::vector<boost::filesystem::path> getPhotosPaths(boost::filesystem::path);
-    std::vector<boost::filesystem::path> getSubdirectoriesPaths(boost::filesystem::path);
+    std::vector<boost::filesystem::path> getPhotosPaths(boost::filesystem::path directoryPath);
+    std::vector<boost::filesystem::path> getSubdirectoriesPaths(boost::filesystem::path directoryPath);
 
-    bool hasPhotos(boost::filesystem::path);
-    bool hasSubdirectories(boost::filesystem::path);
+    bool hasPhotos(boost::filesystem::path directoryPath);
+    bool hasSubdirectories(boost::filesystem::path directoryPath);
 
   private:
     std::vector<boost::filesystem::path> getDirectoryContents(boost::filesystem::path);

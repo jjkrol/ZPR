@@ -6,15 +6,40 @@
 #include <boost/gil/extension/dynamic_image/any_image.hpp>
 #include <map>
 
+/** @class Photo
+ * @brief A class representing a single photo. 
+ *
+ * Main features (most to be
+ * yet implemented):
+ *  - a real photo (file or db entry) has *only one* object representing it.
+ *  this means that you can't have two Photo objects representing an image
+ *  with the same id/path. This implies some manipulations in constructor
+ *  (similar to singleton maybe?)
+ *  - providing thumbnails and full image
+ *  - changing tags
+ *  - moving and deleting the photo
+ *  - placing effects on the photo and getting effect previews of certain size
+ */
+
 class Photo {
 
   public:
     static Photo * initialize(boost::filesystem::path argumentPath);
     ~Photo ();
 
+    /**
+     * @TODO Implement this
+     */
     boost::gil::rgb8_image_t getThumbnail();
+
+    /**
+     * @TODO optimisation, implement various image types
+     */
     boost::gil::rgb8_image_t getImage();
 
+    /**
+     * @returns A relative path to the photo.
+     */
     boost::filesystem::path getPath();
     boost::filesystem::path getFilename();
 

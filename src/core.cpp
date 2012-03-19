@@ -1,12 +1,7 @@
-/** \class CoreController
- * A class acting as a main application controller
- * responsible for initialization
- */
-
 #include "../include/core.hpp"
 
+CoreController* CoreController::instance = NULL;
 CoreController* CoreController::initialize(bool enableGui, std::string forcedConfigPath){
-  static CoreController* instance;
   if(instance == NULL){
     instance = new CoreController(enableGui, forcedConfigPath);
   }

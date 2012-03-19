@@ -1,21 +1,17 @@
-/** \class Directory
- * A class representing a single directory, providing its photos and subdirectories.
- */
 #include "../include/directory.hpp"
 
 using namespace boost::filesystem;
 using namespace std;
 
 /** 
- * \TODO create a singleton-like class, (one path - one object) ?
- * \TODO make appending paths look better
- * \TODO add error handling to constructor
+ * @TODO create a singleton-like class, (one path - one object) ?
+ * @TODO make appending paths look better
+ * @TODO add error handling to constructor
  */
 class CoreController;
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
-  /// There is no error handling in case the provided path is a file
-  //TODO implement error handling
+  /// @warning There is no error handling in case the provided path is a file
   disk = new Disk();
   if(exists(directoryPath) && is_directory(directoryPath)){
 
@@ -62,16 +58,10 @@ string Directory::getName(){
   return directoryPath.filename().string();
 }
 
-/** this method is better than checking the size of getPhotos, because it does not
- * initialize new Photo objects
- */
 bool Directory::hasPhotos(){
   return disk->hasPhotos(directoryPath);
 }
 
-/** this method is better than checking the size of getSubdirectories, because it does not
- * initialize new Directory objects
- */
 bool Directory::hasSubdirectories(){
   return disk->hasSubdirectories(directoryPath);
 }
