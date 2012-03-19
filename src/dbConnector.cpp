@@ -5,15 +5,10 @@
  * @version 0.1
 */
 
-#include <sqlite3.h>
 #include <iostream> //for testing only
-#include <vector>
-#include <string>
 
 #include "../include/dbConnector.hpp"
 
-using std::vector;
-using std::string;
 //////////////////////////////////////////////////////////////////////
 //Definitions of DBConnectorFactory methods
 ////////////////////////////////////////////////////////////////////////
@@ -60,7 +55,7 @@ void SQLiteConnector::close() {
   sqlite3_close(database);
 }
 
-int SQLiteConnector::sendQuery(char *query) {
+ResultTable SQLiteConnector::sendQuery(char *query) {
   sqlite3_stmt *statement;
   vector<vector<string> > results;
 
@@ -95,25 +90,7 @@ int SQLiteConnector::sendQuery(char *query) {
   string error = sqlite3_errmsg(database);
   if(error != "not an error")
     std::cout << query << " " << error << std::endl;
-}
 
-int main(int argc, char *argv[]) {
-  DBConnector *sqlconnector = DBConnectorFactory::getInstance(" ");
-  sqlconnector->open("DB.sqlite");
-
-  if(argc == 1)
-    return 0;
-  if(argc >=  2){
-    sqlconnector->sendQuery(argv[1]);
-    return 0;
-  }
-  if(argv[1][0] == 'a')
-    sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER,"
-                            " INETEGR path );");
-  if(argv[1][0] == 'b')
-    sqlconnector->sendQuery("INSERT INTO photos VALUES(1,2);");
-
-  sqlconnector->close();
-  return 0;
+  return results;
 }
 

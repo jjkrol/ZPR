@@ -13,10 +13,17 @@
 */
 #pragma once
 
+#include <vector>
+#include <string>
+#include <sqlite3.h>
 /**
  * @todo Adding photos to database
  * @todo Compatibility check ?
 */
+using std::vector;
+using std::string;
+
+typedef vector< vector <string> > ResultTable;
 
 class DBConnector;
 class SQLiteConnector;
@@ -37,7 +44,7 @@ public:
 class DBConnector {
 public:
   virtual bool open(const char *filename) = 0;
-  virtual int sendQuery(char *query) = 0;
+  virtual ResultTable sendQuery(char *query) = 0;
   virtual void close() = 0;
 
 /*! @fn virtual int sendQuery(const char*) = 0;
@@ -60,7 +67,7 @@ public:
 class SQLiteConnector : public DBConnector{
   friend class DBConnectorFactory;
 public:
-  int sendQuery(char *query);
+  ResultTable sendQuery(char *query);
   bool open(const char *filename);
   void close();
 private:
