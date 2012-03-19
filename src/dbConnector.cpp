@@ -25,14 +25,12 @@ DBConnector* DBConnectorFactory::getInstance(const char *type) {
   return SQLiteConnector::getInstance();
 }
 
-
 //////////////////////////////////////////////////////////////////////
 //Definitions of SQLiteConnector methods
 ////////////////////////////////////////////////////////////////////////
 /** @warning Don't forget to initialize 'instance' pointer to 0
     in every concrete version of DBConnector
 */
-
 
 /** Must be initialized with 0 before can be used*/
 DBConnector* SQLiteConnector::instance = 0;

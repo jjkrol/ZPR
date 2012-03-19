@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <sqlite3.h>
+
 /**
  * @todo Adding photos to database
  * @todo Compatibility check ?
@@ -23,10 +24,21 @@
 using std::vector;
 using std::string;
 
-typedef vector< vector <string> > ResultTable;
-
 class DBConnector;
 class SQLiteConnector;
+
+/** @typedef typedef vector< vector <string> > ResultTable;
+  * ResultTable is a type of objects storing results of queries.
+  * Each line of a result is represented by a vector of strings.
+  * Results may be composed of more than a line, that's why
+  * a ResultTable is of type vector<vector<string> >
+  *
+  * @typedef typedef DBConnector* (*Creator)();
+  * Creator is a static function called by the DBConnectorFactory
+  * to give access to different DBConnectors
+*/
+typedef vector< vector <string> > ResultTable;
+typedef DBConnector*(*Creator)(void);
 
 /*! @class DBConnectorFactory
  *  Class used to provide instances of adequate concrete versions
@@ -35,23 +47,38 @@ class SQLiteConnector;
 class DBConnectorFactory {
 public:
   static DBConnector* getInstance(const char *type);
-};
+  static void registerType(string type_name , Creator creating_func);
 
+//public:
+//  static vector<> types_register;
+};
 
 /*! @interface DBConnector
  *  Interface providing functions for communication with databases.
 */
 class DBConnector {
 public:
+/*! @fn virtual ResultTable sendQuery(char* query) = 0;
+ *  @brief For testing purposes.
+ *  @warning Should be commented or removed in final version!
+ *  @returns the result of the query
+ *
+ *  @fn virtual bool open(const char *filename) = 0;
+ *  @brief Opens connection with database and creates necessary
+ *  structures.
+ *  @returns `true` when database openned succesfully and `false`
+ *  otherwise.
+*/
   virtual bool open(const char *filename) = 0;
   virtual ResultTable sendQuery(char *query) = 0;
   virtual void close() = 0;
 
-/*! @fn virtual int sendQuery(const char*) = 0;
-   *  @brief For testing purposes.
-   *  @warning Should be commented or removed in final version!
-   *  @returns the result of the query
-  */
+protected:
+/*! @fn virtual ~DBConnector(){ }
+ *  Virtual private  destructor ensures that DBConnectors
+ *  can be created only via DBConnectorFactory::getInstance() method.
+*/
+  virtual ~DBConnector(){ }
 };
 ////////////////////////////////////////////////////////////////////////
 //Concrete versions of DBConnector Interface
