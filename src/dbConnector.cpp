@@ -17,16 +17,17 @@ using std::string;
 //////////////////////////////////////////////////////////////////////
 //Definitions of DBConnectorFactory methods
 ////////////////////////////////////////////////////////////////////////
-DBConnector* DBConnectorFactory::Instance(const char *type) {
+DBConnector* DBConnectorFactory::getInstance(const char *type) {
   /** @todo Concrete versions of DBConnector should
     * invoke the Register() function to register their types
     * in the register of types stored in the  DBConnectorGenerator
     * object (the register should be static). Then when
-    * the DBConnectorFactory::Instance(type) is called,
-    * Instance() should look for the pointer to adequate Instance()
-    * function in its register and should call the function.
+    * the DBConnectorFactory::getInstance(type) is called,
+    * getInstance() should look for the pointer to adequate
+    * getInstance() function in its register and should call
+    * the function.
   */
-  return SQLiteConnector::Instance();
+  return SQLiteConnector::getInstance();
 }
 
 
@@ -41,7 +42,7 @@ DBConnector* DBConnectorFactory::Instance(const char *type) {
 /** Must be initialized with 0 before can be used*/
 DBConnector* SQLiteConnector::instance = 0;
 
-DBConnector* SQLiteConnector::Instance() {
+DBConnector* SQLiteConnector::getInstance() {
   if(instance == 0)
     instance = new SQLiteConnector;  
 
@@ -94,23 +95,25 @@ int SQLiteConnector::sendQuery(char *query) {
   string error = sqlite3_errmsg(database);
   if(error != "not an error")
     std::cout << query << " " << error << std::endl;
-  else
-    std::cout << "OK" << std::endl;
 }
 
-//int main(int argc, char *argv[]) {
-  //DBConnector *sqlconnector = DBConnectorFactory::Instance(" ");
-  //sqlconnector->open("DB.sqlite");
-//
-  //if(argv[1][0] == 'a')
-    //sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER,"
-                            //" INETEGR path );");
-  //if(argv[1][0] == 'b')
-    //sqlconnector->sendQuery("INSERT INTO photos VALUES(1,2);");
-  ////else {
-    //sqlconnector->sendQuery(argv[1]);
-  //}
-  //sqlconnector->close();
-  //return 0;
-//}
+int main(int argc, char *argv[]) {
+  DBConnector *sqlconnector = DBConnectorFactory::getInstance(" ");
+  sqlconnector->open("DB.sqlite");
+
+  if(argc == 1)
+    return 0;
+  if(argc >=  2){
+    sqlconnector->sendQuery(argv[1]);
+    return 0;
+  }
+  if(argv[1][0] == 'a')
+    sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER,"
+                            " INETEGR path );");
+  if(argv[1][0] == 'b')
+    sqlconnector->sendQuery("INSERT INTO photos VALUES(1,2);");
+
+  sqlconnector->close();
+  return 0;
+}
 

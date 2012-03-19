@@ -27,7 +27,7 @@ class SQLiteConnector;
 */
 class DBConnectorFactory {
 public:
-  static DBConnector* Instance(const char *type);
+  static DBConnector* getInstance(const char *type);
 };
 
 
@@ -36,10 +36,6 @@ public:
 */
 class DBConnector {
 public:
-  //enum State {
-    //OPEN_OK = 0x00,
-  //};
-
   virtual bool open(const char *filename) = 0;
   virtual int sendQuery(char *query) = 0;
   virtual void close() = 0;
@@ -47,7 +43,7 @@ public:
 /*! @fn virtual int sendQuery(const char*) = 0;
    *  @brief For testing purposes.
    *  @warning Should be commented or removed in final version!
-   *  @returns 0 if something went wrong
+   *  @returns the result of the query
   */
 };
 ////////////////////////////////////////////////////////////////////////
@@ -58,7 +54,7 @@ public:
   * @brief Concrete version of DBConnector. Uses SQLite Database.
   *
   * Must declare DBConnectorFactory as a friend. Must provide
-  * Instance function which gives access to the database
+  * getInstance function which gives access to the database
   * (every concrete connector is implemented as a Singleton)
 */
 class SQLiteConnector : public DBConnector{
@@ -70,7 +66,7 @@ public:
 private:
   sqlite3 *database;
   static DBConnector *instance;
-  static DBConnector* Instance();
+  static DBConnector* getInstance();
 };
 
 
