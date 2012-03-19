@@ -98,19 +98,19 @@ int SQLiteConnector::sendQuery(char *query) {
     std::cout << "OK" << std::endl;
 }
 
-int main(int argc, char *argv[]) {
-  DBConnector *sqlconnector = DBConnectorFactory::Instance(" ");
-  sqlconnector->open("DB.sqlite");
-
-  if(argv[1][0] == 'a')
-    sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER,"
-                            " INETEGR path );");
-  if(argv[1][0] == 'b')
-    sqlconnector->sendQuery("INSERT INTO photos VALUES(1,2);");
-  //else {
+//int main(int argc, char *argv[]) {
+  //DBConnector *sqlconnector = DBConnectorFactory::Instance(" ");
+  //sqlconnector->open("DB.sqlite");
+//
+  //if(argv[1][0] == 'a')
+    //sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER,"
+                            //" INETEGR path );");
+  //if(argv[1][0] == 'b')
+    //sqlconnector->sendQuery("INSERT INTO photos VALUES(1,2);");
+  ////else {
     //sqlconnector->sendQuery(argv[1]);
   //}
-  sqlconnector->close();
-  return 0;
-}
+  //sqlconnector->close();
+  //return 0;
+//}
 
