@@ -62,18 +62,16 @@ void SQLiteConnector::close() {
 int SQLiteConnector::sendQuery(char *query) {
   sqlite3_stmt *statement;
   vector<vector<string> > results;
-  /**@var int error_code
-   * It's used for debugging
-  */
-  int error_code;
 
-  if((error_code = sqlite3_prepare_v2(database,query,-1,&statement,0))
+  if(sqlite3_prepare_v2(database,query,-1,&statement,NULL)
      == SQLITE_OK) {
     int columns = sqlite3_column_count(statement);
     int result_state = 0;
 
     while(true) {
       //if result_state equals SQLITE_ROWS that means that there is
+      result_state = sqlite3_step(statement);
+
       if(result_state == SQLITE_ROW) {
         vector<string> values;
         for(int i=0 ; i<columns ; ++i) {
@@ -91,27 +89,28 @@ int SQLiteConnector::sendQuery(char *query) {
       else
         break;
     }
-    std::cout<<"OK"<<std::endl;
+    sqlite3_finalize(statement);
   }
-  //the code below this line is used for testing purposes and
-  //should be removed in the final version
+  string error = sqlite3_errmsg(database);
+  if(error != "not an error")
+    std::cout << query << " " << error << std::endl;
   else
-    std::cout<<"Error code is: "<<error_code<<std::endl;
-  sqlite3_finalize(statement);
+    std::cout << "OK" << std::endl;
 }
 
-//int main(int argc, char *argv[]) {
-  //DBConnector *sqlconnector = DBConnectorFactory::Instance(" ");
-  //sqlconnector->open("DB.sqlite");
-//
-  //if(argv[1][0] == 'a'){
-    //sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER);");
-    //sqlconnector->sendQuery("INSERT INTO photos VALUES(1);");
-  //}
+int main(int argc, char *argv[]) {
+  DBConnector *sqlconnector = DBConnectorFactory::Instance(" ");
+  sqlconnector->open("DB.sqlite");
+
+  if(argv[1][0] == 'a')
+    sqlconnector->sendQuery("CREATE TABLE photos (id INTEGER,"
+                            " INETEGR path );");
+  if(argv[1][0] == 'b')
+    sqlconnector->sendQuery("INSERT INTO photos VALUES(1,2);");
   //else {
     //sqlconnector->sendQuery(argv[1]);
   //}
-  //sqlconnector->close();
-  //return 0;
-//}
+  sqlconnector->close();
+  return 0;
+}
 
