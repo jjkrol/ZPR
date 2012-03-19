@@ -1,14 +1,13 @@
-#ifndef GUI_HPP_
-#define GUI_HPP_
+#pragma once
+
+#include <gtkmm.h>
 
 /** \class GUI
  *  \brief Class representing Graphical User Interface.
  *
- *  Class uses GTKmm, it serves as a link between user and program (Core class)
+ *  Class uses GTKmm, it serves as a link between user and program
  *  taking commands from user and sending them to the Core class.
  */
-
-#include <gtkmm.h>
 
 class GUI {
   private:
@@ -41,5 +40,3 @@ class GUI {
     ~GUI();
     void createMainWindow();
 };
-
-#endif

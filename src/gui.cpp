@@ -3,7 +3,7 @@
 /** \class GUI
  *  \brief Class representing Graphical User Interface.
  *
- *  Class uses GTKmm, it serves as a link between user and program (Core class)
+ *  Class uses GTKmm, it serves as a link between user and program
  *  taking commands from user and sending them to the Core class.
  */
 
@@ -133,9 +133,9 @@ void GUI::fitImage() {
   //checking if fitting image is needed
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = image->get_pixbuf();
   Gdk::Rectangle rectangle = image_window->get_allocation();
+  if(!pixbuf) return;
   if(rectangle.get_width() > pixbuf->get_width() &&
      rectangle.get_height() > pixbuf->get_height()) return;
-  if(!pixbuf) return;
 
   //calculating desired width and height
   int width, height;
