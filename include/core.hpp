@@ -20,7 +20,7 @@ class CoreController {
 public:
 
 
-  static CoreController* initialize(bool enableGui=TRUE,std::string forcedConfigPath="");
+  static CoreController* initialize(int argc, char ** argv, bool enableGui=TRUE,std::string forcedConfigPath="");
   ~CoreController (){};
 
   /**
@@ -42,7 +42,7 @@ public:
   boost::filesystem::path getLibraryDirectoryPath();
 
 private:
-  CoreController (bool enableGui=TRUE, std::string forcedConfigPath="");
+  CoreController (int argc, char ** argv, bool enableGui=TRUE, std::string forcedConfigPath="");
   CoreController& operator= (const CoreController&);
   CoreController (const CoreController&);
 

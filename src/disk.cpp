@@ -6,7 +6,9 @@ using namespace boost::gil;
 using namespace std;
 
 Disk::Disk(){
-  CoreController * core = CoreController::initialize();
+  int argc = 0;
+  char ** argv = NULL;
+  CoreController * core = CoreController::initialize(argc, argv);
   libraryDirectoryPath = core->getLibraryDirectoryPath();
 }
 

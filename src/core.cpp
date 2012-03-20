@@ -1,9 +1,9 @@
 #include "../include/core.hpp"
 
 CoreController* CoreController::instance = NULL;
-CoreController* CoreController::initialize(bool enableGui, std::string forcedConfigPath){
+CoreController* CoreController::initialize(int argc, char ** argv, bool enableGui, std::string forcedConfigPath){
   if(instance == NULL){
-    instance = new CoreController(enableGui, forcedConfigPath);
+    instance = new CoreController(argc, argv, enableGui, forcedConfigPath);
   }
 
   return instance;
@@ -21,14 +21,12 @@ boost::property_tree::ptree CoreController::getConfiguration(){
   return configManager->getConfigurationTree();
 }
 
-CoreController::CoreController(bool enableGui, std::string forcedConfigPath){
+CoreController::CoreController(int argc, char ** argv, bool enableGui, std::string forcedConfigPath){
 
   std::string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
   configManager = ConfigurationManager::initialize(boost::filesystem::path(configPath));
 
   if(enableGui){
-    int argc=0;
-    char ** argv =NULL; 
     GUI gui(argc, argv);
     gui.createMainWindow();
   }

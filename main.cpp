@@ -7,7 +7,7 @@
 #endif
 
 int main(int argc, char *argv[]) {
-  CoreController::initialize();
+  CoreController::initialize(argc, argv);
 
 // JUST FOR TESTS
   #if DATABASE_TESTING == true

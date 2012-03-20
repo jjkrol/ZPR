@@ -7,9 +7,10 @@
 using namespace boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( testSuite )
-
+int argc = 0;
+char ** argv = NULL;
   BOOST_AUTO_TEST_CASE( coreClassTest ){
-    CoreController* core = CoreController::initialize(FALSE, "test.cfg");
+    CoreController* core = CoreController::initialize(argc, argv, FALSE, "test.cfg");
 
     BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
 
@@ -24,7 +25,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
-    CoreController* core = CoreController::initialize(FALSE, "test.cfg");
+    CoreController* core = CoreController::initialize(argc, argv, FALSE, "test.cfg");
 
     Directory* myTestDir = core->getDirectoryTree();
     BOOST_CHECK(myTestDir->getPath()=="/");
