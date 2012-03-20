@@ -5,7 +5,6 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "directory.hpp"
-#include "photo.hpp"
 #include "configurationManager.hpp"
 #include "gui.hpp"
 

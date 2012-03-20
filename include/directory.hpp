@@ -6,6 +6,7 @@
 #include "photo.hpp"
 #include "disk.hpp"
 class Disk;
+class Photo;
 
 /** @class Directory
  *  @brief A class representing a single directory, providing its photos and subdirectories.

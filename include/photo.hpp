@@ -2,9 +2,14 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/gil/gil_all.hpp>
+#include <boost/gil/image.hpp>
 #include <boost/gil/extension/io/jpeg_io.hpp>
+#include <boost/gil/extension/io/jpeg_dynamic_io.hpp>
 #include <boost/gil/extension/dynamic_image/any_image.hpp>
 #include <map>
+#include <gtkmm.h>
+
+#include "disk.hpp"
 
 /** @class Photo
  * @brief A class representing a single photo. 
@@ -20,6 +25,8 @@
  *  - moving and deleting the photo
  *  - placing effects on the photo and getting effect previews of certain size
  */
+
+class Disk;
 
 class Photo {
 
@@ -37,6 +44,8 @@ class Photo {
      */
     boost::gil::rgb8_image_t getImage();
 
+    Glib::RefPtr<Gdk::Pixbuf> getPixbuf();
+
     /**
      * @returns A relative path to the photo.
      */
@@ -44,6 +53,7 @@ class Photo {
     boost::filesystem::path getFilename();
 
   private:
+    Disk* disk;
     Photo& operator=(const Photo&);
     Photo( const Photo&);
     Photo (boost::filesystem::path argumentPath);

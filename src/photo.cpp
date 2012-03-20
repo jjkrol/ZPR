@@ -24,7 +24,7 @@ Photo* Photo::initialize(boost::filesystem::path argumentPath){
 }
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
-
+  disk = new Disk();
 }
 
 Photo::~Photo(){
@@ -33,15 +33,27 @@ Photo::~Photo(){
 }
 
 rgb8_image_t Photo::getThumbnail(){
-  rgb8_image_t image;
-  jpeg_read_image(photoPath.string(), image);
-  return image;
+  return getImage();
 }
 
 rgb8_image_t Photo::getImage(){
+  return disk->getPhotoFile(photoPath);
+}
+
+Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf(){
   rgb8_image_t image;
-  jpeg_read_image(photoPath.string(), image);
-  return image;
+
+  image = getImage();
+
+  const rgb8_image_t::view_t image_view = view(image);
+  Glib::RefPtr<Gdk::Pixbuf> ptr = Gdk::Pixbuf::create_from_data(reinterpret_cast<guint8*>(&image),
+      Gdk::COLORSPACE_RGB,
+      false,
+      8,
+      image.width(),
+      image.height(),
+      image.width() * 3);
+  return ptr;
 }
 
 boost::filesystem::path Photo::getPath(){

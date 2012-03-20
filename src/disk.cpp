@@ -2,6 +2,7 @@
 #include "../include/disk.hpp"
 
 using namespace boost::filesystem;
+using namespace boost::gil;
 using namespace std;
 
 Disk::Disk(){
@@ -53,6 +54,12 @@ bool Disk::hasSubdirectories(path directoryPath){
     return true;
 }
 
+rgb8_image_t Disk::getPhotoFile(path photoPath){
+  rgb8_image_t image;
+  path absolutePath = makeAbsolutePath(photoPath);
+  jpeg_read_image(absolutePath.string(), image);
+  return image;
+}
 //private methods
 
 // returns content of given directory (all files)
