@@ -2,7 +2,6 @@
 
 #include <gtkmm.h>
 #include <vector>
-//#include "./core.hpp"
 
 /** @class GUI
  *  @brief Class representing Graphical User Interface.
