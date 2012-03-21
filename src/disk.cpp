@@ -1,5 +1,6 @@
 
 #include "../include/disk.hpp"
+#include <iostream>
 
 using namespace boost::filesystem;
 using namespace boost::gil;
@@ -56,11 +57,9 @@ bool Disk::hasSubdirectories(path directoryPath){
     return true;
 }
 
-rgb8_image_t Disk::getPhotoFile(path photoPath){
-  rgb8_image_t image;
+Gdk::Pixbuf* Disk::getPhotoFile(path photoPath){
   path absolutePath = makeAbsolutePath(photoPath);
-  jpeg_read_image(absolutePath.string(), image);
-  return image;
+  return gdk_pixbuf_new_from_file(static_cast<const char *>(absolutePath.string()));
 }
 //private methods
 

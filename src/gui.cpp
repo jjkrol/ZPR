@@ -1,5 +1,6 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
+#include <iostream>
 
 /** @class GUI
  *  @brief Class representing Graphical User Interface.
@@ -28,6 +29,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   colors_label = new Gtk::Label("Colors modification");
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
+  image_zoom = new Gtk::HScale();
 
   //editing widgets
   notebook->append_page(*basic_label, "Basic");
@@ -43,6 +45,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   bottom_box->pack_start(*right_button, false, false);
   bottom_box->pack_start(*filename_label, true, true);
   bottom_box->pack_start(*fit_button, false, false);
+  bottom_box->pack_start(*image_zoom, false, false);
   bottom_box->pack_start(*open_button, false, false);
 
   right_box = new Gtk::Box();
@@ -69,12 +72,12 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   main_window->add(*grid);
 
   //connecting to core and loading directory
-  //core = CoreController::initialize();
+  core = CoreController::initialize(0, NULL, false);
 
   //loading image
-  //current_dir = core->getDirectoryTree();
-  //photos = current_dir->getPhotos();
-  //current_photo = photos.begin();
+  current_dir = core->getDirectoryTree();
+  photos = current_dir->getPhotos();
+  current_photo = photos.begin();
 }
 
 //GUI class descructor
@@ -106,6 +109,9 @@ void GUI::createMainWindow() {
 
   //loading image
   //image->set((*current_photo)->getPixbuf());
+  //Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*current_photo)->getPixbuf();
+  //image->set((*current_photo)->getPixbuf());
+  //fitImage();
 
   //showing widgets
   main_window->show_all_children();
@@ -147,6 +153,8 @@ void GUI::fitImage() {
   if(!pixbuf) return;
   if(rectangle.get_width() > pixbuf->get_width() &&
      rectangle.get_height() > pixbuf->get_height()) return;
+
+  std::cout << rectangle.get_width()<< " " <<  rectangle.get_height() << std::endl; 
 
   //calculating desired width and height
   int width, height;

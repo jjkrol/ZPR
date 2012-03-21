@@ -39,6 +39,7 @@ class GUI {
     //right side widgets
     Gtk::Button *open_button, *fit_button;
     Gtk::Button *left_button, *right_button;
+    Gtk::HScale *image_zoom;
     Gtk::Label *filename_label;
     Gtk::Label *basic_label, *colors_label, *effects_label;
     Gtk::Image *image;

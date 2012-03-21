@@ -44,7 +44,7 @@ class Photo {
      */
     boost::gil::rgb8_image_t getImage();
 
-    Glib::RefPtr<Gdk::Pixbuf> getPixbuf();
+    Gdk::Pixbuf* getPixbuf();
 
     /**
      * @returns A relative path to the photo.
