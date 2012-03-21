@@ -1,16 +1,29 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <vector>
+//#include "./core.hpp"
 
-/** \class GUI
- *  \brief Class representing Graphical User Interface.
+/** @class GUI
+ *  @brief Class representing Graphical User Interface.
  *
  *  Class uses GTKmm, it serves as a link between user and program
  *  taking commands from user and sending them to the Core class.
  */
 
+class CoreController;
+class Directory;
+class Photo;
+
 class GUI {
   private:
+    //comunication with CoreController
+    CoreController *core;
+    Directory *current_dir;
+    std::vector<Photo*> photos;
+    std::vector<Photo*>::iterator current_photo;
+
+    //main window and kit
     Gtk::Main kit;
     Gtk::Window *main_window;
 

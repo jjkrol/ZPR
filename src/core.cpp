@@ -1,4 +1,5 @@
 #include "../include/core.hpp"
+#include "../include/gui.hpp"
 
 CoreController* CoreController::instance = NULL;
 CoreController* CoreController::initialize(int argc, char ** argv, bool enableGui, std::string forcedConfigPath){

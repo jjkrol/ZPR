@@ -1,7 +1,8 @@
 #include "../include/gui.hpp"
+#include "../include/core.hpp"
 
-/** \class GUI
- *  \brief Class representing Graphical User Interface.
+/** @class GUI
+ *  @brief Class representing Graphical User Interface.
  *
  *  Class uses GTKmm, it serves as a link between user and program
  *  taking commands from user and sending them to the Core class.
@@ -9,7 +10,6 @@
 
 //GUI constructor - creates main window and its widgets
 GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
-
   //creating main window
   main_window = new Gtk::Window(Gtk::WINDOW_TOPLEVEL);
   main_window->set_title("Image Viewer");
@@ -67,6 +67,14 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
 
   image_window->add(*image);
   main_window->add(*grid);
+
+  //connecting to core and loading directory
+  //core = CoreController::initialize();
+
+  //loading image
+  //current_dir = core->getDirectoryTree();
+  //photos = current_dir->getPhotos();
+  //current_photo = photos.begin();
 }
 
 //GUI class descructor
@@ -95,6 +103,9 @@ void GUI::createMainWindow() {
   //connecting buttons signals to functions
   open_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::openImage));
   fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
+
+  //loading image
+  //image->set((*current_photo)->getPixbuf());
 
   //showing widgets
   main_window->show_all_children();
