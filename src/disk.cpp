@@ -57,9 +57,9 @@ bool Disk::hasSubdirectories(path directoryPath){
     return true;
 }
 
-Gdk::Pixbuf* Disk::getPhotoFile(path photoPath){
+Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
   path absolutePath = makeAbsolutePath(photoPath);
-  return gdk_pixbuf_new_from_file(static_cast<const char *>(absolutePath.string()));
+  return Gdk::Pixbuf::create_from_file(absolutePath.string());
 }
 //private methods
 

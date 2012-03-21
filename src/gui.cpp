@@ -108,10 +108,8 @@ void GUI::createMainWindow() {
   fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
 
   //loading image
-  //image->set((*current_photo)->getPixbuf());
-  //Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*current_photo)->getPixbuf();
-  //image->set((*current_photo)->getPixbuf());
-  //fitImage();
+  image->set((*current_photo)->getPixbuf());
+  fitImage();
 
   //showing widgets
   main_window->show_all_children();
@@ -153,8 +151,6 @@ void GUI::fitImage() {
   if(!pixbuf) return;
   if(rectangle.get_width() > pixbuf->get_width() &&
      rectangle.get_height() > pixbuf->get_height()) return;
-
-  std::cout << rectangle.get_width()<< " " <<  rectangle.get_height() << std::endl; 
 
   //calculating desired width and height
   int width, height;

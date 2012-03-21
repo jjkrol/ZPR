@@ -3,8 +3,6 @@
 using namespace boost::gil;
 using namespace std;
 
-
-
 Photo* Photo::initialize(boost::filesystem::path argumentPath){
   /// photos are saved in a map indexed by paths, so you can't initialize
   /// two instances of the same photo.
@@ -37,11 +35,10 @@ rgb8_image_t Photo::getThumbnail(){
 }
 
 rgb8_image_t Photo::getImage(){
-  //return disk->getPhotoFile(photoPath);
-  //return NULL;
+  //FIXME
 }
 
-Gdk::Pixbuf* Photo::getPixbuf(){
+Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
   return disk->getPhotoFile(photoPath);
 }
 

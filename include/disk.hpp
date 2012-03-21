@@ -24,7 +24,7 @@ class Disk {
     bool hasPhotos(boost::filesystem::path directoryPath);
     bool hasSubdirectories(boost::filesystem::path directoryPath);
 
-    boost::gil::rgb8_image_t getPhotoFile(boost::filesystem::path photoPath);
+    Glib::RefPtr<Gdk::Pixbuf> getPhotoFile(boost::filesystem::path photoPath);
 
   private:
     std::vector<boost::filesystem::path> getDirectoryContents(boost::filesystem::path);

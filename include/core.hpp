@@ -6,7 +6,6 @@
 
 #include "directory.hpp"
 #include "configurationManager.hpp"
-#include "gui.hpp"
 
 class Directory;
 
@@ -20,7 +19,7 @@ class CoreController {
 public:
 
 
-  static CoreController* initialize(int argc, char ** argv, bool enableGui=TRUE,std::string forcedConfigPath="");
+  static CoreController* initialize(int argc=0, char ** argv=NULL, bool enableGui=TRUE,std::string forcedConfigPath="");
   ~CoreController (){};
 
   /**
