@@ -29,9 +29,12 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   colors_label = new Gtk::Label("Colors modification");
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
-  image_zoom = new Gtk::HScale();
+  image_zoom = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
 
   //editing widgets
+  image_zoom->set_range(1, 100);
+  image_zoom->set_draw_value(false);
+  image_zoom->set_show_fill_level(true);
   notebook->append_page(*basic_label, "Basic");
   notebook->append_page(*colors_label, "Colors");
   notebook->append_page(*effects_label, "Effects");
@@ -99,6 +102,7 @@ GUI::~GUI() {
   delete colors_label;
   delete effects_label;
   delete image;
+  delete image_zoom;
 }
 
 //function connects signals and shows main window
