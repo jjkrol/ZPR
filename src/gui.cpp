@@ -35,6 +35,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   image_zoom->set_range(1, 100);
   image_zoom->set_draw_value(false);
   image_zoom->set_show_fill_level(true);
+  image_zoom->set_size_request(10);
   notebook->append_page(*basic_label, "Basic");
   notebook->append_page(*colors_label, "Colors");
   notebook->append_page(*effects_label, "Effects");
@@ -108,49 +109,23 @@ GUI::~GUI() {
 //function connects signals and shows main window
 void GUI::createMainWindow() {
   //connecting buttons signals to functions
-  open_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::openImage));
+  open_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
   fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
 
   //loading image
-  image->set((*current_photo)->getPixbuf());
-  fitImage();
+  //image->set((*current_photo)->getPixbuf());
 
   //showing widgets
   main_window->show_all_children();
   main_window->maximize();
   if(main_window) kit.run(*main_window);
-}
-
-//function creates file open dialog and sets image source
-void GUI::openImage() {
-  //file choose dialog
-  Gtk::FileChooserDialog dialog("Open image", Gtk::FILE_CHOOSER_ACTION_OPEN);
-  dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-
-  //file filter
-  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-  filter->add_pixbuf_formats();
-  dialog.add_filter(filter);
-
-  //waiting for OK
-  switch(dialog.run()) {
-    case Gtk::RESPONSE_ACCEPT:
-      image->set(dialog.get_filename());
-      filename_label->set_text(dialog.get_filename());
-      fitImage();
-      break;
-    default:
-      break;
-  }
-
-  dialog.hide();
+  fitImage();
 }
 
 //method for fitting image into Gtk::Image widget
 void GUI::fitImage() {
   //checking if fitting image is needed
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = image->get_pixbuf();
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*current_photo)->getPixbuf();
   Gdk::Rectangle rectangle = image_window->get_allocation();
   if(!pixbuf) return;
   if(rectangle.get_width() > pixbuf->get_width() &&

@@ -47,6 +47,8 @@ class GUI {
     //methods for handling signals
     void openImage();
     void fitImage();
+    //void nextImage();
+    //void prevImage();
 
   public:
     GUI(int argc, char *argv[]);
