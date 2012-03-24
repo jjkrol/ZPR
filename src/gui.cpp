@@ -148,7 +148,7 @@ void GUI::loadImage() {
 
 //method for loading next image from folder
 void GUI::nextImage() {
-  if(current_photo == photos.end()) return;
+  if(current_photo == --photos.end()) return;
   current_photo++;
   loadImage();
 }
