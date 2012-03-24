@@ -37,7 +37,7 @@ class GUI {
     Gtk::Notebook *notebook;
 
     //right side widgets
-    Gtk::Button *open_button, *fit_button;
+    Gtk::Button *fit_button;
     Gtk::Button *left_button, *right_button;
     Gtk::Scale *image_zoom;
     Gtk::Label *filename_label;
@@ -45,10 +45,9 @@ class GUI {
     Gtk::Image *image;
 
     //methods for handling signals
-    void openImage();
-    void fitImage();
-    //void nextImage();
-    //void prevImage();
+    void loadImage();
+    void nextImage();
+    void prevImage();
 
   public:
     GUI(int argc, char *argv[]);

@@ -20,7 +20,6 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   image_window = new Gtk::ScrolledWindow();
   menu = new Gtk::MenuBar();
   library_button = new Gtk::Button("Back to library");
-  open_button = new Gtk::Button(Gtk::Stock::OPEN);
   fit_button = new Gtk::Button(Gtk::Stock::ZOOM_FIT);
   left_button = new Gtk::Button(Gtk::Stock::GO_BACK);
   right_button = new Gtk::Button(Gtk::Stock::GO_FORWARD);
@@ -48,9 +47,8 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   bottom_box->pack_start(*left_button, false, false);
   bottom_box->pack_start(*right_button, false, false);
   bottom_box->pack_start(*filename_label, true, true);
-  bottom_box->pack_start(*fit_button, false, false);
   bottom_box->pack_start(*image_zoom, false, false);
-  bottom_box->pack_start(*open_button, false, false);
+  bottom_box->pack_start(*fit_button, false, false);
 
   right_box = new Gtk::Box();
   right_box->set_hexpand(true);
@@ -94,7 +92,6 @@ GUI::~GUI() {
   delete menu;
   delete library_button;
   delete notebook;
-  delete open_button;
   delete fit_button;
   delete left_button;
   delete right_button;
@@ -109,27 +106,27 @@ GUI::~GUI() {
 //function connects signals and shows main window
 void GUI::createMainWindow() {
   //connecting buttons signals to functions
-  open_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
-  fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::fitImage));
-
-  //loading image
-  //image->set((*current_photo)->getPixbuf());
+  fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::loadImage));
+  right_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::nextImage));
+  left_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::prevImage));
 
   //showing widgets
   main_window->show_all_children();
   main_window->maximize();
   if(main_window) kit.run(*main_window);
-  fitImage();
 }
 
-//method for fitting image into Gtk::Image widget
-void GUI::fitImage() {
+//method for loading image into Gtk::Image widget
+void GUI::loadImage() {
   //checking if fitting image is needed
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*current_photo)->getPixbuf();
   Gdk::Rectangle rectangle = image_window->get_allocation();
   if(!pixbuf) return;
   if(rectangle.get_width() > pixbuf->get_width() &&
-     rectangle.get_height() > pixbuf->get_height()) return;
+     rectangle.get_height() > pixbuf->get_height()) {
+    image->set(pixbuf);
+    return;
+  }
 
   //calculating desired width and height
   int width, height;
@@ -147,4 +144,18 @@ void GUI::fitImage() {
   //image resizing
   pixbuf = pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
   image->set(pixbuf);
+}
+
+//method for loading next image from folder
+void GUI::nextImage() {
+  if(current_photo == photos.end()) return;
+  current_photo++;
+  loadImage();
+}
+
+//method for loading previous image from folder
+void GUI::prevImage() {
+  if(current_photo == photos.begin()) return;
+  current_photo--;
+  loadImage();
 }
