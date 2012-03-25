@@ -74,7 +74,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   main_window->add(*grid);
 
   //connecting to core and loading directory
-  core = CoreController::initialize(0, NULL, false);
+  core = CoreController::getInstance(0, NULL, false);
 
   //loading image
   current_dir = core->getDirectoryTree();

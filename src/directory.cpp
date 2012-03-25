@@ -12,14 +12,13 @@ class CoreController;
 
 Directory::Directory(path inputPath):directoryPath(inputPath){
   /// @warning There is no error handling in case the provided path is a file
-  disk = new Disk();
+  disk = Disk::getInstance();
   if(exists(directoryPath) && is_directory(directoryPath)){
 
   }
 }
 
 Directory::~Directory(){
-  delete disk;
 }
 
 vector <Directory*> Directory::getSubdirectories(){
@@ -44,7 +43,7 @@ vector<Photo*> Directory::getPhotos(){
   //create vector of pointers to Photo objects
   for(vector<path>::iterator it = photoFilenames.begin(); it!=photoFilenames.end(); it++){
     path photoPath = directoryPath;
-    photos.push_back(Photo::initialize(photoPath/=path("/")/=(*it)));
+    photos.push_back(Photo::getInstance(photoPath/=path("/")/=(*it)));
   }
 
   return photos;

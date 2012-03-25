@@ -3,11 +3,16 @@
 using namespace boost::filesystem;
 using namespace std;
 
-Disk::Disk(){
-  int argc = 0;
-  char ** argv = NULL;
-  CoreController * core = CoreController::initialize(argc, argv);
-  libraryDirectoryPath = core->getLibraryDirectoryPath();
+Disk* Disk::instance = NULL;
+
+Disk* Disk::getInstance(path libraryDirectoryPath){
+  if(instance == NULL)
+    instance = new Disk(libraryDirectoryPath);
+  return instance;
+}
+
+Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath){
+
 }
 
 vector <path> Disk::getSubdirectoriesPaths(path directoryPath){

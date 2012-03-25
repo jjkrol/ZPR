@@ -11,7 +11,7 @@
 class ConfigurationManager {
 
 public:
-  static ConfigurationManager* initialize(boost::filesystem::path configFilePath);
+  static ConfigurationManager* getInstance(boost::filesystem::path configFilePath);
 
   /**
    * @returns A string value represented in configuration by the given key

@@ -4,10 +4,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "directory.hpp"
 #include "configurationManager.hpp"
+#include "disk.hpp"
 #include "gui.hpp"
+#include "directory.hpp"
 
+class Disk;
 class Directory;
 
 /**
@@ -20,8 +22,7 @@ class CoreController {
 public:
 
 
-  static CoreController* initialize(int argc=0, char ** argv=NULL, bool enableGui=true,std::string forcedConfigPath="");
-  ~CoreController (){};
+  static CoreController* getInstance(int argc=0, char ** argv=NULL, bool enableGui=true,std::string forcedConfigPath="");
 
   /**
    * @returns An object representing the top directory of the library. Lower levels of
@@ -45,7 +46,9 @@ private:
   CoreController (int argc, char ** argv, bool enableGui=true, std::string forcedConfigPath="");
   CoreController& operator= (const CoreController&);
   CoreController (const CoreController&);
+  ~CoreController (){};
 
   static CoreController* instance;
   ConfigurationManager* configManager;
+  Disk* disk;
 };

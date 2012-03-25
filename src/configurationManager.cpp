@@ -1,11 +1,10 @@
-
 #include "../include/configurationManager.hpp"
 
 using namespace boost::property_tree;
 
 ConfigurationManager * ConfigurationManager::instance = NULL;
 
-ConfigurationManager* ConfigurationManager::initialize(boost::filesystem::path configFilePath){
+ConfigurationManager* ConfigurationManager::getInstance(boost::filesystem::path configFilePath){
 
 
   if(instance == NULL){

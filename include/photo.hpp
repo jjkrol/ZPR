@@ -30,8 +30,7 @@ class Disk;
 class Photo {
 
   public:
-    static Photo * initialize(boost::filesystem::path argumentPath);
-    ~Photo ();
+    static Photo * getInstance(boost::filesystem::path argumentPath);
 
     /**
      * @TODO Implement this
@@ -52,10 +51,12 @@ class Photo {
     boost::filesystem::path getFilename();
 
   private:
-    Disk* disk;
+    Photo (boost::filesystem::path argumentPath);
     Photo& operator=(const Photo&);
     Photo( const Photo&);
-    Photo (boost::filesystem::path argumentPath);
+    ~Photo ();
+
+    Disk* disk;
     boost::filesystem::path photoPath;
 };
 

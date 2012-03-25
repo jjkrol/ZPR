@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
 int argc = 0;
 char ** argv = NULL;
   BOOST_AUTO_TEST_CASE( coreClassTest ){
-    CoreController* core = CoreController::initialize(argc, argv, FALSE, "test.cfg");
+    CoreController* core = CoreController::getInstance(argc, argv, FALSE, "test.cfg");
 
     BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
 
@@ -18,14 +18,14 @@ char ** argv = NULL;
 
   BOOST_AUTO_TEST_CASE( photoClassTest ) {
     path p("test/zdj.jpg");
-    Photo* myphoto = Photo::initialize(p);
+    Photo* myphoto = Photo::getInstance(p);
     BOOST_CHECK(myphoto->getPath() == p );
     //double initialization
-    BOOST_CHECK(Photo::initialize(p) == Photo::initialize(p));
+    BOOST_CHECK(Photo::getInstance(p) == Photo::getInstance(p));
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
-    CoreController* core = CoreController::initialize(argc, argv, FALSE, "test.cfg");
+    CoreController* core = CoreController::getInstance(argc, argv, FALSE, "test.cfg");
 
     Directory* myTestDir = core->getDirectoryTree();
     BOOST_CHECK(myTestDir->getPath()=="/");

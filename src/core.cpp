@@ -1,7 +1,8 @@
 #include "../include/core.hpp"
 
 CoreController* CoreController::instance = NULL;
-CoreController* CoreController::initialize(int argc, char ** argv, bool enableGui, std::string forcedConfigPath){
+
+CoreController* CoreController::getInstance(int argc, char ** argv, bool enableGui, std::string forcedConfigPath){
   if(instance == NULL){
     instance = new CoreController(argc, argv, enableGui, forcedConfigPath);
   }
@@ -24,7 +25,9 @@ boost::property_tree::ptree CoreController::getConfiguration(){
 CoreController::CoreController(int argc, char ** argv, bool enableGui, std::string forcedConfigPath){
 
   std::string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
-  configManager = ConfigurationManager::initialize(boost::filesystem::path(configPath));
+  configManager = ConfigurationManager::getInstance(boost::filesystem::path(configPath));
+
+  disk = Disk::getInstance(getLibraryDirectoryPath());
 
   if(enableGui){
     GUI gui(argc, argv);

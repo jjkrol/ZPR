@@ -3,7 +3,7 @@
 using namespace boost::gil;
 using namespace std;
 
-Photo* Photo::initialize(boost::filesystem::path argumentPath){
+Photo* Photo::getInstance(boost::filesystem::path argumentPath){
   /// photos are saved in a map indexed by paths, so you can't initialize
   /// two instances of the same photo.
 
@@ -22,7 +22,7 @@ Photo* Photo::initialize(boost::filesystem::path argumentPath){
 }
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
-  disk = new Disk();
+  disk = Disk::getInstance();
 }
 
 Photo::~Photo(){
