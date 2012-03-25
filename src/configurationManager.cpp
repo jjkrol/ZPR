@@ -24,4 +24,5 @@ ptree ConfigurationManager::getConfigurationTree(){
 
 ConfigurationManager::ConfigurationManager(boost::filesystem::path configFilePath) : configFilePath(configFilePath){
   read_xml(configFilePath.string(), configTree);
+
 }

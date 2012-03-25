@@ -33,13 +33,19 @@ boost::property_tree::ptree CoreController::getConfiguration(){
   return configManager->getConfigurationTree();
 }
 
+
+//private 
+
 CoreController::CoreController(std::string forcedConfigPath){
-  manageConfig(forcedConfigPath);
+  //an example of simple threads
+  boost::thread configThread(&CoreController::manageConfig, this, forcedConfigPath);
+  boost::thread somethingThread(&CoreController::doSomeLongLastingTask, this);
+
+  configThread.join();
+  somethingThread.join();
   manageDisk();
 
 }
-
-//private 
 
 void CoreController::manageConfig(std::string forcedConfigPath){
   std::string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
@@ -50,4 +56,7 @@ void CoreController::manageConfig(std::string forcedConfigPath){
 void CoreController::manageDisk(){
   disk = Disk::getInstance(getLibraryDirectoryPath());
   disk_thread = boost::thread(&Disk::mainLoop, disk);
+}
+
+void CoreController::doSomeLongLastingTask(){
 }

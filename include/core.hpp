@@ -59,6 +59,7 @@ private:
 
   void manageConfig(std::string);
   void manageDisk();
+  void doSomeLongLastingTask();
 
   static CoreController* instance;
   ConfigurationManager* configManager;
