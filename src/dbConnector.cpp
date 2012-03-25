@@ -2,12 +2,15 @@
  * @file dbConnector.cpp
  * @brief File containing definition of an DB connectors
  * @author Jack Witkowski
- * @version 0.1
+ * @version 0.01
 */
 
 #include <iostream> //for testing only
+#include <string>
 
 #include "../include/dbConnector.hpp"
+#include "../include/disk.hpp"
+#include "../include/hashFunctions.hpp"
 
 //////////////////////////////////////////////////////////////////////
 //Definitions of DBConnectorFactory methods
@@ -43,10 +46,20 @@ DBConnector* SQLiteConnector::getInstance() {
 }
 
 bool SQLiteConnector::open(const char *filename) {
-  if((sqlite3_open(filename,&database)) == SQLITE_OK)
-    return true;
-
   return false;
+//  if(((sqlite3_open(filename,&database)) == SQLITE_OK) 
+//     && (!exists(filename))) {
+//     createDB();
+//     return true;
+//  }
+//  else if(exists(filename)) {
+//    if(hasChanged()) {
+//      ...
+//    }
+//    else
+//      return true;
+//  }
+//  return false;
 }
 
 void SQLiteConnector::close() {
@@ -90,5 +103,31 @@ ResultTable SQLiteConnector::sendQuery(char *query) {
     std::cout << query << " " << error << std::endl;
 
   return results;
+}
+
+bool SQLiteConnector::hasChanged (boost::filesystem::path directory) {
+  //Only photos should affect the checksum_tmp.
+  vector<boost::filesystem::path>
+  paths = disk_space->getPhotosPaths(directory);
+
+  static unsigned int checksum_tmp = 0; 
+
+  for(vector<boost::filesystem::path>::iterator i = paths.begin();
+      i != paths.end() ; i++ ) {
+    //% -1 opperation assures that max unsigned int value (-1) is never
+    //exceeded.
+    checksum_tmp = (checksum_tmp + hash((i->string()).c_str()))
+                   % (unsigned int)(-1);
+  }
+
+  //Now we're scanning all subdirectories included in the directory
+  paths=disk_space->getSubdirectoriesPaths(directory);
+
+  for(vector<boost::filesystem::path>::iterator i = paths.begin();
+      i != paths.end() ; i++) {
+    hasChanged(*i);
+  }
+
+  return (checksum == checksum_tmp);
 }
 
