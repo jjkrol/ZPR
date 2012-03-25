@@ -2,7 +2,7 @@
  * @file dbConnector.hpp
  * @brief File containing definition of an DB connectors
  * @author Jack Witkowski
- * @version 0.1
+ * @version 0.01
  * Basicly there are 3 types of classes defined in this file:
  * - DBConnector which is an interface for all singletons used
  *   to communicate with diffrent types of databases (eg.SQLite DB)
@@ -15,17 +15,20 @@
 
 #include <vector>
 #include <string>
+#include <boost/filesystem.hpp>
 #include <sqlite3.h>
 
 /**
  * @todo Adding photos to database
  * @todo Compatibility check ?
 */
-using std::vector;
-using std::string;
+class Disk;
 
 class DBConnector;
 class SQLiteConnector;
+
+using std::vector;
+using std::string;
 
 /** @typedef typedef vector< vector <string> > ResultTable;
   * ResultTable is a type of objects storing results of queries.
@@ -47,10 +50,7 @@ typedef DBConnector*(*Creator)(void);
 class DBConnectorFactory {
 public:
   static DBConnector* getInstance(const char *type);
-  static void registerType(string type_name , Creator creating_func);
 
-//public:
-//  static vector<> types_register;
 };
 
 /*! @interface DBConnector
@@ -74,10 +74,6 @@ public:
   virtual void close() = 0;
 
 protected:
-/*! @fn virtual ~DBConnector(){ }
- *  Virtual private  destructor ensures that DBConnectors
- *  can be created only via DBConnectorFactory::getInstance() method.
-*/
   virtual ~DBConnector(){ }
 };
 ////////////////////////////////////////////////////////////////////////
@@ -98,9 +94,24 @@ public:
   bool open(const char *filename);
   void close();
 private:
+  unsigned int checksum;
   sqlite3 *database;
+  Disk* disk_space; //test
+
   static DBConnector *instance;
-  static DBConnector* getInstance();
+  static DBConnector * getInstance();
+
+  bool hasChanged(boost::filesystem::path directory);
 };
 
-
+//tutaj sobie po polsku napisze
+//compatibility check:
+//Musze jeszcze jakos od krola pobierac obiekt Disk albo samemu miec taki obiekt
+// done: wez od krola folder glowny(moze byc argument funkcji compatibility check),
+//- bierz po koleji sciezki do zdjec i dodawaj do sumy kontrolnej
+//  + getPhotosPaths
+//  + getSubdirectoriesPaths
+//- dla calego wektora zwrocenego przez getSubdirectoriesPaths wywolaj checkCompatibility()
+//- na koniec porownaj z zapamietana wczesniej suma kontrolna,
+//- jak sie cos zmienilo to napisz komunikat czy uzytkownik chce wczytac jeszcze raz baze,
+//  albo nawet wczytaj bez pytania.

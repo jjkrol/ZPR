@@ -13,7 +13,8 @@ env.Program(
     'src/core.cpp',
     'src/configurationManager.cpp',
     'src/gui.cpp',
-    'src/dbConnector.cpp'
+    'src/dbConnector.cpp',
+    'src/hashFunctions.cpp'
     ])
 program = env.Program('unit_test', \
   source = [
