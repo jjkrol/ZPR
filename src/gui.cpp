@@ -1,6 +1,5 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
-#include <iostream>
 
 /** @class GUI
  *  @brief Class representing Graphical User Interface.
@@ -28,10 +27,10 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   colors_label = new Gtk::Label("Colors modification");
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
-  image_zoom = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
+  image_zoom = new Gtk::Scale(Gtk::Adjustment::create(50.0, 0.0, 100.0),
+                              Gtk::ORIENTATION_HORIZONTAL);
 
   //editing widgets
-  image_zoom->set_range(1, 100);
   image_zoom->set_draw_value(false);
   image_zoom->set_show_fill_level(true);
   image_zoom->set_size_request(10);
@@ -47,7 +46,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   bottom_box->pack_start(*left_button, false, false);
   bottom_box->pack_start(*right_button, false, false);
   bottom_box->pack_start(*filename_label, true, true);
-  bottom_box->pack_start(*image_zoom, false, false);
+  bottom_box->pack_start(*image_zoom, true, true);
   bottom_box->pack_start(*fit_button, false, false);
 
   right_box = new Gtk::Box();
@@ -74,7 +73,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   main_window->add(*grid);
 
   //connecting to core and loading directory
-  core = CoreController::getInstance();
+  core = CoreController::initialize(0, NULL, false);
 
   //loading image
   current_dir = core->getDirectoryTree();
