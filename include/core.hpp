@@ -6,6 +6,7 @@
 
 #include "directory.hpp"
 #include "configurationManager.hpp"
+#include "gui.hpp"
 
 class Directory;
 
@@ -19,7 +20,7 @@ class CoreController {
 public:
 
 
-  static CoreController* initialize(int argc=0, char ** argv=NULL, bool enableGui=TRUE,std::string forcedConfigPath="");
+  static CoreController* initialize(int argc=0, char ** argv=NULL, bool enableGui=true,std::string forcedConfigPath="");
   ~CoreController (){};
 
   /**
@@ -41,7 +42,7 @@ public:
   boost::filesystem::path getLibraryDirectoryPath();
 
 private:
-  CoreController (int argc, char ** argv, bool enableGui=TRUE, std::string forcedConfigPath="");
+  CoreController (int argc, char ** argv, bool enableGui=true, std::string forcedConfigPath="");
   CoreController& operator= (const CoreController&);
   CoreController (const CoreController&);
 

@@ -4,7 +4,6 @@
 #include <boost/gil/gil_all.hpp>
 #include <boost/gil/image.hpp>
 #include <boost/gil/extension/io/jpeg_io.hpp>
-#include <boost/gil/extension/io/jpeg_dynamic_io.hpp>
 #include <boost/gil/extension/dynamic_image/any_image.hpp>
 #include <map>
 #include <gtkmm.h>
@@ -59,3 +58,4 @@ class Photo {
     Photo (boost::filesystem::path argumentPath);
     boost::filesystem::path photoPath;
 };
+

@@ -1,9 +1,6 @@
-
 #include "../include/disk.hpp"
-#include <iostream>
 
 using namespace boost::filesystem;
-using namespace boost::gil;
 using namespace std;
 
 Disk::Disk(){
@@ -61,6 +58,7 @@ Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
   path absolutePath = makeAbsolutePath(photoPath);
   return Gdk::Pixbuf::create_from_file(absolutePath.string());
 }
+
 //private methods
 
 // returns content of given directory (all files)

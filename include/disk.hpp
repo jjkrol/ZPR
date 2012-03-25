@@ -1,12 +1,9 @@
 #pragma once
 
-#include<boost/filesystem.hpp>
-#include <boost/gil/gil_all.hpp>
-#include <boost/gil/extension/io/jpeg_io.hpp>
-#include <boost/gil/extension/dynamic_image/any_image.hpp>
+#include <boost/filesystem.hpp>
+#include <gtkmm.h>
 
 #include "core.hpp"
-
 #include "photo.hpp"
 
 /** @class Disk

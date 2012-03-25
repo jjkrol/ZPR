@@ -5,6 +5,7 @@
 
 #include "photo.hpp"
 #include "disk.hpp"
+
 class Disk;
 class Photo;
 

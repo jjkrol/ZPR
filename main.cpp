@@ -1,4 +1,3 @@
-#include <iostream>
 #include "include/core.hpp"
 
 #define DATABASE_TESTING true
