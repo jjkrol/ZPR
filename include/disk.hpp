@@ -2,6 +2,7 @@
 
 #include <boost/filesystem.hpp>
 #include <gtkmm.h>
+#include <unistd.h>
 
 #include "core.hpp"
 #include "photo.hpp"
@@ -13,6 +14,8 @@ class Disk {
 
   public:
     static Disk* getInstance(boost::filesystem::path libraryDirectoryPath="");
+
+    void mainLoop();
 
     std::vector<boost::filesystem::path> getPhotosPaths(boost::filesystem::path directoryPath);
     std::vector<boost::filesystem::path> getSubdirectoriesPaths(boost::filesystem::path directoryPath);

@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/thread.hpp>
 
 #include "configurationManager.hpp"
 #include "disk.hpp"
@@ -21,8 +22,16 @@ class CoreController {
 
 public:
 
-
-  static CoreController* getInstance(int argc=0, char ** argv=NULL, bool enableGui=true,std::string forcedConfigPath="");
+  static CoreController* getInstance(std::string forcedConfigPath="");
+  /**
+   * @brief destroys the CoreController object, but joins all the threads before
+   *
+   */
+  void destroy();
+  /**
+   * @brief runs the gui, all the preparations are done in constructor by now
+   */
+  void startApplication(int argc=0, char ** argv=NULL);
 
   /**
    * @returns An object representing the top directory of the library. Lower levels of
@@ -43,12 +52,16 @@ public:
   boost::filesystem::path getLibraryDirectoryPath();
 
 private:
-  CoreController (int argc, char ** argv, bool enableGui=true, std::string forcedConfigPath="");
+  CoreController (std::string forcedConfigPath="");
   CoreController& operator= (const CoreController&);
   CoreController (const CoreController&);
   ~CoreController (){};
 
+  void manageConfig(std::string);
+  void manageDisk();
+
   static CoreController* instance;
   ConfigurationManager* configManager;
   Disk* disk;
+  boost::thread disk_thread;
 };

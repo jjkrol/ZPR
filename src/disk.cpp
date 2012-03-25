@@ -29,6 +29,18 @@ vector <path> Disk::getSubdirectoriesPaths(path directoryPath){
   return subdirectories;
 }
 
+void Disk::mainLoop(){
+  while(1){
+    //do things
+    //TODO check for incoming messaages
+
+    std::cout<<"kotek"<<std::endl;
+    sleep(1);
+
+  }
+
+}
+
 vector<path> Disk::getPhotosPaths(path directoryPath){
   vector<path> photos;
 

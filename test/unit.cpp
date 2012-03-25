@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
 int argc = 0;
 char ** argv = NULL;
   BOOST_AUTO_TEST_CASE( coreClassTest ){
-    CoreController* core = CoreController::getInstance(argc, argv, FALSE, "test.cfg");
+    CoreController* core = CoreController::getInstance("test.cfg");
 
     BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
 
@@ -25,7 +25,7 @@ char ** argv = NULL;
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
-    CoreController* core = CoreController::getInstance(argc, argv, FALSE, "test.cfg");
+    CoreController* core = CoreController::getInstance("test.cfg");
 
     Directory* myTestDir = core->getDirectoryTree();
     BOOST_CHECK(myTestDir->getPath()=="/");
