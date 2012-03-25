@@ -39,7 +39,7 @@ char ** argv = NULL;
     BOOST_REQUIRE(beta->getName() == "beta");
     BOOST_CHECK(beta->hasPhotos() == true);
     BOOST_CHECK(beta->hasSubdirectories() == false);
-
+    
     Directory* delta = subdirs[3];
     BOOST_REQUIRE(delta->getName() == "delta");
     BOOST_CHECK(delta->hasPhotos() == false);
@@ -48,8 +48,16 @@ char ** argv = NULL;
     BOOST_CHECK(myTestDir->hasSubdirectories() == true);
     BOOST_CHECK(myTestDir->getSubdirectories().size() == 4);
     BOOST_CHECK(myTestDir->getPhotos().size() == 1);
+    // movePhoto check
+    Photo* myPhoto = myTestDir->getPhotos()[0]; 
+    myPhoto->move(path("/delta/"));
+    BOOST_CHECK(delta->hasPhotos() == true);
+    myPhoto->deleteFromLibraryAndDisk();
+    BOOST_CHECK(delta->hasPhotos() == false);
+
 
   }
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

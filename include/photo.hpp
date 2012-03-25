@@ -49,6 +49,26 @@ class Photo {
      */
     boost::filesystem::path getPath();
     boost::filesystem::path getFilename();
+    
+    /// 
+    /**
+     * @brief moves photo to a new destination in the filesystem 
+     * and updates the database
+     *@TODO implement this (db function needed)
+     */
+    void move(boost::filesystem::path destinationPath);
+    /**
+     * @brief deletes the photo only from library (stays on disk)
+     * @TODO implement this (db function needed)
+     * @warning this function also destroys the photo object
+     */
+    void deleteFromLibrary();
+
+    /**
+     * @biref the photo will fall into the deepest darkness of nothingness
+     * @warning this function also destroys the photo object
+     */
+    void deleteFromLibraryAndDisk();
 
   private:
     Photo (boost::filesystem::path argumentPath);

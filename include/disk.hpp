@@ -24,6 +24,10 @@ class Disk {
     bool hasSubdirectories(boost::filesystem::path directoryPath);
 
     Glib::RefPtr<Gdk::Pixbuf> getPhotoFile(boost::filesystem::path photoPath);
+    
+    void deletePhoto(boost::filesystem::path photoPath);
+
+    boost::filesystem::path movePhoto(boost::filesystem::path sourcePath, boost::filesystem::path destinationPath);
 
   private:
     Disk (boost::filesystem::path);

@@ -34,7 +34,6 @@ void Disk::mainLoop(){
     //do things
     //TODO check for incoming messaages
 
-    std::cout<<"kotek"<<std::endl;
     sleep(1);
 
   }
@@ -76,6 +75,18 @@ Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
   return Gdk::Pixbuf::create_from_file(absolutePath.string());
 }
 
+boost::filesystem::path Disk::movePhoto(path sourcePath, path destinationPath){
+  path destinationWithFilename = destinationPath;
+  destinationWithFilename /= sourcePath.filename();
+  rename( makeAbsolutePath(sourcePath), makeAbsolutePath(destinationWithFilename) );
+  return destinationWithFilename;
+}
+
+void Disk::deletePhoto(path photoPath){
+  remove( makeAbsolutePath(photoPath) );
+  
+}
+
 //private methods
 
 // returns content of given directory (all files)
@@ -86,6 +97,8 @@ vector<path> Disk::getDirectoryContents(path directoryPath){
   return directoryContents;
 }
 
-path Disk::makeAbsolutePath(path relativePath){
-  return path(libraryDirectoryPath.string() + relativePath.string());
+path Disk::makeAbsolutePath(path relativePath){\
+  path absolutePath = libraryDirectoryPath;
+  absolutePath /= relativePath.relative_path();
+  return absolutePath;
 }
