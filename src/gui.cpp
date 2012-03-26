@@ -140,6 +140,9 @@ void GUI::loadImage() {
     height = width / image_raito;
   }
 
+  //displaying filename
+  filename_label->set_label(((*current_photo)->getFilename()).string());
+
   //image resizing
   pixbuf = pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
   image->set(pixbuf);
