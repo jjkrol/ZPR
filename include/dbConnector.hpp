@@ -20,7 +20,7 @@
 
 /**
  * @todo Adding photos to database
- * @todo Compatibility check ?
+ * @todo Removing photos from database
 */
 class Disk;
 
@@ -49,7 +49,7 @@ typedef DBConnector*(*Creator)(void);
 */
 class DBConnectorFactory {
 public:
-  static DBConnector* getInstance(const char *type);
+  static DBConnector* getInstance(std::string type);
 
 };
 
@@ -58,19 +58,26 @@ public:
 */
 class DBConnector {
 public:
-/*! @fn virtual ResultTable sendQuery(char* query) = 0;
+/*! @fn virtual ResultTable sendQuery(string query) = 0;
  *  @brief For testing purposes.
  *  @warning Should be commented or removed in final version!
  *  @returns the result of the query
  *
- *  @fn virtual bool open(const char *filename) = 0;
+ *  @fn virtual bool open(const string filename) = 0;
  *  @brief Opens connection with database and creates necessary
  *  structures.
  *  @returns `true` when database openned succesfully and `false`
  *  otherwise.
 */
-  virtual bool open(const char *filename) = 0;
-  virtual ResultTable sendQuery(char *query) = 0;
+  enum Flags {
+    FAILURE = 0x0,
+    OPENED  = 0x1,
+    CREATED = 0x2,
+    CHANGED = 0x4
+  };
+
+  virtual int open(const std::string filename) = 0;
+  virtual ResultTable sendQuery(std::string query) = 0;
   virtual void close() = 0;
 
 protected:
@@ -90,28 +97,20 @@ protected:
 class SQLiteConnector : public DBConnector{
   friend class DBConnectorFactory;
 public:
-  ResultTable sendQuery(char *query);
-  bool open(const char *filename);
+  ResultTable sendQuery(string query);
+  int open(const string filename);
   void close();
+  bool addPhoto(boost::filesystem::path photo);
 private:
-  unsigned int checksum;
-  sqlite3 *database;
-  Disk* disk_space; //test
-
   static DBConnector *instance;
   static DBConnector * getInstance();
 
-  bool hasChanged(boost::filesystem::path directory);
-};
+  sqlite3 *database;
 
-//tutaj sobie po polsku napisze
-//compatibility check:
-//Musze jeszcze jakos od krola pobierac obiekt Disk albo samemu miec taki obiekt
-// done: wez od krola folder glowny(moze byc argument funkcji compatibility check),
-//- bierz po koleji sciezki do zdjec i dodawaj do sumy kontrolnej
-//  + getPhotosPaths
-//  + getSubdirectoriesPaths
-//- dla calego wektora zwrocenego przez getSubdirectoriesPaths wywolaj checkCompatibility()
-//- na koniec porownaj z zapamietana wczesniej suma kontrolna,
-//- jak sie cos zmienilo to napisz komunikat czy uzytkownik chce wczytac jeszcze raz baze,
-//  albo nawet wczytaj bez pytania.
+  unsigned int checksum;
+  string filename;
+
+  bool hasChanged(boost::filesystem::path directory);
+  inline void createDB();
+  bool loadDB(std::vector<boost::filesystem::path> directories);
+};

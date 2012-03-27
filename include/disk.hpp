@@ -29,6 +29,9 @@ class Disk {
 
     boost::filesystem::path movePhoto(boost::filesystem::path sourcePath, boost::filesystem::path destinationPath);
 
+    inline static bool exists(boost::filesystem::path file) {
+      return boost::filesystem::exists(file);
+    } 
   private:
     Disk (boost::filesystem::path);
     Disk& operator= (const Disk&);
