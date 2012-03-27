@@ -3,8 +3,6 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 
-#include "photo.hpp"
-#include "disk.hpp"
 
 class Disk;
 class Photo;

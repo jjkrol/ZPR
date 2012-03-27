@@ -1,4 +1,8 @@
 #include "../include/core.hpp"
+#include "../include/configurationManager.hpp"
+#include "../include/disk.hpp"
+#include "../include/gui.hpp"
+#include "../include/directory.hpp"
 
 CoreController* CoreController::instance = NULL;
 

@@ -4,8 +4,6 @@
 #include <gtkmm.h>
 #include <unistd.h>
 
-#include "core.hpp"
-#include "photo.hpp"
 
 /** @class Disk
  *  @brief A class providing an adapter to the disk space.

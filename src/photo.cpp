@@ -1,4 +1,5 @@
 #include "../include/photo.hpp"
+#include "../include/disk.hpp"
 
 using namespace boost::gil;
 using namespace std;

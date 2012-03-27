@@ -5,13 +5,10 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/thread.hpp>
 
-#include "configurationManager.hpp"
-#include "disk.hpp"
-#include "gui.hpp"
-#include "directory.hpp"
 
 class Disk;
 class Directory;
+class ConfigurationManager;
 
 /**
  * @class CoreController

@@ -1,5 +1,7 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
+#include "../include/photo.hpp"
+#include "../include/directory.hpp"
 #include <iostream>
 
 /** @class GUI

@@ -1,4 +1,6 @@
 #include "../include/disk.hpp"
+#include "../include/core.hpp"
+#include "../include/photo.hpp"
 
 using namespace boost::filesystem;
 using namespace std;

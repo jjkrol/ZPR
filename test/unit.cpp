@@ -4,6 +4,9 @@
 #include <boost/filesystem.hpp>
 
 #include "../include/core.hpp"
+#include "../include/photo.hpp"
+#include "../include/directory.hpp"
+
 using namespace boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( testSuite )
