@@ -45,6 +45,8 @@ class GUI {
     Gtk::Image *image;
 
     //methods for handling signals
+    void onWindowStateEvent(GdkEventWindowState *);
+    void onWindowResize(GdkEventConfigure *);
     void loadImage();
     void nextImage();
     void prevImage();

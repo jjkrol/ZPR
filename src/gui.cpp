@@ -34,7 +34,6 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   //editing widgets
   image_zoom->set_draw_value(false);
   image_zoom->set_show_fill_level(true);
-  //image_zoom->set_size_request(10);
   notebook->append_page(*basic_label, "Basic");
   notebook->append_page(*colors_label, "Colors");
   notebook->append_page(*effects_label, "Effects");
@@ -108,6 +107,8 @@ void GUI::createMainWindow() {
   //connecting buttons signals to functions
   fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::loadImage));
   main_window->signal_show().connect(sigc::mem_fun(this, &GUI::loadImage));
+  main_window->signal_configure_event().connect_notify(sigc::mem_fun(this, &GUI::onWindowResize));
+  main_window->signal_window_state_event().connect_notify(sigc::mem_fun(this, &GUI::onWindowStateEvent));
   right_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::nextImage));
   left_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::prevImage));
   image_zoom->signal_value_changed().connect(sigc::mem_fun(this, &GUI::zoomImage));
@@ -148,6 +149,8 @@ Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
   float widget_raito = (float)rectangle.get_width() / (float)rectangle.get_height();
   float image_raito = (float)pixbuf->get_width() / (float)pixbuf->get_height();
 
+  //std::cout << rectangle.get_width() << " " << rectangle.get_height() << std::endl;
+
   if(widget_raito >= image_raito) {
     height = rectangle.get_height() - 4;
     width = height * image_raito;
@@ -176,4 +179,16 @@ void GUI::prevImage() {
 
 void GUI::zoomImage() {
   std::cout << image_zoom->get_value() << std::endl;
+}
+
+void GUI::onWindowResize(GdkEventConfigure *event) {
+  loadImage();
+  return;
+}
+
+void GUI::onWindowStateEvent(GdkEventWindowState *state) {
+  if(state->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+    main_window->maximize();
+  loadImage();
+  return;
 }
