@@ -1,5 +1,6 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
+#include <iostream>
 
 /** @class GUI
  *  @brief Class representing Graphical User Interface.
@@ -27,13 +28,13 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   colors_label = new Gtk::Label("Colors modification");
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
-  image_zoom = new Gtk::Scale(Gtk::Adjustment::create(50.0, 0.0, 100.0),
+  image_zoom = new Gtk::Scale(Gtk::Adjustment::create(100.0, 100.0, 400.0),
                               Gtk::ORIENTATION_HORIZONTAL);
 
   //editing widgets
   image_zoom->set_draw_value(false);
   image_zoom->set_show_fill_level(true);
-  image_zoom->set_size_request(10);
+  //image_zoom->set_size_request(10);
   notebook->append_page(*basic_label, "Basic");
   notebook->append_page(*colors_label, "Colors");
   notebook->append_page(*effects_label, "Effects");
@@ -106,27 +107,42 @@ GUI::~GUI() {
 void GUI::createMainWindow() {
   //connecting buttons signals to functions
   fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::loadImage));
+  main_window->signal_show().connect(sigc::mem_fun(this, &GUI::loadImage));
   right_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::nextImage));
   left_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::prevImage));
+  image_zoom->signal_value_changed().connect(sigc::mem_fun(this, &GUI::zoomImage));
 
   //showing widgets
-  main_window->show_all_children();
   main_window->maximize();
+  main_window->show_all_children();
   if(main_window) kit.run(*main_window);
 }
 
 //method for loading image into Gtk::Image widget
 void GUI::loadImage() {
-  //checking if fitting image is needed
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*current_photo)->getPixbuf();
   Gdk::Rectangle rectangle = image_window->get_allocation();
   if(!pixbuf) return;
+
+  //displaying filename
+  filename_label->set_label(((*current_photo)->getFilename()).string());
+
+  //checking if fitting image is needed
   if(rectangle.get_width() > pixbuf->get_width() &&
      rectangle.get_height() > pixbuf->get_height()) {
     image->set(pixbuf);
+    image_zoom->set_adjustment(Gtk::Adjustment::create(100.0, 100.0, 400.0));
     return;
   }
 
+  //resizing and setting image
+  pixbuf = resizeImage(pixbuf, rectangle);
+  image->set(pixbuf);
+}
+
+//additional function for fitting pixbuf into window
+Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+                                      Gdk::Rectangle rectangle) {
   //calculating desired width and height
   int width, height;
   float widget_raito = (float)rectangle.get_width() / (float)rectangle.get_height();
@@ -140,12 +156,8 @@ void GUI::loadImage() {
     height = width / image_raito;
   }
 
-  //displaying filename
-  filename_label->set_label(((*current_photo)->getFilename()).string());
-
   //image resizing
-  pixbuf = pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
-  image->set(pixbuf);
+  return pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
 }
 
 //method for loading next image from folder
@@ -160,4 +172,8 @@ void GUI::prevImage() {
   if(current_photo == photos.begin()) return;
   current_photo--;
   loadImage();
+}
+
+void GUI::zoomImage() {
+  std::cout << image_zoom->get_value() << std::endl;
 }

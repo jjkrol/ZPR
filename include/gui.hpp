@@ -48,6 +48,10 @@ class GUI {
     void loadImage();
     void nextImage();
     void prevImage();
+    void zoomImage();
+
+    //additional functions
+    Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
 
   public:
     GUI(int argc, char *argv[]);
