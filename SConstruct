@@ -14,7 +14,7 @@ env.Program(
     'src/configurationManager.cpp',
     'src/gui.cpp',
     'src/dbConnector.cpp',
-    'src/hashFunctions.cpp'
+    'src/hashFunctions.cpp',
     ])
 program = env.Program('unit_test', \
   source = [
@@ -28,3 +28,11 @@ program = env.Program('unit_test', \
     ])
 test_alias = Alias('unit_test', [program], program[0].path)
 AlwaysBuild(test_alias)
+
+async = env.Program('async', \
+  source = [
+    'test/async_test.cpp',
+    'src/asynchronous.cpp',
+    'src/messageQueue.cpp',
+    'src/ticket.cpp'
+  ])
