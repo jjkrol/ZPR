@@ -3,6 +3,10 @@
 #include <boost/function.hpp>
 #include <queue>
 
+#define naturalnie  true
+#define nietego     false
+
+
 /*
  * issues:
  *  passing pointers - which type is the best for passing return values?
@@ -17,11 +21,11 @@ class Ticket {
   public:
     Ticket (){};
     virtual ~Ticket (){};
-    int * getPointer(){
+    void * getPointer(){
       return pointer;
     };
 
-    void setPointer(int * newPointer){
+    void setPointer(void * newPointer){
       pointer = newPointer;
     }
 
@@ -34,41 +38,44 @@ class Ticket {
 
   private:
     bool ready;
-    int *  pointer;
+    void *  pointer;
 };
 
-class Message {
-  public:
-    Message (){};
-    virtual ~Message (){};
-    boost::function<int*()> functionAddress;
+struct Message {
+    boost::function<void*()> functionObject;
     Ticket * returnTicket;
-  private:
 };
 
 class MessageQueue {
   public:
     MessageQueue (){};
     virtual ~MessageQueue (){};
-    Ticket * put(Message inMsg){
+
+    Ticket * push(Message inMsg){
       Ticket* ticket = new Ticket();
-      inMsg.returnTicket = ticket;
+      inMsg.returnTicket = ticket; // loop has to know where to store the return value
+
       queueMutex.lock();
-      queue.push(inMsg);
+        queue.push(inMsg);
       queueMutex.unlock();
+
       return ticket;
     }
+
+    Message pop(){
+      Message retMsg;
+
+      queueMutex.lock();
+        retMsg = queue.front();
+        queue.pop();
+      queueMutex.unlock();
+
+      return retMsg;
+    }
+
     bool isEmpty(){
       return queue.empty();
     }  
-    Message pop(){
-      Message retMsg;
-      queueMutex.lock();
-      retMsg = queue.front();
-      queue.pop();
-      queueMutex.unlock();
-      return retMsg;
-    }
 
   private:
     std::queue<Message> queue;
@@ -76,68 +83,96 @@ class MessageQueue {
 };
 
 class Asynchronous{
-  protected:
-    virtual void mainLoop() = 0;
+  public:
+  Asynchronous(){
+    stopLoop = nietego;
+    mainLoopThread = boost::thread(&Asynchronous::mainLoop, this) ;
+  }
 
-    MessageQueue inMQ;
+  virtual ~Asynchronous(){
+      stopLoop = naturalnie;
+      mainLoopThread.join();
+  }
+
+  protected:
+
+    virtual void mainLoop(){
+      while(!stopLoop){  
+        if(!normalMessageQueue.isEmpty()){
+          Message msg = normalMessageQueue.pop();
+          void * output = msg.functionObject() ; 
+          Ticket * ticket = msg.returnTicket;
+          ticket->setPointer(output); 
+          ticket->setReady(naturalnie); // not really safe
+        }
+      }
+    }
+
+    virtual void * invokeMethod(boost::function<void*()> funct){
+      //prepare a message
+      Message msg;
+      msg.functionObject = funct;
+      
+      //prepare return ticket
+      Ticket * ticket;
+      ticket = normalMessageQueue.push(msg);
+
+      //wait for the order to be complete
+      while(!ticket->isReady())
+        ;
+      return ticket->getPointer();
+    }
+
+    MessageQueue normalMessageQueue;
     bool stopLoop;
     boost::thread mainLoopThread;
 };
 
 // specific classes
 
-
-class PizzaDeliverySystem : Asynchronous {
+class PizzaDeliverySystem : public Asynchronous {
   public:
-    PizzaDeliverySystem (){
-      stopLoop = false;
-      mainLoopThread = boost::thread(&PizzaDeliverySystem::mainLoop, this) ;
-    }
 
-    ~PizzaDeliverySystem (){
-      stopLoop = true;
-      mainLoopThread.join();
-    }
+    /* all public methods are similar to that pattern:
+     * returntype methodName(arguments){
+     *  return *reinterpret_cast<returntype*>( if we return by value
+     *  OR
+     *  return reinterpret_cast<returntype*>( if we return pointer
+     *    invokeMethod(
+     *      boost::bind(
+     *        &ObjectName::internalMethodName, this, arguments
+     *        )
+     *      )
+     *    );
+     * }
+     */
 
     std::string getPizza(std::string pizzaName){
-      Message msg;
-      Ticket * ticket;
-
-      msg.functionAddress = boost::bind(&PizzaDeliverySystem::pleaseGetPizza, this, pizzaName); //&PizzaDeliverySystem::pleaseGetPizza;
-      std::cout<<"-- Putting order in the order queue"<<std::endl;
-      sleep(1);
-      ticket = inMQ.put(msg);
-      std::cout<<"-- The order ticket for pizza "<<pizzaName<<" was created, waiting for the pizza..."<<std::endl;
-      sleep(1);
-      while(!ticket->isReady())
-        ;
-      std::cout<<"-- The order ticket for "<<pizzaName<<" is ready, we're sending pizza to the client!"<<std::endl;
-      sleep(1);
-      return *reinterpret_cast<std::string*>(ticket->getPointer());
+      return *reinterpret_cast<std::string*>(
+          invokeMethod(
+            boost::bind(
+              &PizzaDeliverySystem::internalGetPizza, this, pizzaName
+              )
+            )
+          );
     }
 
   private:
-    void mainLoop(){
-      Message msg;
-      while(!stopLoop){  //implement a way to stop it
-        if(!inMQ.isEmpty()){
-          msg = inMQ.pop();
-          std::cout<<"-- The order was taken by the chef"<<std::endl;
-          sleep(1);
-          int * output = msg.functionAddress() ; 
-          Ticket * ticket = msg.returnTicket;
-          ticket->setPointer(output); // = run(msg.function) // make class friend
-          std::cout<<"-- Chef: The order  is ready, next please!"<<std::endl;
-          sleep(1);
-          ticket->setReady(true); // not really safe
-        }
-      }
-    }
-    int* pleaseGetPizza(std::string pizzaName){
+
+    /* all private methods follow that pattern:
+     * void* internalMethodName(arguments){
+     *  pointer = do_some_stuff_here_and_return_a_pointer_to_the_result();
+     *  return reinterpret_cast<void*>(pointer);
+     * }
+     */
+
+    void* internalGetPizza(std::string pizzaName){
       std::cout<<"-- Chef: I'm making a delicious "<<pizzaName<<" pizza..."<<std::endl;
       sleep(3);
+
       std::string * pizza = new std::string(pizzaName+" and green peppers, mushrooms, olives, chives");
-      return reinterpret_cast<int*>(pizza);
+
+      return reinterpret_cast<void*>(pizza);
     }
 };
 
@@ -147,6 +182,13 @@ class MeInMyHouse {
     ~MeInMyHouse (){};
 
     void letsEatPizza(){
+      /*
+       * In external classes you run their own methods 
+       * calling methods of an Asynchronous object.
+       * You run them in separate threads
+       * and join the threads  when you need the result.
+       */
+
       std::cout<<"Ordering first pizza"<<std::endl;
       boost::thread pizzaOrder1(&MeInMyHouse::getPizza1, this);
       sleep(1);
