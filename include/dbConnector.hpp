@@ -27,10 +27,7 @@ class Disk;
 class DBConnector;
 class SQLiteConnector;
 
-using std::vector;
-using std::string;
-
-/** @typedef typedef vector< vector <string> > ResultTable;
+/*! @typedef typedef std::vector< std::vector <std::string> > ResultTable;
   * ResultTable is a type of objects storing results of queries.
   * Each line of a result is represented by a vector of strings.
   * Results may be composed of more than a line, that's why
@@ -39,14 +36,14 @@ using std::string;
   * @typedef typedef DBConnector* (*Creator)();
   * Creator is a static function called by the DBConnectorFactory
   * to give access to different DBConnectors
+  *
+  * @class DBConnectorFactory
+  * Class used to provide instances of adequate concrete versions
+  * of database connectors (eg. SQLiteConnector)
 */
-typedef vector< vector <string> > ResultTable;
+typedef std::vector< std::vector <std::string> > ResultTable;
 typedef DBConnector*(*Creator)(void);
 
-/*! @class DBConnectorFactory
- *  Class used to provide instances of adequate concrete versions
- *  of database connectors (eg. SQLiteConnector)
-*/
 class DBConnectorFactory {
 public:
   static DBConnector* getInstance(std::string type);
@@ -94,23 +91,51 @@ protected:
   * getInstance function which gives access to the database
   * (every concrete connector is implemented as a Singleton)
 */
-class SQLiteConnector : public DBConnector{
+class SQLiteConnector : public DBConnector {
   friend class DBConnectorFactory;
+
 public:
-  ResultTable sendQuery(string query);
-  int open(const string filename);
+/*! @fn ResultTable sendQuery(std::string query);
+  * @brief Function used for test. Allows to send static queries (without
+  * variables) to database.
+  * @returns the vector of vectors which represents the result of the query
+  *
+  * @fn int open(const std::string filename)
+  * @brief Opens a database stored in a file of name specified in the function's
+  * argument. It creates a new DB if it doesn't exist.
+  * @returns falgs defined in DBConnector::Flags
+  *
+*/
+  ResultTable sendQuery(std::string query);
+
+  int open(const std::string filename);
+  inline bool hasChanged();
+  inline void addDirectories(
+    const std::vector<boost::filesystem::path> &directories);
+  bool addPhotos(const std::vector<boost::filesystem::path> &photos);
   void close();
-  bool addPhoto(boost::filesystem::path photo);
+
+  void movePhoto(
+    boost::filesystem::path old_path, boost::filesystem::path new_path);
+  void deletePhoto(boost::filesystem::path photos_path);
+
 private:
   static DBConnector *instance;
   static DBConnector * getInstance();
 
   sqlite3 *database;
+//unsigned int checksum;
+  std::string filename;
+  std::vector<boost::filesystem::path> directories;
 
-  unsigned int checksum;
-  string filename;
+  bool createDB();
 
-  bool hasChanged(boost::filesystem::path directory);
-  inline void createDB();
-  bool loadDB(std::vector<boost::filesystem::path> directories);
+  void saveSettings();
+  void saveDirectories();
+  bool addPhoto(const boost::filesystem::path &photo);
+
+  bool getDirectoriesFromDB();
+  bool getChecksumFromDB();
+
+  unsigned int calculateChecksum();
 };
