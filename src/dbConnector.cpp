@@ -12,19 +12,25 @@
 #include "../include/hashFunctions.hpp"
 
 using namespace boost::filesystem;
-//////////////////////////////////////////////////////////////////////
+using std::vector;
+using std::string;
+
+/** @todo Concrete versions of DBConnector should
+  * invoke the Register() function to register their types
+  * in the register of types stored in the  DBConnectorGenerator
+  * object (the register should be static). Then when
+  * the DBConnectorFactory::getInstance(type) is called,
+  * getInstance() should look for the pointer to adequate
+  * getInstance() function in its register and should call
+  * the function.
+  *
+  * @todo what to do when existing database has changed (different checksum)
+*/
+
+////////////////////////////////////////////////////////////////////////////////
 //Definitions of DBConnectorFactory methods
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 DBConnector* DBConnectorFactory::getInstance(const string type) {
-  /** @todo Concrete versions of DBConnector should
-    * invoke the Register() function to register their types
-    * in the register of types stored in the  DBConnectorGenerator
-    * object (the register should be static). Then when
-    * the DBConnectorFactory::getInstance(type) is called,
-    * getInstance() should look for the pointer to adequate
-    * getInstance() function in its register and should call
-    * the function.
-  */
   return SQLiteConnector::getInstance();
 }
 
@@ -32,10 +38,8 @@ DBConnector* DBConnectorFactory::getInstance(const string type) {
 //Definitions of SQLiteConnector methods
 ////////////////////////////////////////////////////////////////////////////////
 /** @warning Don't forget to initialize 'instance' pointer to 0
-    in every concrete version of DBConnector
+  * in every concrete version of DBConnector
 */
-
-/** Must be initialized with 0 before can be used*/
 DBConnector* SQLiteConnector::instance = 0;
 DBConnector* SQLiteConnector::getInstance() {
   if(instance == 0)
@@ -44,43 +48,79 @@ DBConnector* SQLiteConnector::getInstance() {
   return instance;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//Public methods
+////////////////////////////////////////////////////////////////////////////////
 int SQLiteConnector::open(string f) {
+  //first the name of a database file stored in this object is changed
   if(filename.empty())
     filename=f;
   else
     return FAILURE;
 
+  //if the object exists, function tries to open the database
   if(Disk::exists(filename)) {
     if(sqlite3_open(filename.c_str(),&database) != SQLITE_OK)
       return FAILURE;
-    else {
-     //if(hasChanged())
-      if(0)
-        return (OPENED | CHANGED);
-      else
-        return OPENED;
+    else if(getDirectoriesFromDB()) {
+      return OPENED;
     }
-  }
-  else if(sqlite3_open(filename.c_str(),&database) == SQLITE_OK) {
-    createDB();
-    return (OPENED | CREATED);
+    return FAILURE;
   }
 
+  //if database file doesn't exist then it should be created
+  else if(sqlite3_open(filename.c_str(),&database) == SQLITE_OK) {
+    if(createDB())
+      return (OPENED | CREATED);
+    return FAILURE;      
+  }
+
+  //in case of failure in opening the database, a FAILURE value is returned
   return FAILURE;
 }
-void SQLiteConnector::createDB() {
-  const char *query = 
-      "CREATE TABLE photos (id INTEGER PRIMARY KEY, path BLOB);"
-      "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);";
-  sendQuery(query);
+
+
+bool SQLiteConnector::hasChanged() {
+  return (getChecksumFromDB() == calculateChecksum());
 }
 
-bool SQLiteConnector::loadDB(vector<path> dirs) {
-  //add every photo from each of directories stored in this vector
-  //to the database (non-recursively)
+/*//Only photos should affect the checksum_tmp.
+  Disk *disk_space = Disk::getInstance();
+  vector<boost::filesystem::path>
+  paths = disk_space->getPhotosPaths(directory);
+
+  static unsigned int checksum_tmp = 0; 
+
+  for(vector<boost::filesystem::path>::iterator i = paths.begin();
+      i != paths.end() ; i++ ) {
+    //% (unsigned int)(-1) opperation assures that max unsigned int value (-1)
+    //is never exceeded.
+    checksum_tmp = (checksum_tmp + hash((i->string()).c_str()))
+                   % (unsigned int)(-1);
+  }
+
+  //Now we're scanning all subdirectories included in the directory
+  paths=disk_space->getSubdirectoriesPaths(directory);
+
+  for(vector<boost::filesystem::path>::iterator i = paths.begin();
+      i != paths.end() ; i++) {
+    hasChanged(*i);
+  }
+
+  return (checksum == checksum_tmp);
+}*/
+
+void SQLiteConnector::addDirectories(const vector<path> &input_dirs) {
+  directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
+}
+
+bool SQLiteConnector::addPhotos(const vector<path> &photos) {
+  //add every photo from each of directories stored in a class member vector
+  //directories to the database (non-recursively)
   Disk *disk_space = Disk::getInstance();
 
-  for(vector<path>::iterator i = dirs.begin();i!=dirs.end() ; i++) {
+  for(vector<path>::iterator i = directories.begin();
+      i != directories.end() ; i++) {
     vector<path> photos = disk_space->getPhotosPaths(*i);
     for(vector<path>::iterator i = photos.begin() ; i != photos.end() ; i++) {
       if(!addPhoto(*i))
@@ -90,7 +130,76 @@ bool SQLiteConnector::loadDB(vector<path> dirs) {
   return true;
 }
 
-bool SQLiteConnector::addPhoto(path photo) {
+void SQLiteConnector::close() {
+  saveSettings();
+  saveDirectories();
+  sqlite3_close(database);
+
+  database = 0;
+  filename.erase();
+
+/*  sqlite3_stmt *stmt;
+  const char *query = "INSERT INTO settings VALUES(?,?);";
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
+    sqlite3_bind_text(stmt, 1, "checksum", -1, SQLITE_STATIC);
+    sqlite3_bind_blob(stmt, 2, &checksum, sizeof(checksum), SQLITE_STATIC);
+  }
+  sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  string error = sqlite3_errmsg(database);
+  if(error != "not an error")
+    std::cout << query << " " << error << std::endl;
+
+  sqlite3_close(database);
+  database = NULL;
+  filename.erase();*/
+}
+
+void SQLiteConnector::movePhoto(path old_path, path new_path) {
+  //@todo
+}
+
+void SQLiteConnector::deletePhoto(path photos_path) {
+  //@todo
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//Private methods
+////////////////////////////////////////////////////////////////////////////////
+bool SQLiteConnector::createDB() {
+  sqlite3_stmt *stmt;
+  const char *query = 
+      "CREATE TABLE photos (id INTEGER PRIMARY KEY, path BLOB UNIQUE);"
+      "CREATE TABLE directories (path BLOB);"
+      "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);";
+
+  if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    string error = sqlite3_errmsg(database);
+    if(error != "not an error") {
+      std::cout << query << " " << error << std::endl;
+      return false;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+void SQLiteConnector::saveSettings() {
+  //@todo save(calculateChecksum());
+}
+
+void SQLiteConnector::saveDirectories() {
+  //@todo
+}
+
+bool SQLiteConnector::addPhoto(const path &photo) {
+  //inserting NULL as a id value is used for autoincrementing id numbers
   const char *query = "INSERT INTO photos VALUES (NULL,?);";
   sqlite3_stmt *stmt;
   int rc;
@@ -110,24 +219,30 @@ bool SQLiteConnector::addPhoto(path photo) {
 
   } while (rc==SQLITE_SCHEMA);
 
+  string error = sqlite3_errmsg(database);
+  if(error != "not an error")
+    std::cout << query << " " << error << std::endl;
+
   return true;
 }
 
-void SQLiteConnector::close() {
-  sqlite3_stmt *stmt;
-  const char *query = "INSERT INTO settings VALUES(?,?);";
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_text(stmt, 1, "checksum", -1, SQLITE_STATIC);
-    sqlite3_bind_blob(stmt, 2, &checksum, sizeof(checksum), SQLITE_STATIC);
-  }
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
-  sqlite3_close(database);
-  database = NULL;
-  filename.erase();
+bool SQLiteConnector::getDirectoriesFromDB() {
+  //@todo
+  return true;
 }
 
+bool SQLiteConnector::getChecksumFromDB() {
+  //@todo
+  return true;
+}
+
+unsigned int SQLiteConnector::calculateChecksum() {
+  //@todo
+  return true;
+}
+
+//Methods defined beneath this line are used only for tests and should not
+//be included into final version of the program
 ResultTable SQLiteConnector::sendQuery(string query) {
   sqlite3_stmt *statement;
   vector<vector<string> > results;
@@ -165,32 +280,5 @@ ResultTable SQLiteConnector::sendQuery(string query) {
     std::cout << query << " " << error << std::endl;
 
   return results;
-}
-
-bool SQLiteConnector::hasChanged (boost::filesystem::path directory = "/") {
-  //Only photos should affect the checksum_tmp.
-  Disk *disk_space = Disk::getInstance();
-  vector<boost::filesystem::path>
-  paths = disk_space->getPhotosPaths(directory);
-
-  static unsigned int checksum_tmp = 0; 
-
-  for(vector<boost::filesystem::path>::iterator i = paths.begin();
-      i != paths.end() ; i++ ) {
-    //% (unsigned int)(-1) opperation assures that max unsigned int value (-1)
-    //is never exceeded.
-    checksum_tmp = (checksum_tmp + hash((i->string()).c_str()))
-                   % (unsigned int)(-1);
-  }
-
-  //Now we're scanning all subdirectories included in the directory
-  paths=disk_space->getSubdirectoriesPaths(directory);
-
-  for(vector<boost::filesystem::path>::iterator i = paths.begin();
-      i != paths.end() ; i++) {
-    hasChanged(*i);
-  }
-
-  return (checksum == checksum_tmp);
 }
 
