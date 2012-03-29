@@ -26,7 +26,7 @@ Asynchronous::Asynchronous(){
   while(!stopLoops)  
     if(!normalMessageQueue.isEmpty()){
       Message msg = normalMessageQueue.pop();
-      runTask(msg);
+      runTask(msg); 
     }
 }
 

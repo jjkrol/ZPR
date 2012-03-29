@@ -69,7 +69,7 @@ class PizzaDeliverySystem : public Asynchronous {
 sleep(1);
       }
       std::string * pizza = new std::string(pizzaName+" and green peppers, mushrooms, olives, chives");
-      return reinterpret_cast<void*>(pizza);
+      return pizza;
     }
 
     std::string pizzaHouseName;

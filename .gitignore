@@ -2,3 +2,8 @@
 .scons*
 *.zarg*
 DB.sqlite
+*.log
+*.aux
+imgview
+unit_test
+async

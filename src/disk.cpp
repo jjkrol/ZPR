@@ -83,7 +83,7 @@ void * Disk::internalGetPhotosPaths(boost::filesystem::path directoryPath){
 
   for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
     if(!is_directory(*it))
-      if( (*it).extension()==".jpg" ) // right now we only use jpg
+      if( (*it).extension()==".jpg" || (*it).extension() == ".png") // right now we only use jpg
         photos->push_back((*it).filename());
 
   } 
