@@ -20,3 +20,4 @@ void Ticket::setReady(){
   ready = true;
   cond.notify_all();
 }
+

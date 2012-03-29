@@ -17,82 +17,129 @@ Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath)
 
 }
 
-vector <path> Disk::getSubdirectoriesPaths(path directoryPath){
-  vector<path> subdirectories;
-
-  path absolutePath = makeAbsolutePath(directoryPath);
-  vector<path> directoryContents = getDirectoryContents(absolutePath);
-
-  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(is_directory(*it))
-      subdirectories.push_back((*it).filename());
-  } 
-
-  return subdirectories;
+paths_t Disk::getSubdirectoriesPaths(path directoryPath){
+  return returnByValueConcurrent<paths_t>(
+      boost::bind(
+        &Disk::internalGetSubdirectoriesPaths, this, directoryPath
+        )
+      );
 }
 
-void Disk::mainLoop(){
-  while(1){
-    //do things
-    //TODO check for incoming messaages
-
-    sleep(1);
-
-  }
-
+paths_t Disk::getPhotosPaths(path directoryPath){
+  return returnByValueConcurrent<paths_t>(
+      boost::bind(
+        &Disk::internalGetPhotosPaths, this, directoryPath
+        )
+      );
 }
 
-vector<path> Disk::getPhotosPaths(path directoryPath){
-  vector<path> photos;
+bool Disk::hasPhotos(path directoryPath){
+  return returnByValueConcurrent<bool>(
+      boost::bind(
+        &Disk::internalHasPhotos, this, directoryPath
+        )
+      );
+}
+
+bool Disk::hasSubdirectories(path directoryPath){
+  return returnByValueConcurrent<bool>(
+      boost::bind(
+        &Disk::internalHasSubdirectories, this, directoryPath
+        )
+      );
+}
+
+Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
+  return returnByValueConcurrent< Glib::RefPtr<Gdk::Pixbuf> >(
+      boost::bind(
+        &Disk::internalGetPhotoFile, this, photoPath
+        )
+      );
+}
+
+path Disk::movePhoto(path sourcePath, path destinationPath){
+  return returnByValueConcurrent<path>(
+      boost::bind(
+        &Disk::internalMovePhoto, this, sourcePath, destinationPath
+        )
+      );
+}
+
+void Disk::deletePhoto(path photoPath){
+  returnByValueConcurrent<bool>(
+      boost::bind(
+        &Disk::internalDeletePhoto, this, photoPath
+        )
+      );
+}
+
+//private methods
+
+void * Disk::internalGetPhotosPaths(boost::filesystem::path directoryPath){
+  paths_t * photos = new paths_t();
 
   path absolutePath = makeAbsolutePath(directoryPath);
-  vector<path> directoryContents = getDirectoryContents(absolutePath);
+  paths_t directoryContents = getDirectoryContents(absolutePath);
 
   for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
     if(!is_directory(*it))
       if( (*it).extension()==".jpg" ) // right now we only use jpg
-        photos.push_back((*it).filename());
+        photos->push_back((*it).filename());
 
   } 
 
   return photos;
 }
 
-bool Disk::hasPhotos(path directoryPath){
+void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPath){
+  paths_t * subdirectories = new paths_t();
+
+  path absolutePath = makeAbsolutePath(directoryPath);
+  paths_t  directoryContents = getDirectoryContents(absolutePath);
+
+  for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+    if(is_directory(*it))
+      subdirectories->push_back((*it).filename());
+  } 
+
+  return subdirectories;
+}
+
+void * Disk::internalHasPhotos(boost::filesystem::path directoryPath){
   if(getPhotosPaths(directoryPath).size() == 0)
-    return false;
+    return new bool(false);
   else
-    return true;
+    return new bool(true);
 }
 
-bool Disk::hasSubdirectories(path directoryPath){
+void * Disk::internalHasSubdirectories(boost::filesystem::path directoryPath){
   if(getSubdirectoriesPaths(directoryPath).size() == 0)
-    return false;
+    return new bool(false);
   else
-    return true;
+    return new bool(true);
 }
 
-Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
+void * Disk::internalGetPhotoFile(path photoPath){
   path absolutePath = makeAbsolutePath(photoPath);
-  return Gdk::Pixbuf::create_from_file(absolutePath.string());
+  Glib::RefPtr<Gdk::Pixbuf> * retPtr = new Glib::RefPtr<Gdk::Pixbuf>(Gdk::Pixbuf::create_from_file(absolutePath.string()));
+  return retPtr;
 }
 
-boost::filesystem::path Disk::movePhoto(path sourcePath, path destinationPath){
+void * Disk::internalMovePhoto(path sourcePath, path destinationPath){
   path destinationWithFilename = destinationPath;
   destinationWithFilename /= sourcePath.filename();
   rename( makeAbsolutePath(sourcePath), makeAbsolutePath(destinationWithFilename) );
-  return destinationWithFilename;
+  return new path(destinationWithFilename);
 }
 
-void Disk::deletePhoto(path photoPath){
-  remove( makeAbsolutePath(photoPath) );
-  
+void * Disk::internalDeletePhoto(path photoPath){
+  remove(makeAbsolutePath(photoPath) );
+  return new bool(true);
 }
 
-//private methods
 
 // returns content of given directory (all files)
-vector<path> Disk::getDirectoryContents(path directoryPath){
+paths_t Disk::getDirectoryContents(path directoryPath){
   vector<path> directoryContents;
   copy(directory_iterator(directoryPath), directory_iterator(), back_inserter(directoryContents));
   sort(directoryContents.begin(), directoryContents.end());

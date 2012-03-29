@@ -1,19 +1,5 @@
 #include "../include/asynchronous.hpp"
 
-/*
- * issues:
- *  passing pointers - which type is the best for passing return values?
- *  memory leaks (who will destroy passed data?)
- *  coding style - java style bitch!
- *  loose threads in concurrentLoop
- */
-
-// general classes
-
-
-
-
-
 // specific classes
 
 class PizzaDeliverySystem : public Asynchronous {
@@ -38,24 +24,21 @@ class PizzaDeliverySystem : public Asynchronous {
      * are similar to that pattern:
      *
      * returntype methodName(arguments){
-     *  return *reinterpret_cast<returntype*>( if we return by value
-     *  OR
-     *  return reinterpret_cast<returntype*>( if we return pointer
-     *    invokeQueuedMethod(
+     *  return returnByValueConcurrent<returntype>(
+     *  return returnByValueQueued<returntype>(
+     *  return returnByPointerConcurrent<returntype>(
+     *  return returnByPointerQueued<returntype>(
      *      boost::bind(
      *        &ObjectName::internalMethodName, this, arguments
      *        )
-     *      )
      *    );
      * }
      */
     std::string getPizza(std::string pizzaName){
-      return *reinterpret_cast<std::string*>(
-          invokeQueuedMethod(
+      return returnByValueQueued<std::string>(
             boost::bind(
               &PizzaDeliverySystem::internalGetPizza, this, pizzaName
               )
-            )
           );
     }
     /*
@@ -66,9 +49,6 @@ class PizzaDeliverySystem : public Asynchronous {
      * pattern is similar to the previous one, the only difference
      * is that we use invokeConcurrentMethod instead of invokeQueuedMethod
      * try it and see what happens
-     * 
-     *
-     *
      */
 
   private:

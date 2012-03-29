@@ -59,7 +59,6 @@ void CoreController::manageConfig(std::string forcedConfigPath){
 
 void CoreController::manageDisk(){
   disk = Disk::getInstance(getLibraryDirectoryPath());
-  disk_thread = boost::thread(&Disk::mainLoop, disk);
 }
 
 void CoreController::doSomeLongLastingTask(){

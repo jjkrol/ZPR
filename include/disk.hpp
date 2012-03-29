@@ -4,19 +4,21 @@
 #include <gtkmm.h>
 #include <unistd.h>
 
+#include "asynchronous.hpp"
+
+typedef std::vector<boost::filesystem::path> paths_t;
+typedef std::vector<boost::filesystem::path>* paths_t_ptr;
 
 /** @class Disk
  *  @brief A class providing an adapter to the disk space.
  */
-class Disk {
+class Disk : public Asynchronous {
 
   public:
     static Disk* getInstance(boost::filesystem::path libraryDirectoryPath="");
 
-    void mainLoop();
-
-    std::vector<boost::filesystem::path> getPhotosPaths(boost::filesystem::path directoryPath);
-    std::vector<boost::filesystem::path> getSubdirectoriesPaths(boost::filesystem::path directoryPath);
+    paths_t getPhotosPaths(boost::filesystem::path directoryPath);
+    paths_t getSubdirectoriesPaths(boost::filesystem::path directoryPath);
 
     bool hasPhotos(boost::filesystem::path directoryPath);
     bool hasSubdirectories(boost::filesystem::path directoryPath);
@@ -36,8 +38,21 @@ class Disk {
     Disk (const Disk&);
     ~Disk (){};
 
+//internal functions
+    void * internalGetPhotosPaths(boost::filesystem::path directoryPath);
+    void * internalGetSubdirectoriesPaths(boost::filesystem::path directoryPath);
+
+    void * internalHasPhotos(boost::filesystem::path);
+    void * internalHasSubdirectories(boost::filesystem::path directoryPath);
+
+    void * internalGetPhotoFile(boost::filesystem::path photoPath);
+    
+    void * internalDeletePhoto(boost::filesystem::path photoPath);
+
+    void * internalMovePhoto(boost::filesystem::path sourcePath, boost::filesystem::path destinationPath);
+
     static Disk* instance;
-    std::vector<boost::filesystem::path> getDirectoryContents(boost::filesystem::path);
+    paths_t getDirectoryContents(boost::filesystem::path);
     boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
     boost::filesystem::path libraryDirectoryPath;
 };

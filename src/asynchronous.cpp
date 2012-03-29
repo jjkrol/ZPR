@@ -3,6 +3,12 @@
 #include "../include/ticket.hpp"
 #include "../include/message.hpp"
 
+/*
+ * issues:
+ *  memory leaks (who will destroy passed data?)
+ *  loose threads in concurrentLoop
+ */
+
 
 Asynchronous::Asynchronous(){
   stopLoops = nietego;
@@ -20,11 +26,7 @@ Asynchronous::Asynchronous(){
   while(!stopLoops)  
     if(!normalMessageQueue.isEmpty()){
       Message msg = normalMessageQueue.pop();
-      void * output = msg.functionObject() ; 
-      Ticket * ticket = msg.returnTicket;
-      ticket->setPointer(output); 
-      ticket->setReady(); 
-
+      runTask(msg);
     }
 }
 
@@ -33,15 +35,17 @@ Asynchronous::Asynchronous(){
   while(!stopLoops)  
     if(!concurrentMessageQueue.isEmpty()){
       Message msg = concurrentMessageQueue.pop();
-      threadFromQueue = boost::thread(&Asynchronous::runParallelFunction, this, msg);
+      threadFromQueue = boost::thread(&Asynchronous::runTask, this, msg);
       //TODO what happens with those threads?
     }
 }
 
-void Asynchronous::runParallelFunction(Message msg){
+void Asynchronous::runTask(Message msg){
+  //run the task
   void * output = msg.functionObject() ; 
-  Ticket * ticket = msg.returnTicket;
 
+  //fill the response 
+  Ticket * ticket = msg.returnTicket;
   ticket->setPointer(output); 
   ticket->setReady();
 }
@@ -66,6 +70,6 @@ void Asynchronous::runParallelFunction(Message msg){
   //wait for the order to be complete
   ticket->wait();
   void * pointer = ticket->getPointer();
+  delete ticket; //TODO would be better do delete this in the queue, but how?
   return pointer;
-
 }
