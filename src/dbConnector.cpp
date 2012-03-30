@@ -5,7 +5,7 @@
  * @version 0.01
 */
 
-#include <iostream> //for testing only
+#include <iostream> //for testing end error reporting
 
 #include "../include/dbConnector.hpp"
 #include "../include/disk.hpp"
@@ -14,6 +14,8 @@
 using namespace boost::filesystem;
 using std::vector;
 using std::string;
+using std::cout;
+using std::endl;
 
 /** @todo Concrete versions of DBConnector should
   * invoke the Register() function to register their types
@@ -144,25 +146,49 @@ void SQLiteConnector::close() {
   if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
     sqlite3_bind_text(stmt, 1, "checksum", -1, SQLITE_STATIC);
     sqlite3_bind_blob(stmt, 2, &checksum, sizeof(checksum), SQLITE_STATIC);
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
   }
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
 
   string error = sqlite3_errmsg(database);
   if(error != "not an error")
-    std::cout << query << " " << error << std::endl;
-
-  sqlite3_close(database);
-  database = NULL;
-  filename.erase();*/
+    std::cout << query << " " << error << std::endl;*/
 }
 
 void SQLiteConnector::movePhoto(path old_path, path new_path) {
-  //@todo
+  sqlite3_stmt *stmt;
+  const char *query = "UPDATE photos SET path=? WHERE path=? ;";
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
+    sqlite3_bind_blob(stmt, 1, &old_path, -1, SQLITE_STATIC);
+    sqlite3_bind_blob(stmt, 2, &new_path, -1, SQLITE_STATIC);
+
+    //while(sqlite3_step(stmt) != SQLITE_DONE);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+  }
+
+  string error = sqlite3_errmsg(database);
+  if(error != "not an error")
+    cout << query << error << endl;
 }
 
-void SQLiteConnector::deletePhoto(path photos_path) {
-  //@todo
+bool SQLiteConnector::deletePhoto(path photos_path) {
+  sqlite3_stmt *stmt;
+  const char *query = "DELETE FROM photos WHERE path=? ;";
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
+    sqlite3_bind_blob(stmt, 1, &photos_path, -1, SQLITE_STATIC);
+
+    //while(sqlite3_step(stmt) != SQLITE_DONE);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+  }
+
+  if(reportErrors(query))
+    return false;
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +202,7 @@ bool SQLiteConnector::createDB() {
       "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);";
 
   if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
+    //while(sqlite3_step(stmt) != SQLITE_DONE);
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
 
@@ -209,7 +236,7 @@ bool SQLiteConnector::addPhoto(const path &photo) {
     if(rc != SQLITE_OK)
       return false;
 
-    sqlite3_bind_blob(stmt, 1, &photo, sizeof(photo), SQLITE_STATIC);
+    sqlite3_bind_blob(stmt, 1,&photo, sizeof(photo), SQLITE_STATIC );
     rc = sqlite3_step(stmt);
     
     if(rc == SQLITE_ROW)
@@ -220,9 +247,10 @@ bool SQLiteConnector::addPhoto(const path &photo) {
   } while (rc==SQLITE_SCHEMA);
 
   string error = sqlite3_errmsg(database);
-  if(error != "not an error")
+  if(error != "not an error"){
     std::cout << query << " " << error << std::endl;
-
+    return false;
+  }
   return true;
 }
 
@@ -232,13 +260,34 @@ bool SQLiteConnector::getDirectoriesFromDB() {
 }
 
 bool SQLiteConnector::getChecksumFromDB() {
-  //@todo
+  sqlite3_stmt *stmt;
+  const char *query = "SELECT value FROM settings WHERE key=\"checksum\";";
+  int rc;
+  do {
+    rc=sqlite3_prepare_v2(database, query, -1, &stmt, NULL);
+    if(rc != SQLITE_OK)
+      return false;
+
+    rc=sqlite3_step(stmt);
+    if(rc == SQLITE_ROW) {
+      //@todo
+    }
+  } while (rc==SQLITE_SCHEMA);
   return true;
 }
 
 unsigned int SQLiteConnector::calculateChecksum() {
   //@todo
   return true;
+}
+
+bool SQLiteConnector::reportErrors(const char * query) {
+  string error = sqlite3_errmsg(database);
+  if(error != "not an error"){
+    std::cout << query << " " << error << std::endl;
+    return true;
+  }
+  return false;
 }
 
 //Methods defined beneath this line are used only for tests and should not
@@ -252,26 +301,21 @@ ResultTable SQLiteConnector::sendQuery(string query) {
     int columns = sqlite3_column_count(statement);
     int result_state = 0;
 
-    while(true) {
+    while(sqlite3_step(statement) == SQLITE_ROW) {
       //if result_state equals SQLITE_ROWS that means that there is
-      result_state = sqlite3_step(statement);
-
-      if(result_state == SQLITE_ROW) {
-        vector<string> values;
-        for(int i=0 ; i<columns ; ++i) {
-          //NULL can be returned as a result what would cause
-          //a runtime error, if not proceeded appropriately.
-          //That's why if NULL is returned the empty string is pushed
-          //to the vector (line)
-          string s;
-          char *tmp = (char*)sqlite3_column_text(statement,i);
-          if(tmp) s=tmp;
-          values.push_back(s);
-        }
-        results.push_back(values);
+      //result_state = sqlite3_step(statement);
+      vector<string> values;
+      for(int i=0 ; i<columns ; ++i) {
+        //NULL can be returned as a result what would cause
+        //a runtime error, if not proceeded appropriately.
+        //That's why if NULL is returned the empty string is pushed
+        //to the vector (line)
+        string s;
+        char *tmp = (char*)sqlite3_column_text(statement,i);
+        if(tmp) s=tmp;
+        values.push_back(s);
       }
-      else
-        break;
+      results.push_back(values);
     }
     sqlite3_finalize(statement);
   }

@@ -73,9 +73,18 @@ public:
     CHANGED = 0x4
   };
 
-  virtual int open(const std::string filename) = 0;
   virtual ResultTable sendQuery(std::string query) = 0;
+  virtual int open(const std::string filename) = 0;
+  virtual inline bool hasChanged() = 0;
+  virtual inline void addDirectories(
+    const std::vector<boost::filesystem::path> &directories) = 0;
+  virtual bool addPhotos(
+    const std::vector<boost::filesystem::path> &photos) = 0;
   virtual void close() = 0;
+
+  virtual void movePhoto(
+    boost::filesystem::path old_path, boost::filesystem::path new_path) = 0;
+  virtual bool deletePhoto(boost::filesystem::path photos_path) = 0;
 
 protected:
   virtual ~DBConnector(){ }
@@ -117,7 +126,7 @@ public:
 
   void movePhoto(
     boost::filesystem::path old_path, boost::filesystem::path new_path);
-  void deletePhoto(boost::filesystem::path photos_path);
+  bool deletePhoto(boost::filesystem::path photos_path);
 
 private:
   static DBConnector *instance;
@@ -138,4 +147,5 @@ private:
   bool getChecksumFromDB();
 
   unsigned int calculateChecksum();
+  inline bool reportErrors(const char *query);
 };
