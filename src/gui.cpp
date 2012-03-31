@@ -81,6 +81,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   current_dir = core->getDirectoryTree();
   photos = current_dir->getPhotos();
   current_photo = photos.begin();
+  current_pixbuf = (*current_photo)->getPixbuf();
 }
 
 //GUI class descructor
@@ -123,43 +124,48 @@ void GUI::createMainWindow() {
 
 //method for loading image into Gtk::Image widget
 void GUI::loadImage() {
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*current_photo)->getPixbuf();
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
   Gdk::Rectangle rectangle = image_window->get_allocation();
   if(!pixbuf) return;
 
-  //displaying filename
+  //displaying filename and resetting zoom widget
   filename_label->set_label(((*current_photo)->getFilename()).string());
+  image_zoom->set_range(100.0, 400.0);
+  image_zoom->set_value(100.0);
+  //image_zoom->clear_marks();
 
-  //checking if fitting image is needed
-  if(rectangle.get_width() > pixbuf->get_width() &&
-     rectangle.get_height() > pixbuf->get_height()) {
-    image->set(pixbuf);
-    image_zoom->set_adjustment(Gtk::Adjustment::create(100.0, 100.0, 400.0));
-    return;
-  }
+  //fitting image if needed
+  if(rectangle.get_width() < pixbuf->get_width() ||
+     rectangle.get_height() < pixbuf->get_height())
+    pixbuf = resizeImage(pixbuf, rectangle);
 
   //resizing and setting image
-  pixbuf = resizeImage(pixbuf, rectangle);
   image->set(pixbuf);
 }
 
 //additional function for fitting pixbuf into window
 Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
-                                      Gdk::Rectangle rectangle) {
-  //calculating desired width and height
+                                           Gdk::Rectangle rectangle) {
   int width, height;
-  float widget_raito = (float)rectangle.get_width() / (float)rectangle.get_height();
-  float image_raito = (float)pixbuf->get_width() / (float)pixbuf->get_height();
+  double zoom_raito;
+  double widget_raito = (double)rectangle.get_width() / (double)rectangle.get_height();
+  double image_raito = (double)pixbuf->get_width() / (double)pixbuf->get_height();
 
-  //std::cout << rectangle.get_width() << " " << rectangle.get_height() << std::endl;
-
+  //calculating desired width and height
   if(widget_raito >= image_raito) {
     height = rectangle.get_height() - 4;
     width = height * image_raito;
+    zoom_raito = (double)rectangle.get_height() / (double)pixbuf->get_height();
   } else {
     width = rectangle.get_width() - 4;
     height = width / image_raito;
+    zoom_raito = (double)rectangle.get_width() / (double)pixbuf->get_width();
   }
+
+  //zoom widget adjusting
+  image_zoom->set_range(zoom_raito * 100.0, 400.0);
+  //image_zoom->add_mark(100.0, Gtk::POS_TOP, "");
+  image_zoom->set_value(zoom_raito * 100.0);
 
   //image resizing
   return pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
@@ -169,6 +175,7 @@ Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
 void GUI::nextImage() {
   if(current_photo == --photos.end()) return;
   current_photo++;
+  current_pixbuf = (*current_photo)->getPixbuf();
   loadImage();
 }
 
@@ -176,11 +183,17 @@ void GUI::nextImage() {
 void GUI::prevImage() {
   if(current_photo == photos.begin()) return;
   current_photo--;
+  current_pixbuf = (*current_photo)->getPixbuf();
   loadImage();
 }
 
 void GUI::zoomImage() {
-  std::cout << image_zoom->get_value() << std::endl;
+  //std::cout << image_zoom->get_value() << std::endl;
+  double zoom = image_zoom->get_value() / 100;
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
+  pixbuf = pixbuf->scale_simple(pixbuf->get_width() * zoom,
+                                pixbuf->get_height() * zoom, Gdk::INTERP_BILINEAR);
+  image->set(pixbuf);
 }
 
 void GUI::onWindowResize(GdkEventConfigure *event) {
@@ -189,7 +202,7 @@ void GUI::onWindowResize(GdkEventConfigure *event) {
 }
 
 void GUI::onWindowStateEvent(GdkEventWindowState *state) {
-  if(state->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+  if(state->new_window_state & Gdk::WINDOW_STATE_MAXIMIZED)
     main_window->maximize();
   loadImage();
   return;

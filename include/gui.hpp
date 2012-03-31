@@ -21,6 +21,7 @@ class GUI {
     Directory *current_dir;
     std::vector<Photo*> photos;
     std::vector<Photo*>::iterator current_photo;
+    Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
     //main window and kit
     Gtk::Main kit;
