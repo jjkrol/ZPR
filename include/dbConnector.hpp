@@ -82,7 +82,7 @@ public:
     const std::vector<boost::filesystem::path> &photos) = 0;
   virtual void close() = 0;
 
-  virtual void movePhoto(
+  virtual bool movePhoto(
     boost::filesystem::path old_path, boost::filesystem::path new_path) = 0;
   virtual bool deletePhoto(boost::filesystem::path photos_path) = 0;
 
@@ -122,30 +122,29 @@ public:
   inline void addDirectories(
     const std::vector<boost::filesystem::path> &directories);
   bool addPhotos(const std::vector<boost::filesystem::path> &photos);
+  bool addPhoto(const boost::filesystem::path &photo);
   void close();
 
-  void movePhoto(
+  bool movePhoto(
     boost::filesystem::path old_path, boost::filesystem::path new_path);
   bool deletePhoto(boost::filesystem::path photos_path);
 
 private:
-  static DBConnector *instance;
-  static DBConnector * getInstance();
-
   sqlite3 *database;
-//unsigned int checksum;
   std::string filename;
   std::vector<boost::filesystem::path> directories;
 
+  static DBConnector *instance;
+  static DBConnector * getInstance();
+
   bool createDB();
 
-  void saveSettings();
-  void saveDirectories();
-  bool addPhoto(const boost::filesystem::path &photo);
+  bool saveSettings();
+  bool saveDirectories();
 
   bool getDirectoriesFromDB();
-  bool getChecksumFromDB();
+  bool getChecksumFromDB(int &checksum);
 
-  unsigned int calculateChecksum();
+  int calculateChecksum();
   inline bool reportErrors(const char *query);
 };
