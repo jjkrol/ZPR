@@ -8,6 +8,7 @@
 
 class Disk;
 class Directory;
+class UserInterface;
 class ConfigurationManager;
 
 /**
@@ -59,6 +60,7 @@ private:
   void doSomeLongLastingTask();
 
   static CoreController* instance;
+  UserInterface *gui;
   ConfigurationManager* configManager;
   Disk* disk;
   boost::thread disk_thread;

@@ -4,15 +4,15 @@
 #include "../include/directory.hpp"
 #include <iostream>
 
-/** @class GUI
- *  @brief Class representing Graphical User Interface.
- *
- *  Class uses GTKmm, it serves as a link between user and program
- *  taking commands from user and sending them to the Core class.
- */
+UserInterface* UserInterface::instance = NULL;
 
-//GUI constructor - creates main window and its widgets
-GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
+UserInterface* UserInterface::getInstance(int argc, char *argv[]) {
+  if(instance == NULL) instance = new UserInterface(argc, argv);
+  return instance;
+}
+
+//UserInterface constructor - creates main window and its widgets
+UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
   //creating main window
   main_window = new Gtk::Window(Gtk::WINDOW_TOPLEVEL);
   main_window->set_title("Image Viewer");
@@ -30,7 +30,7 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   colors_label = new Gtk::Label("Colors modification");
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
-  image_zoom = new Gtk::Scale(Gtk::Adjustment::create(100.0, 100.0, 400.0),
+  image_zoom = new Gtk::Scale(/*Gtk::Adjustment::create(100.0, 100.0, 400.0),*/
                               Gtk::ORIENTATION_HORIZONTAL);
 
   //editing widgets
@@ -84,8 +84,8 @@ GUI::GUI(int argc, char *argv[]) : kit(argc, argv) {
   current_pixbuf = (*current_photo)->getPixbuf();
 }
 
-//GUI class descructor
-GUI::~GUI() {
+//UserInterface class descructor
+void UserInterface::destroy() {
   delete main_window;
   delete grid;
   delete left_box;
@@ -103,18 +103,20 @@ GUI::~GUI() {
   delete effects_label;
   delete image;
   delete image_zoom;
+  delete instance;
+  instance = NULL;
 }
 
 //function connects signals and shows main window
-void GUI::createMainWindow() {
+void UserInterface::showEditWindow() {
   //connecting buttons signals to functions
-  fit_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::loadImage));
-  main_window->signal_show().connect(sigc::mem_fun(this, &GUI::loadImage));
-  main_window->signal_configure_event().connect_notify(sigc::mem_fun(this, &GUI::onWindowResize));
-  main_window->signal_window_state_event().connect_notify(sigc::mem_fun(this, &GUI::onWindowStateEvent));
-  right_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::nextImage));
-  left_button->signal_clicked().connect(sigc::mem_fun(this, &GUI::prevImage));
-  image_zoom->signal_value_changed().connect(sigc::mem_fun(this, &GUI::zoomImage));
+  fit_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::loadImage));
+  main_window->signal_show().connect(sigc::mem_fun(this, &UserInterface::loadImage));
+  main_window->signal_configure_event().connect_notify(sigc::mem_fun(this, &UserInterface::onWindowResize));
+  main_window->signal_window_state_event().connect_notify(sigc::mem_fun(this, &UserInterface::onWindowStateEvent));
+  right_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::nextImage));
+  left_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::prevImage));
+  image_zoom->signal_value_changed().connect(sigc::mem_fun(this, &UserInterface::zoomImage));
 
   //showing widgets
   main_window->maximize();
@@ -123,7 +125,7 @@ void GUI::createMainWindow() {
 }
 
 //method for loading image into Gtk::Image widget
-void GUI::loadImage() {
+void UserInterface::loadImage() {
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
   Gdk::Rectangle rectangle = image_window->get_allocation();
   if(!pixbuf) return;
@@ -144,7 +146,7 @@ void GUI::loadImage() {
 }
 
 //additional function for fitting pixbuf into window
-Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+Glib::RefPtr<Gdk::Pixbuf> UserInterface::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
                                            Gdk::Rectangle rectangle) {
   int width, height;
   double zoom_raito;
@@ -164,7 +166,6 @@ Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
 
   //zoom widget adjusting
   image_zoom->set_range(zoom_raito * 100.0, 400.0);
-  //image_zoom->add_mark(100.0, Gtk::POS_TOP, "");
   image_zoom->set_value(zoom_raito * 100.0);
 
   //image resizing
@@ -172,7 +173,7 @@ Glib::RefPtr<Gdk::Pixbuf> GUI::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
 }
 
 //method for loading next image from folder
-void GUI::nextImage() {
+void UserInterface::nextImage() {
   if(current_photo == --photos.end()) return;
   current_photo++;
   current_pixbuf = (*current_photo)->getPixbuf();
@@ -180,15 +181,14 @@ void GUI::nextImage() {
 }
 
 //method for loading previous image from folder
-void GUI::prevImage() {
+void UserInterface::prevImage() {
   if(current_photo == photos.begin()) return;
   current_photo--;
   current_pixbuf = (*current_photo)->getPixbuf();
   loadImage();
 }
 
-void GUI::zoomImage() {
-  //std::cout << image_zoom->get_value() << std::endl;
+void UserInterface::zoomImage() {
   double zoom = image_zoom->get_value() / 100;
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
   pixbuf = pixbuf->scale_simple(pixbuf->get_width() * zoom,
@@ -196,12 +196,12 @@ void GUI::zoomImage() {
   image->set(pixbuf);
 }
 
-void GUI::onWindowResize(GdkEventConfigure *event) {
+void UserInterface::onWindowResize(GdkEventConfigure *event) {
   loadImage();
   return;
 }
 
-void GUI::onWindowStateEvent(GdkEventWindowState *state) {
+void UserInterface::onWindowStateEvent(GdkEventWindowState *state) {
   if(state->new_window_state & Gdk::WINDOW_STATE_MAXIMIZED)
     main_window->maximize();
   loadImage();

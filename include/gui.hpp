@@ -3,7 +3,7 @@
 #include <gtkmm.h>
 #include <vector>
 
-/** @class GUI
+/** @class UserInterface
  *  @brief Class representing Graphical User Interface.
  *
  *  Class uses GTKmm, it serves as a link between user and program
@@ -14,8 +14,11 @@ class CoreController;
 class Directory;
 class Photo;
 
-class GUI {
+class UserInterface {
   private:
+    //singleton instance
+    static UserInterface* instance;
+
     //comunication with CoreController
     CoreController *core;
     Directory *current_dir;
@@ -55,9 +58,11 @@ class GUI {
 
     //additional functions
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
+    ~UserInterface() {};
 
   public:
-    GUI(int argc, char *argv[]);
-    ~GUI();
-    void createMainWindow();
+    UserInterface(int argc, char *argv[]);
+    static UserInterface* getInstance(int argc = 0, char *argv[] = NULL);
+    void destroy();
+    void showEditWindow();
 };

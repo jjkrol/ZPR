@@ -16,13 +16,14 @@ CoreController* CoreController::getInstance(std::string forcedConfigPath){
 
 void CoreController::destroy(){
   disk_thread.join();
+  gui->destroy();
   delete instance;
   instance = NULL;
 }
 
 void CoreController::startApplication(int argc, char** argv){
-  GUI gui(argc, argv);
-  gui.createMainWindow();
+  gui = UserInterface::getInstance(argc, argv);
+  gui->showEditWindow();
 }
 
 Directory* CoreController::getDirectoryTree(){
