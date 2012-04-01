@@ -83,34 +83,10 @@ int SQLiteConnector::open(string f) {
 
 
 bool SQLiteConnector::hasChanged() {
-  return (getChecksumFromDB() == calculateChecksum());
+  int originalChecksum = 0;
+  while(! getChecksumFromDB(originalChecksum));
+  return (originalChecksum == calculateChecksum());
 }
-
-/*//Only photos should affect the checksum_tmp.
-  Disk *disk_space = Disk::getInstance();
-  vector<boost::filesystem::path>
-  paths = disk_space->getPhotosPaths(directory);
-
-  static unsigned int checksum_tmp = 0; 
-
-  for(vector<boost::filesystem::path>::iterator i = paths.begin();
-      i != paths.end() ; i++ ) {
-    //% (unsigned int)(-1) opperation assures that max unsigned int value (-1)
-    //is never exceeded.
-    checksum_tmp = (checksum_tmp + hash((i->string()).c_str()))
-                   % (unsigned int)(-1);
-  }
-
-  //Now we're scanning all subdirectories included in the directory
-  paths=disk_space->getSubdirectoriesPaths(directory);
-
-  for(vector<boost::filesystem::path>::iterator i = paths.begin();
-      i != paths.end() ; i++) {
-    hasChanged(*i);
-  }
-
-  return (checksum == checksum_tmp);
-}*/
 
 void SQLiteConnector::addDirectories(const vector<path> &input_dirs) {
   directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
@@ -139,39 +115,21 @@ void SQLiteConnector::close() {
 
   database = 0;
   filename.erase();
-
-/*  sqlite3_stmt *stmt;
-  const char *query = "INSERT INTO settings VALUES(?,?);";
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_text(stmt, 1, "checksum", -1, SQLITE_STATIC);
-    sqlite3_bind_blob(stmt, 2, &checksum, sizeof(checksum), SQLITE_STATIC);
-
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-  }
-
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error")
-    std::cout << query << " " << error << std::endl;*/
 }
 
-void SQLiteConnector::movePhoto(path old_path, path new_path) {
+bool SQLiteConnector::movePhoto(path old_path, path new_path) {
   sqlite3_stmt *stmt;
   const char *query = "UPDATE photos SET path=? WHERE path=? ;";
 
   if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_blob(stmt, 1, &old_path, -1, SQLITE_STATIC);
-    sqlite3_bind_blob(stmt, 2, &new_path, -1, SQLITE_STATIC);
+    sqlite3_bind_blob(stmt, 1, &old_path, sizeof(old_path), SQLITE_STATIC);
+    sqlite3_bind_blob(stmt, 2, &new_path, sizeof(new_path), SQLITE_STATIC);
 
-    //while(sqlite3_step(stmt) != SQLITE_DONE);
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
   }
 
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error")
-    cout << query << error << endl;
+  return !(reportErrors(query));
 }
 
 bool SQLiteConnector::deletePhoto(path photos_path) {
@@ -179,16 +137,13 @@ bool SQLiteConnector::deletePhoto(path photos_path) {
   const char *query = "DELETE FROM photos WHERE path=? ;";
 
   if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_blob(stmt, 1, &photos_path, -1, SQLITE_STATIC);
+    sqlite3_bind_blob(stmt, 1,&photos_path, sizeof(photos_path), SQLITE_STATIC);
 
-    //while(sqlite3_step(stmt) != SQLITE_DONE);
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
   }
 
-  if(reportErrors(query))
-    return false;
-  return true;
+  return !(reportErrors(query));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,12 +172,48 @@ bool SQLiteConnector::createDB() {
   return false;
 }
 
-void SQLiteConnector::saveSettings() {
-  //@todo save(calculateChecksum());
-}
+bool SQLiteConnector::saveSettings() {
+  sqlite3_stmt *stmt;
+  const char *query =
+            "INSERT INTO settings VALUES (\"checksum\",?);";
+  int rc, checksum = calculateChecksum();
 
-void SQLiteConnector::saveDirectories() {
-  //@todo
+  do {
+    rc = sqlite3_prepare_v2(database, query, -1, &stmt, 0);
+    if(rc != SQLITE_OK)
+      return false;
+
+    sqlite3_bind_blob(stmt, 1, &checksum, sizeof(checksum), SQLITE_STATIC );
+    rc = sqlite3_step(stmt);
+    
+    if(rc == SQLITE_ROW)
+      return false;
+    
+    rc = sqlite3_finalize(stmt);
+
+  } while (rc==SQLITE_SCHEMA);
+
+  return !(reportErrors(query));
+}
+bool SQLiteConnector::saveDirectories() {
+  sqlite3_stmt *stmt;
+  const char *query = "INSERT INTO directories VALUES(?);";
+  
+  unique(directories.begin(),directories.end());
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
+    for(vector<path>::iterator i = directories.begin() ;
+        i != directories.end() ; i++) {
+      sqlite3_bind_blob(stmt, 1, &(*i), sizeof(path), SQLITE_STATIC);
+      sqlite3_step(stmt);
+
+      sqlite3_reset(stmt);
+      sqlite3_clear_bindings(stmt);
+    }
+    sqlite3_finalize(stmt);
+  }
+
+  return reportErrors(query);
 }
 
 bool SQLiteConnector::addPhoto(const path &photo) {
@@ -232,7 +223,7 @@ bool SQLiteConnector::addPhoto(const path &photo) {
   int rc;
 
   do {
-    rc = sqlite3_prepare(database, query, -1, &stmt, 0);
+    rc = sqlite3_prepare_v2(database, query, -1, &stmt, 0);
     if(rc != SQLITE_OK)
       return false;
 
@@ -255,11 +246,23 @@ bool SQLiteConnector::addPhoto(const path &photo) {
 }
 
 bool SQLiteConnector::getDirectoriesFromDB() {
-  //@todo
-  return true;
+  sqlite3_stmt *stmt;
+  const char *query = "SELECT path FROM directories;";
+  directories.clear();
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+      directories.push_back(
+        *(static_cast<const path *>(sqlite3_column_blob(stmt,0)))
+      );
+    }
+    sqlite3_finalize(stmt);
+  }
+
+  return !reportErrors(query);
 }
 
-bool SQLiteConnector::getChecksumFromDB() {
+bool SQLiteConnector::getChecksumFromDB(int &checksum) {
   sqlite3_stmt *stmt;
   const char *query = "SELECT value FROM settings WHERE key=\"checksum\";";
   int rc;
@@ -270,15 +273,28 @@ bool SQLiteConnector::getChecksumFromDB() {
 
     rc=sqlite3_step(stmt);
     if(rc == SQLITE_ROW) {
-      //@todo
+      checksum = *(static_cast<const int *>(sqlite3_column_blob(stmt,0)));
     }
   } while (rc==SQLITE_SCHEMA);
-  return true;
+
+  return !reportErrors(query);
 }
 
-unsigned int SQLiteConnector::calculateChecksum() {
-  //@todo
-  return true;
+int SQLiteConnector::calculateChecksum() {
+  int checksum_tmp = 0;
+  vector<path> photo_paths;
+  Disk * disk = Disk::getInstance();
+  
+  for(vector<path>::iterator i = directories.begin();
+      i != directories.end(); i++) {
+    photo_paths = disk->getPhotosPaths(*i);
+    for(vector<path>::iterator j = photo_paths.begin();
+        j != photo_paths.end() ; j++) {
+      checksum_tmp += hash((j->string()).c_str());
+    }
+  }
+
+  return checksum_tmp;
 }
 
 bool SQLiteConnector::reportErrors(const char * query) {
@@ -296,10 +312,8 @@ ResultTable SQLiteConnector::sendQuery(string query) {
   sqlite3_stmt *statement;
   vector<vector<string> > results;
 
-  if(sqlite3_prepare_v2(database,query.c_str(),-1,&statement,NULL)
-     == SQLITE_OK) {
+  if(sqlite3_prepare_v2(database,query.c_str(),-1,&statement,0) == SQLITE_OK) {
     int columns = sqlite3_column_count(statement);
-    int result_state = 0;
 
     while(sqlite3_step(statement) == SQLITE_ROW) {
       //if result_state equals SQLITE_ROWS that means that there is
