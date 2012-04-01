@@ -187,6 +187,7 @@ void UserInterface::prevImage() {
   loadImage();
 }
 
+//method for zooming image
 void UserInterface::zoomImage() {
   double zoom = image_zoom->get_value() / 100;
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
@@ -195,7 +196,10 @@ void UserInterface::zoomImage() {
   image->set(pixbuf);
 }
 
+//method for automatic image resizing
 void UserInterface::fitImage(Gtk::Allocation &allocation) {
+  if(image_zoom->get_state_flags() & Gtk::STATE_FLAG_FOCUSED)
+    return;
   loadImage();
   return;
 }
