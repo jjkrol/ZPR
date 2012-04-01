@@ -2,7 +2,6 @@
 #include "../include/core.hpp"
 #include "../include/photo.hpp"
 #include "../include/directory.hpp"
-#include <iostream>
 
 UserInterface* UserInterface::instance = NULL;
 
@@ -30,8 +29,7 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
   colors_label = new Gtk::Label("Colors modification");
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
-  image_zoom = new Gtk::Scale(/*Gtk::Adjustment::create(100.0, 100.0, 400.0),*/
-                              Gtk::ORIENTATION_HORIZONTAL);
+  image_zoom = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
 
   //editing widgets
   image_zoom->set_draw_value(false);
@@ -109,14 +107,16 @@ void UserInterface::destroy() {
 
 //function connects signals and shows main window
 void UserInterface::showEditWindow() {
-  //connecting buttons signals to functions
-  fit_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::loadImage));
-  main_window->signal_show().connect(sigc::mem_fun(this, &UserInterface::loadImage));
-  main_window->signal_configure_event().connect_notify(sigc::mem_fun(this, &UserInterface::onWindowResize));
-  main_window->signal_window_state_event().connect_notify(sigc::mem_fun(this, &UserInterface::onWindowStateEvent));
+  //changing images
   right_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::nextImage));
   left_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::prevImage));
+
+  //zooming
+  fit_button->signal_clicked().connect(sigc::mem_fun(this, &UserInterface::loadImage));
   image_zoom->signal_value_changed().connect(sigc::mem_fun(this, &UserInterface::zoomImage));
+
+  //auto resize
+  main_window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &UserInterface::fitImage));
 
   //showing widgets
   main_window->maximize();
@@ -134,7 +134,6 @@ void UserInterface::loadImage() {
   filename_label->set_label(((*current_photo)->getFilename()).string());
   image_zoom->set_range(100.0, 400.0);
   image_zoom->set_value(100.0);
-  //image_zoom->clear_marks();
 
   //fitting image if needed
   if(rectangle.get_width() < pixbuf->get_width() ||
@@ -196,14 +195,7 @@ void UserInterface::zoomImage() {
   image->set(pixbuf);
 }
 
-void UserInterface::onWindowResize(GdkEventConfigure *event) {
-  loadImage();
-  return;
-}
-
-void UserInterface::onWindowStateEvent(GdkEventWindowState *state) {
-  if(state->new_window_state & Gdk::WINDOW_STATE_MAXIMIZED)
-    main_window->maximize();
+void UserInterface::fitImage(Gtk::Allocation &allocation) {
   loadImage();
   return;
 }

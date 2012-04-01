@@ -49,8 +49,7 @@ class UserInterface {
     Gtk::Image *image;
 
     //methods for handling signals
-    void onWindowStateEvent(GdkEventWindowState *);
-    void onWindowResize(GdkEventConfigure *);
+    void fitImage(Gtk::Allocation &);
     void loadImage();
     void nextImage();
     void prevImage();
