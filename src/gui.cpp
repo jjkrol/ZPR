@@ -46,7 +46,7 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
   bottom_box->pack_start(*left_button, false, false);
   bottom_box->pack_start(*right_button, false, false);
   bottom_box->pack_start(*filename_label, true, true);
-  bottom_box->pack_start(*image_zoom, true, true);
+  bottom_box->pack_start(*image_zoom, false, false);
   bottom_box->pack_start(*fit_button, false, false);
 
   right_box = new Gtk::Box();
@@ -119,6 +119,7 @@ void UserInterface::showEditWindow() {
   main_window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &UserInterface::fitImage));
 
   //showing widgets
+  image_zoom->set_size_request(200, -1);
   main_window->maximize();
   main_window->show_all_children();
   if(main_window) kit.run(*main_window);
