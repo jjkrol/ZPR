@@ -6,12 +6,13 @@ Ticket * MessageQueue::push(Message inMsg){
   Ticket* ticket = new Ticket();
   inMsg.returnTicket = ticket; // loop has to know where to store the return value
 
+  boost::lock_guard<boost::mutex> lock(mut);
   queueMutex.lock();
   {
     queue.push(inMsg);
   }
   queueMutex.unlock();
-
+  cond.notify_all();
   return ticket;
 }
 

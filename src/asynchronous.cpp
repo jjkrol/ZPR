@@ -2,7 +2,7 @@
 #include "../include/messageQueue.hpp"
 #include "../include/ticket.hpp"
 #include "../include/message.hpp"
-
+#include <stdlib.h>
 /*
  * issues:
  *  memory leaks (who will destroy passed data?)
@@ -14,6 +14,7 @@ Asynchronous::Asynchronous(){
   stopLoops = nietego;
   mainLoopThread = boost::thread(&Asynchronous::mainLoop, this) ;
   concurrentLoopThread = boost::thread(&Asynchronous::concurrentLoop, this);
+  std::cout<<"asynch constructor"<<std::endl;
 }
 
  Asynchronous::~Asynchronous(){
@@ -23,21 +24,28 @@ Asynchronous::Asynchronous(){
 }
 
  void Asynchronous::mainLoop(){
-  while(!stopLoops)  
-    if(!normalMessageQueue.isEmpty()){
+  boost::unique_lock<boost::mutex> lock(normalMessageQueue.mut);
+  while(!stopLoops){
+    while(normalMessageQueue.isEmpty()){
+      normalMessageQueue.cond.wait(lock);
       Message msg = normalMessageQueue.pop();
       runTask(msg); 
     }
+  }
 }
 
  void Asynchronous::concurrentLoop(){ 
+   std::cout<<"entering councurrent loop"<<std::endl;
   boost::thread threadFromQueue;
-  while(!stopLoops)  
-    if(!concurrentMessageQueue.isEmpty()){
+  boost::unique_lock<boost::mutex> lock(concurrentMessageQueue.mut);
+  while(!stopLoops){
+    while(concurrentMessageQueue.isEmpty()){
+      concurrentMessageQueue.cond.wait(lock);
       Message msg = concurrentMessageQueue.pop();
       threadFromQueue = boost::thread(&Asynchronous::runTask, this, msg);
       //TODO what happens with those threads?
     }
+  }
 }
 
 void Asynchronous::runTask(Message msg){

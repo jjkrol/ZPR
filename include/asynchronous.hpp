@@ -100,7 +100,9 @@ class Asynchronous{
          );
      return retPtr;
     }
+
     bool stopLoops;
+
     MessageQueue normalMessageQueue;
     boost::thread mainLoopThread;
     MessageQueue concurrentMessageQueue;
