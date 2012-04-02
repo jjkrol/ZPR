@@ -25,7 +25,7 @@ Photo* Photo::getInstance(boost::filesystem::path argumentPath){
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
   db = DBConnectorFactory::getInstance("kotek");
-  db->open("Db.sqlite");
+  db->open("DB.sqlite");
 
   //@TODO load photos from db
   
