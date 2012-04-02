@@ -6,8 +6,11 @@
 
 #include "asynchronous.hpp"
 
+/**
+ * this is a shorthand for frequently used vector
+ * containing paths
+ */
 typedef std::vector<boost::filesystem::path> paths_t;
-typedef std::vector<boost::filesystem::path>* paths_t_ptr;
 
 /** @class Disk
  *  @brief A class providing an adapter to the disk space.
@@ -15,6 +18,9 @@ typedef std::vector<boost::filesystem::path>* paths_t_ptr;
 class Disk : public Asynchronous {
 
   public:
+    /**
+     * singleton initialization method
+     */
     static Disk* getInstance(boost::filesystem::path libraryDirectoryPath="");
 
     paths_t getPhotosPaths(boost::filesystem::path directoryPath);
@@ -32,6 +38,7 @@ class Disk : public Asynchronous {
     inline static bool exists(boost::filesystem::path file) {
       return boost::filesystem::exists(file);
     } 
+
   private:
     Disk (boost::filesystem::path);
     Disk& operator= (const Disk&);

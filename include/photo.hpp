@@ -52,12 +52,12 @@ class Photo {
     /**
      * @brief moves photo to a new destination in the filesystem 
      * and updates the database
-     *@TODO implement this (db function needed)
+     *@TODO db function needed
      */
     void move(boost::filesystem::path destinationPath);
     /**
      * @brief deletes the photo only from library (stays on disk)
-     * @TODO implement this (db function needed)
+     * @TODO db function needed
      * @warning this function also destroys the photo object
      */
     void deleteFromLibrary();

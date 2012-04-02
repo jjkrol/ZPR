@@ -45,7 +45,7 @@ Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
 
 void Photo::move(boost::filesystem::path destinationPath){
   ///@TODO use db function
-  photoPath = disk->movePhoto(photoPath, destinationPath);
+  boost::thread moveThread(&Disk::movePhoto, disk, photoPath, destinationPath);
   
 }
 
@@ -55,8 +55,8 @@ void Photo::deleteFromLibrary(){
 }
 
 void Photo::deleteFromLibraryAndDisk(){
-  disk->deletePhoto(photoPath);
   deleteFromLibrary();
+  boost::thread deleteThread(&Disk::deletePhoto, disk, photoPath);
 }
 
 boost::filesystem::path Photo::getPath(){
