@@ -25,6 +25,7 @@
  */
 
 class Disk;
+class DBConnector;
 
 typedef std::set<std::string> taglist_t;
 
@@ -87,7 +88,7 @@ class Photo {
     ~Photo ();
 
     Disk* disk;
-
+    DBConnector* db;
     boost::filesystem::path photoPath;
     std::set<std::string> tags;
 

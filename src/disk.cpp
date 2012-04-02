@@ -134,10 +134,8 @@ void * Disk::internalGetPhotoFile(path photoPath){
 }
 
 void * Disk::internalMovePhoto(path sourcePath, path destinationPath){
-  path destinationWithFilename = destinationPath;
-  destinationWithFilename /= sourcePath.filename();
-  rename( makeAbsolutePath(sourcePath), makeAbsolutePath(destinationWithFilename) );
-  return new path(destinationWithFilename);
+  rename( makeAbsolutePath(sourcePath), makeAbsolutePath(destinationPath) );
+  return new path(destinationPath);
 }
 
 void * Disk::internalDeletePhoto(path photoPath){

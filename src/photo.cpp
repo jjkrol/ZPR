@@ -1,5 +1,6 @@
 #include "../include/photo.hpp"
 #include "../include/disk.hpp"
+#include "../include/dbConnector.hpp"
 
 using namespace boost::gil;
 using namespace std;
@@ -23,7 +24,11 @@ Photo* Photo::getInstance(boost::filesystem::path argumentPath){
 }
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
+  db = DBConnectorFactory::getInstance("kotek");
+  db->open("Db.sqlite");
+
   //@TODO load photos from db
+  
   disk = Disk::getInstance();
 }
 
@@ -52,18 +57,22 @@ boost::filesystem::path Photo::getFilename(){
   return photoPath.filename();
 }
 
+//@TODO should be bool?
 void Photo::move(boost::filesystem::path destinationPath){
-  ///@TODO use db function
-  boost::thread moveThread(&Disk::movePhoto, disk, photoPath, destinationPath);
-  boost::filesystem::path filename = getFilename();
-  photoPath = destinationPath;
-  photoPath /= filename;
-  moveThread.join();
+  boost::filesystem::path newPathWithFilename = destinationPath;
+  newPathWithFilename /= getFilename();
 
+  db->movePhoto(photoPath, newPathWithFilename);
+
+  boost::thread moveThread(&Disk::movePhoto, disk, photoPath, newPathWithFilename);
+
+  photoPath = newPathWithFilename;
+  moveThread.join();
 }
 
+//@TODO should be bool?
 void Photo::deleteFromLibrary(){
-  ///@TODO use db function
+  db->deletePhoto(photoPath);
   delete this;
 }
 
