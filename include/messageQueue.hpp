@@ -18,5 +18,5 @@ class MessageQueue{
 
   private:
     std::queue<Message> queue;
-    boost::mutex queueMutex;
+    boost::shared_mutex queueMutex;
 };
