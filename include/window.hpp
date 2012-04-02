@@ -6,9 +6,10 @@
  *  @brief Class representing main window of an application.
  */
 
-class UserInterface;
-
 class MainWindow : public Gtk::Window {
+  public:
+    friend class UserInterface;
+
   private:
     //connection with UserInterface class
     UserInterface *gui;
@@ -33,7 +34,7 @@ class MainWindow : public Gtk::Window {
     Gtk::Label *basic_label, *colors_label, *effects_label;
     Gtk::Image *image;
 
-    //methods for handling signals
+    //handling signals
     void fitImage(Gtk::Allocation &);
     void loadImage();
     void zoomImage();
@@ -41,9 +42,10 @@ class MainWindow : public Gtk::Window {
     //additional functions
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
 
-  public:
+    //constructor and desctructor
     MainWindow();
     ~MainWindow();
 
+    //allows UserInterface class to change displayed Photo
     void changePhoto(Photo *);
 };
