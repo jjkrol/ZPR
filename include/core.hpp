@@ -43,6 +43,11 @@ public:
   boost::property_tree::ptree getConfiguration();
 
   /**
+   * @brief Saves configuration stored in a property tree
+   */
+  void putConfiguration(boost::property_tree::ptree config);
+
+  /**
    * @warning Should be used carefully! Access to photos and directories should be
    * provided by the Disk class.
    * @returns Absolute path to the LibraryDirectory

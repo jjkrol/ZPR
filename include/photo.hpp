@@ -5,6 +5,7 @@
 #include <boost/gil/image.hpp>
 #include <boost/gil/extension/io/jpeg_io.hpp>
 #include <map>
+#include <set>
 #include <gtkmm.h>
 
 
@@ -24,6 +25,9 @@
  */
 
 class Disk;
+class DBConnector;
+
+typedef std::set<std::string> taglist_t;
 
 class Photo {
 
@@ -47,26 +51,35 @@ class Photo {
      */
     boost::filesystem::path getPath();
     boost::filesystem::path getFilename();
-    
+
     /// 
     /**
      * @brief moves photo to a new destination in the filesystem 
      * and updates the database
-     *@TODO implement this (db function needed)
+     *@TODO db function needed
      */
-    void move(boost::filesystem::path destinationPath);
+    void      move(boost::filesystem::path destinationPath);
+
     /**
      * @brief deletes the photo only from library (stays on disk)
-     * @TODO implement this (db function needed)
+     * @TODO db function needed
      * @warning this function also destroys the photo object
      */
-    void deleteFromLibrary();
+    void      deleteFromLibrary();
 
     /**
      * @biref the photo will fall into the deepest darkness of nothingness
      * @warning this function also destroys the photo object
      */
-    void deleteFromLibraryAndDisk();
+    void      deleteFromLibraryAndDisk();
+
+    void      addTag(std::string tag);
+
+    void      removeTag(std::string tag);
+
+    taglist_t getTags();
+
+    bool      hasTag(std::string tag);
 
   private:
     Photo (boost::filesystem::path argumentPath);
@@ -75,6 +88,10 @@ class Photo {
     ~Photo ();
 
     Disk* disk;
+    DBConnector* db;
     boost::filesystem::path photoPath;
+    std::set<std::string> tags;
+
+
 };
 

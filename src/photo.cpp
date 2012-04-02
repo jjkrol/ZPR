@@ -1,5 +1,6 @@
 #include "../include/photo.hpp"
 #include "../include/disk.hpp"
+#include "../include/dbConnector.hpp"
 
 using namespace boost::gil;
 using namespace std;
@@ -23,6 +24,11 @@ Photo* Photo::getInstance(boost::filesystem::path argumentPath){
 }
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
+  db = DBConnectorFactory::getInstance("kotek");
+  db->open("DB.sqlite");
+
+  //@TODO load photos from db
+  
   disk = Disk::getInstance();
 }
 
@@ -43,26 +49,53 @@ Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
   return disk->getPhotoFile(photoPath);
 }
 
-void Photo::move(boost::filesystem::path destinationPath){
-  ///@TODO use db function
-  photoPath = disk->movePhoto(photoPath, destinationPath);
-  
-}
-
-void Photo::deleteFromLibrary(){
-   ///@TODO use db function
-  delete this;
-}
-
-void Photo::deleteFromLibraryAndDisk(){
-  disk->deletePhoto(photoPath);
-  deleteFromLibrary();
-}
-
 boost::filesystem::path Photo::getPath(){
   return photoPath;
 }
 
 boost::filesystem::path Photo::getFilename(){
   return photoPath.filename();
+}
+
+//@TODO should be bool?
+void Photo::move(boost::filesystem::path destinationPath){
+  boost::filesystem::path newPathWithFilename = destinationPath;
+  newPathWithFilename /= getFilename();
+
+  db->movePhoto(photoPath, newPathWithFilename);
+
+  boost::thread moveThread(&Disk::movePhoto, disk, photoPath, newPathWithFilename);
+
+  photoPath = newPathWithFilename;
+  moveThread.join();
+}
+
+//@TODO should be bool?
+void Photo::deleteFromLibrary(){
+  db->deletePhoto(photoPath);
+  delete this;
+}
+
+void Photo::deleteFromLibraryAndDisk(){
+  boost::thread deleteThread(&Disk::deletePhoto, disk, photoPath);
+  deleteFromLibrary();
+  deleteThread.join();
+}
+
+void      Photo::addTag(std::string tag ){
+  ///@TODO use db function
+  tags.insert(tag);
+}
+
+void      Photo::removeTag(std::string tag){
+  ///@TODO use db function
+  tags.erase(tag);
+}
+
+taglist_t Photo::getTags(){
+  return tags;
+}
+
+bool      Photo::hasTag(std::string tag){
+  return !(tags.find(tag) == tags.end());
 }

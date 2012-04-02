@@ -18,6 +18,11 @@ std::string ConfigurationManager::getStringValue(std::string key){
   return configTree.get<std::string>(key);
 }
 
+void ConfigurationManager::putConfigurationTree(ptree config){
+  write_xml(configFilePath.string(), config);
+  configTree = config;
+}
+
 ptree ConfigurationManager::getConfigurationTree(){
   return configTree;
 }

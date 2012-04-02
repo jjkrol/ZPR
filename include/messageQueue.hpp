@@ -13,7 +13,10 @@ class MessageQueue{
 
     bool isEmpty();
 
+    boost::condition_variable cond; 
+    boost::mutex mut;
+
   private:
     std::queue<Message> queue;
-    boost::mutex queueMutex;
+    boost::shared_mutex queueMutex;
 };

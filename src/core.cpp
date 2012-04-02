@@ -38,6 +38,9 @@ boost::property_tree::ptree CoreController::getConfiguration(){
   return configManager->getConfigurationTree();
 }
 
+void CoreController::putConfiguration(boost::property_tree::ptree config){
+  configManager->putConfigurationTree(config);
+}
 
 //private 
 

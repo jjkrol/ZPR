@@ -24,6 +24,18 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_CHECK(myphoto->getPath() == p );
     //double initialization
     BOOST_CHECK(Photo::getInstance(p) == Photo::getInstance(p));
+    
+    myphoto->addTag("raz");
+    myphoto->addTag("dwa");
+    myphoto->addTag("trzy");
+    myphoto->removeTag("dwa");
+
+    BOOST_CHECK(myphoto->hasTag("raz"));
+    BOOST_CHECK(myphoto->hasTag("trzy"));
+
+    taglist_t tags = myphoto->getTags();
+
+    BOOST_CHECK(tags.size() == 2);
   }
 
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
@@ -46,7 +58,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_REQUIRE(delta->getName() == "delta");
     BOOST_CHECK(delta->hasPhotos() == false);
     BOOST_CHECK(delta->hasSubdirectories() == false);
-
     BOOST_CHECK(myTestDir->hasSubdirectories() == true);
     BOOST_CHECK(myTestDir->getSubdirectories().size() == 4);
     BOOST_CHECK(myTestDir->getPhotos().size() == 1);
@@ -56,8 +67,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_CHECK(delta->hasPhotos() == true);
     myPhoto->deleteFromLibraryAndDisk();
     BOOST_CHECK(delta->hasPhotos() == false);
-
-
   }
 
 

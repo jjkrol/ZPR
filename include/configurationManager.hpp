@@ -7,6 +7,7 @@
 
 /** @class ConfigurationManager
  *  @brief A class responsible for handling configuration and providing access to its individual values
+ *  uses boost::property_tree to represent configuration values
  */
 
 class ConfigurationManager {
@@ -21,13 +22,11 @@ public:
 
   boost::property_tree::ptree getConfigurationTree();
 
-
   /**
-   * @todo Implement this
-   * @brief Overrides the whole configuration with the given values.
+   * @brief Overrides the whole configuration with given values.
    * Saves the config in an appropriate file.
    */
-  void putConfiguration(boost::property_tree::ptree);
+  void putConfigurationTree(boost::property_tree::ptree);
 
 private:
 
