@@ -14,36 +14,37 @@ class MainWindow : public Gtk::Window {
     //connection with UserInterface class
     UserInterface *gui;
 
+    //containers
+    Gtk::Grid grid;
+    Gtk::Notebook notebook;
+    Gtk::Box left_box, right_box, bottom_box;
 
-    ////////////////TO TRZEBA WRZUCIC W DEKORATORY////////////////
+    //menubar
+    Gtk::MenuBar menu;
+
+    //bottom bar widgets
+    Gtk::Scale zoom_slider;
+    Gtk::Image zoom_icon;
+    Gtk::Label statusbar;
+
+    ////////////////TO TRZEBA WRZUCIC W DEKORATOR/////////////////
     Photo *current_photo;
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
-    //containers and menubar
-    Gtk::Grid *grid;
-    Gtk::Box *left_box, *right_box, *bottom_box;
-    Gtk::ScrolledWindow *image_window;
-    Gtk::MenuBar *menu;
-
-    //left side widgets
     Gtk::Button *library_button;
-    Gtk::Notebook *notebook;
 
-    //right side widgets
-    Gtk::Image *zoom_icon;
-    Gtk::Button *left_button, *right_button;
-    Gtk::Scale *image_zoom;
-    Gtk::Label *filename_label;
-    Gtk::Label *basic_label, *colors_label, *effects_label;
     Gtk::Image *image;
+    Gtk::ScrolledWindow *image_window;
 
-    //handling signals
+    Gtk::Button *left_button, *right_button;
+    Gtk::Label *basic_label, *colors_label, *effects_label;
+
     void fitImage(Gtk::Allocation &);
     void loadImage();
     void zoomImage();
 
-    //additional functions
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
+    //////////////////////////////////////////////////////////////
 
     //constructor and desctructor
     MainWindow();
