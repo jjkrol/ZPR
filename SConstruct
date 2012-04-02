@@ -15,7 +15,8 @@ asynchronous = [
     'src/ticket.cpp'
 ]
 gui = [
-    'src/gui.cpp'
+    'src/gui.cpp',
+    'src/window.cpp'
 ]
 database = [
     'src/dbConnector.cpp',

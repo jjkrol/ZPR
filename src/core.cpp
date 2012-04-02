@@ -23,6 +23,7 @@ void CoreController::destroy(){
 
 void CoreController::startApplication(int argc, char** argv){
   gui = UserInterface::getInstance(argc, argv);
+  gui->init();
   gui->showEditWindow();
 }
 
