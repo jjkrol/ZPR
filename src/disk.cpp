@@ -18,7 +18,7 @@ Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath)
 }
 
 paths_t Disk::getSubdirectoriesPaths(path directoryPath){
-  return returnByValueConcurrent<paths_t>(
+  return returnByValueQueued<paths_t>(
       boost::bind(
         &Disk::internalGetSubdirectoriesPaths, this, directoryPath
         )
@@ -26,7 +26,7 @@ paths_t Disk::getSubdirectoriesPaths(path directoryPath){
 }
 
 paths_t Disk::getPhotosPaths(path directoryPath){
-  return returnByValueConcurrent<paths_t>(
+  return returnByValueQueued<paths_t>(
       boost::bind(
         &Disk::internalGetPhotosPaths, this, directoryPath
         )
@@ -34,7 +34,7 @@ paths_t Disk::getPhotosPaths(path directoryPath){
 }
 
 bool Disk::hasPhotos(path directoryPath){
-  return returnByValueConcurrent<bool>(
+  return returnByValueQueued<bool>(
       boost::bind(
         &Disk::internalHasPhotos, this, directoryPath
         )
@@ -42,7 +42,7 @@ bool Disk::hasPhotos(path directoryPath){
 }
 
 bool Disk::hasSubdirectories(path directoryPath){
-  return returnByValueConcurrent<bool>(
+  return returnByValueQueued<bool>(
       boost::bind(
         &Disk::internalHasSubdirectories, this, directoryPath
         )
@@ -50,7 +50,7 @@ bool Disk::hasSubdirectories(path directoryPath){
 }
 
 Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
-  return returnByValueConcurrent< Glib::RefPtr<Gdk::Pixbuf> >(
+  return returnByValueQueued< Glib::RefPtr<Gdk::Pixbuf> >(
       boost::bind(
         &Disk::internalGetPhotoFile, this, photoPath
         )
@@ -58,7 +58,7 @@ Glib::RefPtr<Gdk::Pixbuf> Disk::getPhotoFile(path photoPath){
 }
 
 path Disk::movePhoto(path sourcePath, path destinationPath){
-  return returnByValueConcurrent<path>(
+  return returnByValueQueued<path>(
       boost::bind(
         &Disk::internalMovePhoto, this, sourcePath, destinationPath
         )
@@ -66,7 +66,7 @@ path Disk::movePhoto(path sourcePath, path destinationPath){
 }
 
 void Disk::deletePhoto(path photoPath){
-  returnByValueConcurrent<bool>(
+  returnByValueQueued<bool>(
       boost::bind(
         &Disk::internalDeletePhoto, this, photoPath
         )
@@ -106,17 +106,25 @@ void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPat
 }
 
 void * Disk::internalHasPhotos(boost::filesystem::path directoryPath){
-  if(getPhotosPaths(directoryPath).size() == 0)
-    return new bool(false);
+paths_t * paths = reinterpret_cast<paths_t*>(internalGetPhotosPaths(directoryPath));
+bool * retVal;
+  if(paths->size() == 0)
+    retVal = new bool(false);
   else
-    return new bool(true);
+    retVal =  new bool(true);
+delete paths;
+return retVal;
 }
 
 void * Disk::internalHasSubdirectories(boost::filesystem::path directoryPath){
-  if(getSubdirectoriesPaths(directoryPath).size() == 0)
-    return new bool(false);
+  paths_t *  paths = reinterpret_cast<paths_t*>(internalGetSubdirectoriesPaths(directoryPath));
+  bool * retVal;
+  if(paths->size() == 0)
+    retVal =  new bool(false);
   else
-    return new bool(true);
+    retVal =  new bool(true);
+  delete paths;
+  return retVal;
 }
 
 void * Disk::internalGetPhotoFile(path photoPath){
