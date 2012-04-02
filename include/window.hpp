@@ -13,6 +13,9 @@ class MainWindow : public Gtk::Window {
   private:
     //connection with UserInterface class
     UserInterface *gui;
+
+
+    ////////////////TO TRZEBA WRZUCIC W DEKORATORY////////////////
     Photo *current_photo;
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
@@ -27,7 +30,7 @@ class MainWindow : public Gtk::Window {
     Gtk::Notebook *notebook;
 
     //right side widgets
-    Gtk::Button *fit_button;
+    Gtk::Image *zoom_icon;
     Gtk::Button *left_button, *right_button;
     Gtk::Scale *image_zoom;
     Gtk::Label *filename_label;

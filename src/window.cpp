@@ -7,14 +7,15 @@ MainWindow::MainWindow() {
   //connecting to UserInterface
   gui = UserInterface::getInstance();
 
+  //customizing window
   set_title("Image Viewer");
+  maximize();
 
   //creating widgets
   image = new Gtk::Image();
   image_window = new Gtk::ScrolledWindow();
   menu = new Gtk::MenuBar();
   library_button = new Gtk::Button("Back to library");
-  fit_button = new Gtk::Button(Gtk::Stock::ZOOM_FIT);
   left_button = new Gtk::Button(Gtk::Stock::GO_BACK);
   right_button = new Gtk::Button(Gtk::Stock::GO_FORWARD);
   filename_label = new Gtk::Label("");
@@ -23,6 +24,7 @@ MainWindow::MainWindow() {
   effects_label = new Gtk::Label("Other effects");
   notebook = new Gtk::Notebook();
   image_zoom = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
+  zoom_icon = new Gtk::Image(Gtk::Stock::FIND, Gtk::ICON_SIZE_BUTTON);
 
   //editing widgets
   image_zoom->set_draw_value(false);
@@ -33,31 +35,36 @@ MainWindow::MainWindow() {
 
   //organising widgets
   bottom_box = new Gtk::Box();
+  bottom_box->set_margin_right(5);
   bottom_box->set_hexpand(true);
   bottom_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-  bottom_box->set_spacing(1);
+  bottom_box->set_spacing(2);
   bottom_box->pack_start(*left_button, false, false);
   bottom_box->pack_start(*right_button, false, false);
   bottom_box->pack_start(*filename_label, true, true);
   bottom_box->pack_start(*image_zoom, false, false);
-  bottom_box->pack_start(*fit_button, false, false);
+  bottom_box->pack_start(*zoom_icon, false, false);
 
   right_box = new Gtk::Box();
   right_box->set_hexpand(true);
   right_box->set_vexpand(true);
   right_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-  right_box->set_spacing(4);
+  right_box->set_spacing(1);
   right_box->pack_start(*image_window, true, true);
   right_box->pack_start(*bottom_box, false, false);
 
   left_box = new Gtk::Box();
+  left_box->set_margin_right(1);
   left_box->set_vexpand(true);
   left_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-  left_box->set_spacing(4);
+  left_box->set_spacing(1);
   left_box->pack_start(*library_button, false, false);
   left_box->pack_start(*notebook, true, true);
 
   grid = new Gtk::Grid();
+  grid->set_margin_bottom(1);
+  grid->set_margin_left(1);
+  grid->set_margin_right(1);
   grid->attach(*menu, 0, 0, 2, 1);
   grid->attach(*left_box, 0, 2, 1, 1);
   grid->attach(*right_box, 1, 2, 1, 1);
@@ -72,7 +79,6 @@ MainWindow::MainWindow() {
   left_button->signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
 
   //zooming
-  fit_button->signal_clicked().connect(sigc::mem_fun(this, &MainWindow::loadImage));
   image_zoom->signal_value_changed().connect(sigc::mem_fun(this, &MainWindow::zoomImage));
 
   //auto resize
@@ -88,7 +94,7 @@ MainWindow::~MainWindow() {
   delete menu;
   delete library_button;
   delete notebook;
-  delete fit_button;
+  delete zoom_icon;
   delete left_button;
   delete right_button;
   delete filename_label;

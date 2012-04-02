@@ -18,6 +18,8 @@ UserInterface* UserInterface::getInstance(int argc, char *argv[]) {
 
 /// @fn UserInterface::UserInterface(int argc, char *argv[])
 /// @brief UserInterface constructor - connects to CoreController and gets Photos.
+/// @param argc Number of parameters (for handling GTK+ command line arguments). 
+/// @param argv Table of parameters (for handling GTK+ command line arguments). 
 UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
   core = CoreController::getInstance();
   current_dir = core->getDirectoryTree();
@@ -30,6 +32,8 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
 void UserInterface::init() {
   main_window = new MainWindow();
   main_window->changePhoto(*current_photo);
+  main_window->show_all_children();
+  if(main_window) kit.run(*main_window);
 }
 
 /// @fn void UserInterface::destroy()
@@ -38,14 +42,6 @@ void UserInterface::destroy() {
   delete main_window;
   delete instance;
   instance = NULL;
-}
-
-/// @fn void UserInterface::showEditWindow()
-/// @brief Method responsible for showing application main window.
-void UserInterface::showEditWindow() {
-  main_window->maximize();
-  main_window->show_all_children();
-  if(main_window) kit.run(*main_window);
 }
 
 /// @fn void UserInterface::nextImage()
