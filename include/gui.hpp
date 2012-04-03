@@ -18,6 +18,7 @@ class Photo;
 class UserInterface {
   public:
     friend class MainWindow;
+    friend class EditView;
 
     //allows access to unique class instance
     static UserInterface* getInstance(int argc = 0, char *argv[] = NULL);
@@ -25,7 +26,6 @@ class UserInterface {
     //UserInterface external interface
     void init();
     void destroy();
-    void showEditWindow();
 
  private:
     //singleton instance
@@ -45,7 +45,7 @@ class UserInterface {
     void nextImage();
     void prevImage();
 
-    //constructors and descructors
+    //hidden constructors and descructors
     UserInterface() {};
     ~UserInterface() {};
     UserInterface(int argc, char *argv[]);

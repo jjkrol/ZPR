@@ -31,7 +31,7 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
 /// @brief Method responsible for creating MainWindow and loading Photo object.
 void UserInterface::init() {
   main_window = new MainWindow();
-  main_window->changePhoto(*current_photo);
+  main_window->content->changePhoto(*current_photo);
   main_window->show_all_children();
   if(main_window) kit.run(*main_window);
 }
@@ -49,7 +49,7 @@ void UserInterface::destroy() {
 void UserInterface::nextImage() {
   if(current_photo == --photos.end()) return;
   current_photo++;
-  main_window->changePhoto(*current_photo);
+  main_window->content->changePhoto(*current_photo);
 }
 
 /// @fn void UserInterface::prevImage()
@@ -57,5 +57,5 @@ void UserInterface::nextImage() {
 void UserInterface::prevImage() {
   if(current_photo == photos.begin()) return;
   current_photo--;
-  main_window->changePhoto(*current_photo);
+  main_window->content->changePhoto(*current_photo);
 }
