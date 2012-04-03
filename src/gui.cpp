@@ -31,6 +31,7 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
 /// @brief Method responsible for creating MainWindow and loading Photo object.
 void UserInterface::init() {
   main_window = new MainWindow();
+  main_window->showEditView();
   main_window->content->changePhoto(*current_photo);
   main_window->show_all_children();
   if(main_window) kit.run(*main_window);

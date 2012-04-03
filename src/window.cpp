@@ -40,19 +40,25 @@ MainWindow::MainWindow() :
   bottom_box.pack_end(zoom_icon, false, false);
   bottom_box.pack_end(zoom_slider, false, false);
   bottom_box.pack_end(statusbar, true, true);
+  right_box.pack_start(display, true, true);
   right_box.pack_end(bottom_box, false, false);
   left_box.pack_end(notebook, true, true);
   grid.attach(menu, 0, 0, 2, 1);
   grid.attach(left_box, 0, 2, 1, 1);
   grid.attach(right_box, 1, 2, 1, 1);
   add(grid);
- 
-  //showing photo edit window
-  content = new EditView(this);
 }
 
-//MainWindow descructor
-MainWindow::~MainWindow() {
+void MainWindow::showLibraryView() {
+  if(content) delete content;
+  content = new LibraryView(this);
+  show_all_children();
+}
+
+void MainWindow::showEditView() {
+  if(content) delete content;
+  content = new EditView(this);
+  show_all_children();
 }
 
 //method for changing displayed Photo
@@ -65,7 +71,7 @@ void EditView::changePhoto(Photo *photo) {
 //method for loading image into Gtk::Image widget
 void EditView::loadImage() {
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
-  Gdk::Rectangle rectangle = image_window->get_allocation();
+  Gdk::Rectangle rectangle = window->display.get_allocation();
   if(!pixbuf) return;
 
   //displaying filename and resetting zoom widget
@@ -79,7 +85,7 @@ void EditView::loadImage() {
     pixbuf = resizeImage(pixbuf, rectangle);
 
   //resizing and setting image
-  image->set(pixbuf);
+  image.set(pixbuf);
 }
 
 //additional function for fitting pixbuf into window
@@ -115,7 +121,7 @@ void EditView::zoomImage() {
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
   pixbuf = pixbuf->scale_simple(pixbuf->get_width() * zoom,
                                 pixbuf->get_height() * zoom, Gdk::INTERP_BILINEAR);
-  image->set(pixbuf);
+  image.set(pixbuf);
 }
 
 //method for automatic image resizing
@@ -127,42 +133,65 @@ void EditView::fitImage(Gtk::Allocation &allocation) {
 }
 
 EditView::EditView(MainWindow *w) : window(w),
-  library_button("Back to library"),
-  basic_label("Basic editing"),
-  colors_label("Colors modification"),
-  effects_label("Other effects") {
+  basic_label("Basic editing"), colors_label("Colors modification"),
+  effects_label("Other effects"), library_button("Back to library"),
+  left_button(Gtk::Stock::GO_BACK), right_button(Gtk::Stock::GO_FORWARD) {
 
+  //obtaining UserInterface instance
   gui = UserInterface::getInstance();
 
+  //organising widgets
   window->left_box.pack_start(library_button, false, false);
   window->notebook.append_page(basic_label, "Basic");
   window->notebook.append_page(colors_label, "Colors");
   window->notebook.append_page(effects_label, "Effects");
+  window->bottom_box.pack_start(left_button, false, false);
+  window->bottom_box.pack_start(right_button, false, false);
+  window->display.add(image);
 
-  image = new Gtk::Image();
-  image_window = new Gtk::ScrolledWindow();
-  left_button = new Gtk::Button(Gtk::Stock::GO_BACK);
-  right_button = new Gtk::Button(Gtk::Stock::GO_FORWARD);
+  //connecting signals
+  right_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::nextImage));
+  left_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
+  library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
+  zoom_signal = window->zoom_slider.signal_value_changed().connect(sigc::mem_fun(this, &EditView::zoomImage));
+  fit_signal = window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &EditView::fitImage));
 
-  window->bottom_box.pack_start(*left_button, false, false);
-  window->bottom_box.pack_start(*right_button, false, false);
-  window->right_box.pack_start(*image_window, true, true);
-  image_window->add(*image);
-
-  //changing images
-  right_button->signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::nextImage));
-  left_button->signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
-
-  //zooming
-  window->zoom_slider.signal_value_changed().connect(sigc::mem_fun(this, &EditView::zoomImage));
-
-  //auto resize
-  window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &EditView::fitImage));
+  //loading image
+  loadImage();
 }
 
 EditView::~EditView() {
-  delete left_button;
-  delete right_button;
-  delete image;
-  delete image_window;
+  window->statusbar.set_label("");
+  window->notebook.remove_page(basic_label);
+  window->notebook.remove_page(colors_label);
+  window->notebook.remove_page(effects_label);
+  window->left_box.remove(library_button);
+  window->bottom_box.remove(left_button);
+  window->bottom_box.remove(right_button);
+  window->display.remove();
+  zoom_signal.disconnect();
+  fit_signal.disconnect();
+}
+
+LibraryView::LibraryView(MainWindow *w) : window(w),
+  tags_label("tags browsing"), edit_button("Edit picture") {
+
+  //obtaining UserInterface instance
+  gui = UserInterface::getInstance();
+
+  //organising widgets
+  window->left_box.pack_start(edit_button, false, false);
+  window->notebook.append_page(directory_tree, "Folders");
+  window->notebook.append_page(tags_label, "Tags");
+  window->display.add(images);
+
+  //connecting signals
+  edit_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showEditView));
+}
+
+LibraryView::~LibraryView() {
+  window->statusbar.set_label("");
+  window->notebook.remove_page(directory_tree);
+  window->notebook.remove_page(tags_label);
+  window->left_box.remove(edit_button);
 }

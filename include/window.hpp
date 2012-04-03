@@ -28,6 +28,7 @@ class MainWindow : public Gtk::Window {
     Gtk::Grid grid;
     Gtk::Notebook notebook;
     Gtk::Box left_box, right_box, bottom_box;
+    Gtk::ScrolledWindow display;
 
     //menubar
     Gtk::MenuBar menu;
@@ -39,7 +40,11 @@ class MainWindow : public Gtk::Window {
 
     //constructor and desctructor
     MainWindow();
-    ~MainWindow();
+    ~MainWindow() {};
+
+    //signal handlers for changing tyoe if view
+    void showLibraryView();
+    void showEditView();
 };
 
 /** @class WindowContent
@@ -73,21 +78,24 @@ class EditView : public WindowContent {
     MainWindow *window;
 
     //widgets
-    Gtk::Button library_button;
+    Gtk::Image image;
     Gtk::Label basic_label, colors_label, effects_label;
+    Gtk::Button library_button, left_button, right_button;
 
+    //storing current photo
     Photo *current_photo;
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
-    Gtk::Image *image;
-    Gtk::ScrolledWindow *image_window;
-
-    Gtk::Button *left_button, *right_button;
-
+    //handling signals
     void fitImage(Gtk::Allocation &);
     void loadImage();
     void zoomImage();
 
+    //signals storing (for disconnecting)
+    sigc::connection zoom_signal;
+    sigc::connection fit_signal;
+
+    //additional function for fitting Pixbuf to widget
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
 
     //allows UserInterface class to change displayed Photo
@@ -100,6 +108,23 @@ class EditView : public WindowContent {
  */
 
 class LibraryView : public WindowContent {
+  public:
+    friend class MainWindow;
+    friend class UserInterface;
   private:
-    //LibraryView(MainWindow *);
+    LibraryView() {};
+    ~LibraryView();
+    LibraryView(MainWindow *);
+
+    //connection with upper classes
+    UserInterface *gui;
+    MainWindow *window;
+
+    //widgets
+    Gtk::DrawingArea images;
+    Gtk::TreeView directory_tree;
+    Gtk::Label tags_label;
+    Gtk::Button edit_button;
+
+    virtual void changePhoto(Photo *) {};
 };

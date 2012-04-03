@@ -152,10 +152,30 @@ bool SQLiteConnector::deletePhoto(path photos_path) {
 bool SQLiteConnector::createDB() {
   sqlite3_stmt *stmt;
   const char *query = 
-      "CREATE TABLE photos (id INTEGER PRIMARY KEY, path BLOB UNIQUE);"
-      "CREATE TABLE directories (path BLOB);"
-      "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);";
+      "CREATE TABLE photos (id INTEGER PRIMARY KEY, path BLOB UNIQUE);";
+     // "CREATE TABLE directories (path BLOB);"
+     // "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);";
 
+  if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
+    //while(sqlite3_step(stmt) != SQLITE_DONE);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    reportErrors(query);
+  }
+
+  query = "CREATE TABLE directories (path BLOB);";
+  if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
+    //while(sqlite3_step(stmt) != SQLITE_DONE);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    string error = sqlite3_errmsg(database);
+    if(error != "not an error") {
+      std::cout << query << " " << error << std::endl;
+      return false;
+    }
+  }
   if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
     //while(sqlite3_step(stmt) != SQLITE_DONE);
     sqlite3_step(stmt);
