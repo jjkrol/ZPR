@@ -26,6 +26,7 @@ class MainWindow : public Gtk::Window {
 
     //containers
     Gtk::Grid grid;
+    Gtk::Box toolbar;
     Gtk::Notebook notebook;
     Gtk::Box left_box, right_box, bottom_box;
     Gtk::ScrolledWindow display;
@@ -38,11 +39,15 @@ class MainWindow : public Gtk::Window {
     Gtk::Image zoom_icon;
     Gtk::Label statusbar;
 
+    //top-down buttons
+    Gtk::ToolButton save_button, delete_button;
+    Gtk::ToolButton star_button, tags_button;
+
     //constructor and desctructor
     MainWindow();
     ~MainWindow() {};
 
-    //signal handlers for changing tyoe if view
+    //signal handlers for changing type if view
     void showLibraryView();
     void showEditView();
 };
@@ -79,8 +84,10 @@ class EditView : public WindowContent {
 
     //widgets
     Gtk::Image image;
+    Gtk::Box edit_buttons;
+    Gtk::ToolButton left_button, right_button;
     Gtk::Label basic_label, colors_label, effects_label;
-    Gtk::Button library_button, left_button, right_button;
+    Gtk::Button library_button, undo_button, redo_button;
 
     //storing current photo
     Photo *current_photo;
