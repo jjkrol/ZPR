@@ -86,6 +86,7 @@ class EditView : public WindowContent {
     Gtk::Image image;
     Gtk::Box edit_buttons;
     Gtk::ToolButton left_button, right_button;
+    Gtk::Box basic_box, colors_box, effects_box;
     Gtk::Label basic_label, colors_label, effects_label;
     Gtk::Button library_button, undo_button, redo_button;
 
@@ -94,6 +95,7 @@ class EditView : public WindowContent {
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
     //handling signals
+    void onPageSwitch(Gtk::Widget *, guint);
     void fitImage(Gtk::Allocation &);
     void loadImage();
     void zoomImage();
