@@ -1,356 +1,222 @@
 /**
- * @file dbConnector.cpp
+ * @file dbConnector.hpp
  * @brief File containing definition of an DB connectors
  * @author Jack Witkowski
  * @version 0.01
+ * Basicly there are 3 types of classes defined in this file:
+ * - DBConnector which is an interface for all singletons used
+ *   to communicate with diffrent types of databases (eg.SQLite DB)
+ * - DBConnectorFactory which is used to create DBConnectors
+ *   (it ensures that there is no more than one object of each type
+ *   of database connector
+ * - concrete versions of DBConnector (eg. SQLiteConnector)
 */
+#pragma once
 
-#include <iostream> //for testing end error reporting
+#include <vector>
+#include <string>
+#include <boost/filesystem.hpp>
+#include <sqlite3.h>
 
-#include "../include/dbConnector.hpp"
-#include "../include/disk.hpp"
-#include "../include/hashFunctions.hpp"
-
-using namespace boost::filesystem;
-using std::vector;
-using std::string;
-using std::cout;
-using std::endl;
-
-/** @todo Concrete versions of DBConnector should
-  * invoke the Register() function to register their types
-  * in the register of types stored in the  DBConnectorGenerator
-  * object (the register should be static). Then when
-  * the DBConnectorFactory::getInstance(type) is called,
-  * getInstance() should look for the pointer to adequate
-  * getInstance() function in its register and should call
-  * the function.
+/**
+ * @todo Adding photos to database
+ * @todo Removing photos from database
 */
+class Disk;
 
-////////////////////////////////////////////////////////////////////////////////
-//Definitions of DBConnectorFactory methods
-////////////////////////////////////////////////////////////////////////////////
-DBConnector* DBConnectorFactory::getInstance(const string type) {
-  /** @todo Factory should check the register of creators andn return the
-   * desired one.
-   */
-  return SQLiteConnector::getInstance();
-}
+class DBConnector;
+class SQLiteConnector;
 
-////////////////////////////////////////////////////////////////////////////////
-//Definitions of SQLiteConnector methods
-////////////////////////////////////////////////////////////////////////////////
-/** @warning Don't forget to initialize 'instance' pointer to 0
-  * in every concrete version of DBConnector
+/*! @typedef typedef std::vector< std::vector <std::string> > ResultTable;
+  * ResultTable is a type of objects storing results of queries.
+  * Each line of a result is represented by a vector of strings.
+  * Results may be composed of more than a line, that's why
+  * a ResultTable is of type vector<vector<string> >
+  *
+  * @typedef typedef DBConnector* (*Creator)();
+  * Creator is a static function called by the DBConnectorFactory
+  * to give access to different DBConnectors
+  *
+  * @class DBConnectorFactory
+  * Class used to provide instances of adequate concrete versions
+  * of database connectors (eg. SQLiteConnector)
 */
-DBConnector* SQLiteConnector::instance = 0;
-DBConnector* SQLiteConnector::getInstance() {
-  if(instance == 0)
-    instance = new SQLiteConnector;  
+typedef std::vector< std::vector <std::string> > ResultTable;
+typedef DBConnector*(*Creator)(void);
+typedef boost::filesystem::path PhotoPath;
+typedef boost::filesystem::path DirectoryPath;
 
-  return instance;
-}
+class DBConnectorFactory {
+public:
+  static DBConnector* getInstance(std::string type);
 
-////////////////////////////////////////////////////////////////////////////////
-//Public methods
-////////////////////////////////////////////////////////////////////////////////
-int SQLiteConnector::open(const string f) {
-  //first the name of a database file stored in this object is changed
-  if(filename.empty())
-    filename=f;
-  else
-    return FAILURE;
+};
 
-  //if the object exists, function tries to open the database
-  if(Disk::exists(filename)) {
-    if(sqlite3_open(filename.c_str(),&database) != SQLITE_OK)
-      return FAILURE;
-    else if(getDirectoriesFromDB()) {
-      return OPENED;
-    }
-    return FAILURE;
-  }
+/*! @interface DBConnector
+ *  Interface providing functions for communication with databases.
+*/
+class DBConnector {
+public:
+/*! @fn virtual int open(const string filename) = 0;
+ *  @brief Opens connection with database and creates necessary
+ *  structures.
+ *  @returns flags defined in DBConnector::Flags
+ *
+ *  @fn virtual inline bool hasChanged() const = 0;
+ *  @brief Tells if database was changed since last usage of imgview
+ *  @returns true if database has changed 
+ *  
+ *  @fn virtual virtual void close() = 0;
+ *  @brief closes the connection with database
+ * 
+ *  @fn virtual bool movePhoto(
+ *        const PhotoPath &old_path,
+ *        const PhotoPath &new_path) = 0;
+ *  @brief moves photo from old_path to new path
+ *  @returns true if photo has been moved successfully and false otherwise
+ *
+ *  @fn virtual bool deletePhoto(const PhotoPath &photos_path) =0;
+ *  @brief removes photo from database
+ *  @returns true if photo has been removed successfully and false otherwise
+*/
+  enum Flags {
+    FAILURE = 0x0,
+    OPENED  = 0x1,
+    CREATED = 0x2,
+    CHANGED = 0x4
+  };
 
-  //if database file doesn't exist then it should be created
-  else if(sqlite3_open(filename.c_str(),&database) == SQLITE_OK) {
-    if(createDB())
-      return (OPENED | CREATED);
-    return FAILURE;      
-  }
+  virtual int open(const std::string filename) = 0;
+  virtual inline bool hasChanged() const = 0;
 
-  //in case of failure in opening the database, a FAILURE value is returned
-  return FAILURE;
-}
+  //DON'T KNOW IF THE FUNCTIONS BELOW THIS LINE SHOULD BE AVAILABLE
+  //IF NOT FEEL FREE TO COMMENT THEM
+  virtual inline void addDirectories(
+    const std::vector<DirectoryPath> &directories) = 0;
+  virtual bool addPhotos(
+    const std::vector<PhotoPath> &photos) = 0;
+  virtual bool addPhoto(const PhotoPath &photo) = 0;
+  //END;
 
+  virtual void close() = 0;
 
-bool SQLiteConnector::hasChanged() const{
-  int originalChecksum = 0;
-  while(! getChecksumFromDB(originalChecksum));
-  return !(originalChecksum == calculateChecksum());
-}
+  virtual bool movePhoto(
+    const PhotoPath &old_path,
+    const PhotoPath &new_path) = 0;
+  virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
 
-void SQLiteConnector::addDirectories(const vector<path> &input_dirs) {
-//  directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
-  sqlite3_stmt *stmt;
-  const char *query = ""
-}
+protected:
+  virtual ~DBConnector(){};
+};
 
-bool SQLiteConnector::addPhotos(const vector<path> &photos) {
-  //add every photo from each of directories stored in a class member vector
-  //directories to the database (non-recursively)
-  Disk *disk_space = Disk::getInstance();
+////////////////////////////////////////////////////////////////////////
+//Concrete versions of DBConnector Interface
+////////////////////////////////////////////////////////////////////////
+/*! @class SQLiteConnector
+  * @implements DBConnector
+  * @brief Concrete version of DBConnector. Uses SQLite Database.
+  *
+  * Must declare DBConnectorFactory as a friend. Must provide
+  * getInstance function which gives access to the database
+  * (every concrete connector is implemented as a Singleton)
+*/
+class SQLiteConnector : public DBConnector {
+  friend class DBConnectorFactory;
 
-  for(vector<path>::const_iterator i = directories.begin();
-      i != directories.end() ; i++) {
-    vector<path> photos = disk_space->getPhotosPaths(*i);
-    for(vector<path>::const_iterator i = photos.begin() ;
-        i != photos.end() ; i++) {
-      if(!addPhoto(*i))
-        return false;
-    }
-  }
-  return true;
-}
+public:
+/*! @fn ResultTable sendQuery(std::string query);
+  * @brief Function used for test. Allows to send static queries (without
+  * variables) to database.
+  * @returns the vector of vectors which represents the result of the query
+  *
+  * @fn int open(const std::string filename)
+  * @brief Opens a database stored in a file of name specified in the function's
+  * argument. It creates a new DB if it doesn't exist.
+  * @returns falgs defined in DBConnector::Flags
+  *
+*/
+  ResultTable sendQuery(std::string query);
 
-void SQLiteConnector::close() {
-  saveSettings();
-  saveDirectories();
-  sqlite3_close(database);
+  int open(const std::string filename);
+  inline bool hasChanged() const;
+  inline void addDirectories(
+    const std::vector<boost::filesystem::path> &directories);
+  bool addPhotos(const std::vector<boost::filesystem::path> &photos);
+  bool addPhoto(const boost::filesystem::path &photo);
+  void close();
 
-  database = 0;
-  filename.erase();
-}
+  bool movePhoto(
+    const boost::filesystem::path &old_path,
+    const boost::filesystem::path &new_path);
+  bool deletePhoto(const boost::filesystem::path &photos_path);
 
-bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
-  sqlite3_stmt *stmt;
-  const char *query = "UPDATE photos SET path=? WHERE path=? ;";
+private:
+  SQLiteConnector(){}; //private constructor is a part of singleton pattern
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_blob(stmt, 1, &old_path, sizeof(old_path), SQLITE_STATIC);
-    sqlite3_bind_blob(stmt, 2, &new_path, sizeof(new_path), SQLITE_STATIC);
+  /*! @var sqlite3 *database;
+   *  @brief holds a pointer to opened database
+   *
+   *  @var std::string filename;
+   *  @brief holds a name of database
+   *
+   *  @var static DBConnector *instance;
+   *  @brief holds a pointer to the only existing SQLiteConnector
+   *
+   *  @fn static DBConnector * getInstance();
+   *  @brief Gives access or creates the SQLiteConnector. Is private because
+   *  only the DBFactory should be able to run this method
+   *  @returns a pointer to the instance of SQLiteConnector
+   *
+   *  @fn bool createDB();
+   *  @brief creates tables used in the database
+   *  @returns a true value if tables has been created successfully
+   *
+   *  @fn bool saveSettings();
+   *  @brief Saves every single setting in a database. Actually the only
+   *  setting hold in a database is a checksum, so nothing more is saved.
+   *
+   *  @fn bool getDirectoriesFromDB(
+   *        boost::filesystem::path &main_directory,
+   *        std::vector<boost::filesystem::path> &dirs) const;
+   *  @brief Gets a main directory from the database and the vector
+   *  of directories that should be excluded form the database.
+   *  @todo it shouldn't get paths but DirectoryPaths
+   *  @returns true if was executed successfully and false otherwise
+   *
+   *  @fn bool getChecksumFromDB(int &checksum) const;
+   *  @brief gets a checksum saved in database
+   *  @returns true if executed successfully and false otherwise
+   *
+   *  @fn int calculateChecksum(
+   *        const boost::filesystem::path main_path
+   *        const std::vector<boost::filesystem::path> &dir_paths) const;
+   *  @brief Takes a path of main directory and a vector of directories that
+   *  should be excluded.
+   *  @returns a checksum
+   *  @todo should take DirectoryPath instead of boost::filesystem::path
+   *
+   *  @fn inline bool reportErrors(const char *query) const;
+   *  @brief Takes errors from the database and puts them in std::cerr stream
+   *  @returns true if there were some errors and false if there weren't any
+  */
 
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-  }
+  sqlite3 *database;
+  std::string filename;
+  std::vector<boost::filesystem::path> directories;
 
-  return !(reportErrors(query));
-}
+  static DBConnector *instance;
+  static DBConnector * getInstance();
 
-bool SQLiteConnector::deletePhoto(const path &photos_path) {
-  //TODO deleting adequate row from tags_photos table
-  sqlite3_stmt *stmt;
-  const char *query = "DELETE FROM photos WHERE path=? ;";
+  bool createDB();
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_blob(stmt, 1,&photos_path, sizeof(photos_path), SQLITE_STATIC);
+  bool saveSettings();
 
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-  }
+  bool getDirectoriesFromDB(
+    boost::filesystem::path &main_dir,
+    std::vector<boost::filesystem::path> &dirs) const;
+  bool getChecksumFromDB(int &checksum) const;
 
-  return !(reportErrors(query));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//Private methods
-////////////////////////////////////////////////////////////////////////////////
-bool SQLiteConnector::createDB() {
-  string errmsg;
-  const char *query = 
-      "CREATE TABLE photos (id INTEGER PRIMARY KEY,path BLOB UNIQUE);"
-      "CREATE TABLE directories (path BLOB);"
-      "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);"
-      "CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT);"
-      "CREATE TABLE photos_tags (photo_id INTEGER, tag_id INTEGER,"
-        "FOREIGN KEY(photo_id) REFERENCES photos(id),"
-        "FOREIGN KEY(tag_id) REFERENCES tags(id));";
-
- // if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
-    //while(sqlite3_step(stmt) != SQLITE_DONE);
-  //  sqlite3_step(stmt);
-   // sqlite3_finalize(stmt);
-
-    //string error = sqlite3_errmsg(database);
-    //if(error != "not an error") {
-     // std::cout << query << " " << error << std::endl;
-     // return false;
-   // }
-  //  return true;
-  //}
-
-  //return false;
-  if(sqlite3_exec(database, query, NULL, NULL, NULL) == SQLITE_OK)
-    return true;
-
-  reportErrors(query);
-  return false;
-}
-
-bool SQLiteConnector::saveSettings() {
-  sqlite3_stmt *stmt;
-  const char *query =
-            "INSERT OR REPLACE INTO settings VALUES (\"checksum\",?);";
-  int rc, checksum = calculateChecksum();
-
-  do {
-    rc = sqlite3_prepare_v2(database, query, -1, &stmt, 0);
-    if(rc != SQLITE_OK)
-      return false;
-
-    sqlite3_bind_blob(stmt, 1, &checksum, sizeof(checksum), SQLITE_STATIC );
-    rc = sqlite3_step(stmt);
-    
-    if(rc == SQLITE_ROW)
-      return false;
-    
-    rc = sqlite3_finalize(stmt);
-
-  } while (rc==SQLITE_SCHEMA);
-
-  return !(reportErrors(query));
-}
-bool SQLiteConnector::saveDirectories() {
-  sqlite3_stmt *stmt;
-  const char *query = "INSERT INTO directories VALUES(?);";
-  
-  unique(directories.begin(),directories.end());
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
-    for(vector<path>::const_iterator i = directories.begin() ;
-        i != directories.end() ; i++) {
-      sqlite3_bind_blob(stmt, 1, &(*i), sizeof(path), SQLITE_STATIC);
-      sqlite3_step(stmt);
-
-      sqlite3_reset(stmt);
-      sqlite3_clear_bindings(stmt);
-    }
-    sqlite3_finalize(stmt);
-  }
-
-  return reportErrors(query);
-}
-
-bool SQLiteConnector::addPhoto(const path &photo) {
-  //inserting NULL as a id value is used for autoincrementing id numbers
-  const char *query = "INSERT INTO photos VALUES (NULL,?);";
-  sqlite3_stmt *stmt;
-  int rc;
-
-  do {
-    rc = sqlite3_prepare_v2(database, query, -1, &stmt, 0);
-    if(rc != SQLITE_OK)
-      return false;
-
-    sqlite3_bind_blob(stmt, 1,&photo, sizeof(photo), SQLITE_STATIC );
-    rc = sqlite3_step(stmt);
-    
-    if(rc == SQLITE_ROW)
-      return false;
-    
-    rc = sqlite3_finalize(stmt);
-
-  } while (rc==SQLITE_SCHEMA);
-
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error"){
-    std::cout << query << " " << error << std::endl;
-    return false;
-  }
-  return true;
-}
-
-bool SQLiteConnector::getDirectoriesFromDB() {
-  sqlite3_stmt *stmt;
-  const char *query = "SELECT path FROM directories;";
-  directories.clear();
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    while(sqlite3_step(stmt) == SQLITE_ROW) {
-      directories.push_back(
-        *(static_cast<const path *>(sqlite3_column_blob(stmt,0)))
-      );
-    }
-    sqlite3_finalize(stmt);
-  }
-
-  return !reportErrors(query);
-}
-
-bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
-  sqlite3_stmt *stmt;
-  const char *query = "SELECT value FROM settings WHERE key=\"checksum\";";
-  int rc;
-  do {
-    rc=sqlite3_prepare_v2(database, query, -1, &stmt, NULL);
-    if(rc != SQLITE_OK)
-      return false;
-
-    rc=sqlite3_step(stmt);
-    if(rc == SQLITE_ROW) {
-      checksum = *(static_cast<const int *>(sqlite3_column_blob(stmt,0)));
-    }
-  } while (rc==SQLITE_SCHEMA);
-
-  return !reportErrors(query);
-}
-
-int SQLiteConnector::calculateChecksum() const{
-  int checksum_tmp = 0;
-  vector<path> photo_paths;
-  Disk * disk = Disk::getInstance();
-  
-  for(vector<path>::const_iterator i = directories.begin();
-      i != directories.end(); i++) {
-    photo_paths = disk->getPhotosPaths(*i);
-    for(vector<path>::const_iterator j = photo_paths.begin();
-        j != photo_paths.end() ; j++) {
-      checksum_tmp += hash((j->string()).c_str());
-    }
-  }
-
-  return checksum_tmp;
-}
-
-bool SQLiteConnector::reportErrors(const char * query) const {
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error"){
-    std::cout << query << " " << error << std::endl;
-    return true;
-  }
-  return false;
-}
-
-//Methods defined beneath this line are used only for tests and should not
-//be included into final version of the program
-ResultTable SQLiteConnector::sendQuery(string query) {
-  sqlite3_stmt *statement;
-  vector<vector<string> > results;
-
-  if(sqlite3_prepare_v2(database,query.c_str(),-1,&statement,0) == SQLITE_OK) {
-    int columns = sqlite3_column_count(statement);
-
-    while(sqlite3_step(statement) == SQLITE_ROW) {
-      //if result_state equals SQLITE_ROWS that means that there is
-      //result_state = sqlite3_step(statement);
-      vector<string> values;
-      for(int i=0 ; i<columns ; ++i) {
-        //NULL can be returned as a result what would cause
-        //a runtime error, if not proceeded appropriately.
-        //That's why if NULL is returned the empty string is pushed
-        //to the vector (line)
-        string s;
-        char *tmp = (char*)sqlite3_column_text(statement,i);
-        if(tmp) s=tmp;
-        values.push_back(s);
-      }
-      results.push_back(values);
-    }
-    sqlite3_finalize(statement);
-  }
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error")
-    std::cout << query << " " << error << std::endl;
-
-  return results;
-}
-
+  int calculateChecksum(
+    const std::vector<boost::filesystem::path> &paths) const;
+  inline bool reportErrors(const char *query) const;
+};
