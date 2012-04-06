@@ -64,10 +64,7 @@ int SQLiteConnector::open(const string f) {
   //if the object exists, function tries to open the database
   if(Disk::exists(filename)) {
     if(sqlite3_open(filename.c_str(),&database) != SQLITE_OK)
-      return FAILURE;
-    else if(getDirectoriesFromDB()) {
       return OPENED;
-    }
     return FAILURE;
   }
 
@@ -85,14 +82,14 @@ int SQLiteConnector::open(const string f) {
 
 bool SQLiteConnector::hasChanged() const{
   int originalChecksum = 0;
-  while(! getChecksumFromDB(originalChecksum));
+  if(! getChecksumFromDB(originalChecksum))
+    return true;
   return !(originalChecksum == calculateChecksum());
 }
 
 void SQLiteConnector::addDirectories(const vector<path> &input_dirs) {
 //  directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
   sqlite3_stmt *stmt;
-  const char *query = ""
 }
 
 bool SQLiteConnector::addPhotos(const vector<path> &photos) {
@@ -114,7 +111,6 @@ bool SQLiteConnector::addPhotos(const vector<path> &photos) {
 
 void SQLiteConnector::close() {
   saveSettings();
-  saveDirectories();
   sqlite3_close(database);
 
   database = 0;
@@ -209,7 +205,7 @@ bool SQLiteConnector::saveSettings() {
 
   return !(reportErrors(query));
 }
-bool SQLiteConnector::saveDirectories() {
+/*bool SQLiteConnector::saveDirectories() {
   sqlite3_stmt *stmt;
   const char *query = "INSERT INTO directories VALUES(?);";
   
@@ -228,7 +224,7 @@ bool SQLiteConnector::saveDirectories() {
   }
 
   return reportErrors(query);
-}
+}*/
 
 bool SQLiteConnector::addPhoto(const path &photo) {
   //inserting NULL as a id value is used for autoincrementing id numbers
@@ -259,7 +255,8 @@ bool SQLiteConnector::addPhoto(const path &photo) {
   return true;
 }
 
-bool SQLiteConnector::getDirectoriesFromDB() {
+bool SQLiteConnector::getDirectoriesFromDB(
+    path &main_dir, vector<path> &directories) const {
   sqlite3_stmt *stmt;
   const char *query = "SELECT path FROM directories;";
   directories.clear();

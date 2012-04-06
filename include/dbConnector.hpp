@@ -216,7 +216,6 @@ private:
     std::vector<boost::filesystem::path> &dirs) const;
   bool getChecksumFromDB(int &checksum) const;
 
-  int calculateChecksum(
-    const std::vector<boost::filesystem::path> &paths) const;
+  int calculateChecksum() const;
   inline bool reportErrors(const char *query) const;
 };
