@@ -25,14 +25,15 @@ using std::endl;
   * getInstance() should look for the pointer to adequate
   * getInstance() function in its register and should call
   * the function.
-  *
-  * @todo what to do when existing database has changed (different checksum)
 */
 
 ////////////////////////////////////////////////////////////////////////////////
 //Definitions of DBConnectorFactory methods
 ////////////////////////////////////////////////////////////////////////////////
 DBConnector* DBConnectorFactory::getInstance(const string type) {
+  /** @todo Factory should check the register of creators andn return the
+   * desired one.
+   */
   return SQLiteConnector::getInstance();
 }
 
@@ -53,7 +54,7 @@ DBConnector* SQLiteConnector::getInstance() {
 ////////////////////////////////////////////////////////////////////////////////
 //Public methods
 ////////////////////////////////////////////////////////////////////////////////
-int SQLiteConnector::open(string f) {
+int SQLiteConnector::open(const string f) {
   //first the name of a database file stored in this object is changed
   if(filename.empty())
     filename=f;
@@ -82,14 +83,16 @@ int SQLiteConnector::open(string f) {
 }
 
 
-bool SQLiteConnector::hasChanged() {
+bool SQLiteConnector::hasChanged() const{
   int originalChecksum = 0;
   while(! getChecksumFromDB(originalChecksum));
-  return (originalChecksum == calculateChecksum());
+  return !(originalChecksum == calculateChecksum());
 }
 
 void SQLiteConnector::addDirectories(const vector<path> &input_dirs) {
-  directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
+//  directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
+  sqlite3_stmt *stmt;
+  const char *query = ""
 }
 
 bool SQLiteConnector::addPhotos(const vector<path> &photos) {
@@ -97,10 +100,11 @@ bool SQLiteConnector::addPhotos(const vector<path> &photos) {
   //directories to the database (non-recursively)
   Disk *disk_space = Disk::getInstance();
 
-  for(vector<path>::iterator i = directories.begin();
+  for(vector<path>::const_iterator i = directories.begin();
       i != directories.end() ; i++) {
     vector<path> photos = disk_space->getPhotosPaths(*i);
-    for(vector<path>::iterator i = photos.begin() ; i != photos.end() ; i++) {
+    for(vector<path>::const_iterator i = photos.begin() ;
+        i != photos.end() ; i++) {
       if(!addPhoto(*i))
         return false;
     }
@@ -117,7 +121,7 @@ void SQLiteConnector::close() {
   filename.erase();
 }
 
-bool SQLiteConnector::movePhoto(path old_path, path new_path) {
+bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
   sqlite3_stmt *stmt;
   const char *query = "UPDATE photos SET path=? WHERE path=? ;";
 
@@ -132,7 +136,8 @@ bool SQLiteConnector::movePhoto(path old_path, path new_path) {
   return !(reportErrors(query));
 }
 
-bool SQLiteConnector::deletePhoto(path photos_path) {
+bool SQLiteConnector::deletePhoto(const path &photos_path) {
+  //TODO deleting adequate row from tags_photos table
   sqlite3_stmt *stmt;
   const char *query = "DELETE FROM photos WHERE path=? ;";
 
@@ -150,52 +155,41 @@ bool SQLiteConnector::deletePhoto(path photos_path) {
 //Private methods
 ////////////////////////////////////////////////////////////////////////////////
 bool SQLiteConnector::createDB() {
-  sqlite3_stmt *stmt;
+  string errmsg;
   const char *query = 
-      "CREATE TABLE photos (id INTEGER PRIMARY KEY, path BLOB UNIQUE);";
-     // "CREATE TABLE directories (path BLOB);"
-     // "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);";
+      "CREATE TABLE photos (id INTEGER PRIMARY KEY,path BLOB UNIQUE);"
+      "CREATE TABLE directories (path BLOB);"
+      "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);"
+      "CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT);"
+      "CREATE TABLE photos_tags (photo_id INTEGER, tag_id INTEGER,"
+        "FOREIGN KEY(photo_id) REFERENCES photos(id),"
+        "FOREIGN KEY(tag_id) REFERENCES tags(id));";
 
-  if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
+ // if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
     //while(sqlite3_step(stmt) != SQLITE_DONE);
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
+  //  sqlite3_step(stmt);
+   // sqlite3_finalize(stmt);
 
-    reportErrors(query);
-  }
+    //string error = sqlite3_errmsg(database);
+    //if(error != "not an error") {
+     // std::cout << query << " " << error << std::endl;
+     // return false;
+   // }
+  //  return true;
+  //}
 
-  query = "CREATE TABLE directories (path BLOB);";
-  if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
-    //while(sqlite3_step(stmt) != SQLITE_DONE);
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-
-    string error = sqlite3_errmsg(database);
-    if(error != "not an error") {
-      std::cout << query << " " << error << std::endl;
-      return false;
-    }
-  }
-  if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
-    //while(sqlite3_step(stmt) != SQLITE_DONE);
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-
-    string error = sqlite3_errmsg(database);
-    if(error != "not an error") {
-      std::cout << query << " " << error << std::endl;
-      return false;
-    }
+  //return false;
+  if(sqlite3_exec(database, query, NULL, NULL, NULL) == SQLITE_OK)
     return true;
-  }
 
+  reportErrors(query);
   return false;
 }
 
 bool SQLiteConnector::saveSettings() {
   sqlite3_stmt *stmt;
   const char *query =
-            "INSERT INTO settings VALUES (\"checksum\",?);";
+            "INSERT OR REPLACE INTO settings VALUES (\"checksum\",?);";
   int rc, checksum = calculateChecksum();
 
   do {
@@ -222,7 +216,7 @@ bool SQLiteConnector::saveDirectories() {
   unique(directories.begin(),directories.end());
 
   if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
-    for(vector<path>::iterator i = directories.begin() ;
+    for(vector<path>::const_iterator i = directories.begin() ;
         i != directories.end() ; i++) {
       sqlite3_bind_blob(stmt, 1, &(*i), sizeof(path), SQLITE_STATIC);
       sqlite3_step(stmt);
@@ -282,7 +276,7 @@ bool SQLiteConnector::getDirectoriesFromDB() {
   return !reportErrors(query);
 }
 
-bool SQLiteConnector::getChecksumFromDB(int &checksum) {
+bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
   sqlite3_stmt *stmt;
   const char *query = "SELECT value FROM settings WHERE key=\"checksum\";";
   int rc;
@@ -300,15 +294,15 @@ bool SQLiteConnector::getChecksumFromDB(int &checksum) {
   return !reportErrors(query);
 }
 
-int SQLiteConnector::calculateChecksum() {
+int SQLiteConnector::calculateChecksum() const{
   int checksum_tmp = 0;
   vector<path> photo_paths;
   Disk * disk = Disk::getInstance();
   
-  for(vector<path>::iterator i = directories.begin();
+  for(vector<path>::const_iterator i = directories.begin();
       i != directories.end(); i++) {
     photo_paths = disk->getPhotosPaths(*i);
-    for(vector<path>::iterator j = photo_paths.begin();
+    for(vector<path>::const_iterator j = photo_paths.begin();
         j != photo_paths.end() ; j++) {
       checksum_tmp += hash((j->string()).c_str());
     }
@@ -317,7 +311,7 @@ int SQLiteConnector::calculateChecksum() {
   return checksum_tmp;
 }
 
-bool SQLiteConnector::reportErrors(const char * query) {
+bool SQLiteConnector::reportErrors(const char * query) const {
   string error = sqlite3_errmsg(database);
   if(error != "not an error"){
     std::cout << query << " " << error << std::endl;
