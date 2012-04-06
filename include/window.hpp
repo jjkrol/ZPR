@@ -2,14 +2,14 @@
 
 #include <gtkmm.h>
 
+class WindowContent;
+
 /** @class MainWindow
  *  @brief Class representing main window of an application.
  *         Consist of elements visible in every mode (library view/photo edit
  *         view), and WindowContent Decorator, which defines type of view and
  *         is responsible of handling view-specific tasks and properties.
  */
-
-class WindowContent;
 
 class MainWindow : public Gtk::Window {
   public:
@@ -31,8 +31,9 @@ class MainWindow : public Gtk::Window {
     Gtk::Box left_box, right_box, bottom_box;
     Gtk::ScrolledWindow display;
 
-    //menubar
-    Gtk::MenuBar menu;
+    //menubar creating
+    Glib::RefPtr<Gtk::UIManager> ui_manager;
+    Glib::RefPtr<Gtk::ActionGroup> action_group;
 
     //bottom bar widgets
     Gtk::Scale zoom_slider;
@@ -50,6 +51,10 @@ class MainWindow : public Gtk::Window {
     //signal handlers for changing type if view
     void showLibraryView();
     void showEditView();
+
+    //other signal handlers
+    void editPreferences() {};
+    void showAbout();
 };
 
 /** @class WindowContent
@@ -101,8 +106,7 @@ class EditView : public WindowContent {
     void zoomImage();
 
     //signals storing (for disconnecting)
-    sigc::connection zoom_signal;
-    sigc::connection fit_signal;
+    sigc::connection zoom_signal, fit_signal, page_signal;
 
     //additional function for fitting Pixbuf to widget
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);

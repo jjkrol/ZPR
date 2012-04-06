@@ -1,6 +1,6 @@
 #include "include/core.hpp"
 
-#define DATABASE_TESTING true
+#define DATABASE_TESTING false
 #if DATABASE_TESTING == true
 #include "include/dbConnector.hpp"
 #endif

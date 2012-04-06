@@ -20,6 +20,31 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   zoom_slider.set_show_fill_level(true);
   zoom_slider.set_size_request(200, -1);
 
+  //menubar creating
+  action_group = Gtk::ActionGroup::create();
+  action_group->add(Gtk::Action::create("FileMenu", "File")); 
+  action_group->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT, "_Quit",
+                    "Quit"), sigc::mem_fun(*this, &MainWindow::hide));
+  action_group->add(Gtk::Action::create("EditMenu", "Edit")); 
+  action_group->add(Gtk::Action::create("EditPreferences",
+                    Gtk::Stock::PREFERENCES, "_Preferences", "Preferences"),
+                    sigc::mem_fun(*this, &MainWindow::editPreferences));
+  action_group->add(Gtk::Action::create("HelpMenu", "Help")); 
+  action_group->add(Gtk::Action::create("HelpAbout", Gtk::Stock::ABOUT, "_About",
+                    "About"), sigc::mem_fun(*this, &MainWindow::showAbout));
+  ui_manager = Gtk::UIManager::create();
+  ui_manager->insert_action_group(action_group);
+  add_accel_group(ui_manager->get_accel_group());
+
+  try {
+    ui_manager->add_ui_from_file("menubar.xml");
+  } catch(const Glib::Error& ex) {
+    std::cerr << "building menus failed: " <<  ex.what();
+  }
+
+  Gtk::Widget *menubar = ui_manager->get_widget("/MenuBar");
+  if(menubar) grid.attach(*menubar, 0, 0, 2, 1);
+
   //setting up containers
   grid.set_margin_left(2);
   grid.set_margin_right(2);
@@ -49,7 +74,6 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   right_box.pack_end(bottom_box, false, false);
   left_box.pack_end(toolbar, true, true);
   left_box.pack_end(notebook, true, true);
-  grid.attach(menu, 0, 0, 2, 1);
   grid.attach(left_box, 0, 2, 1, 1);
   grid.attach(right_box, 1, 2, 1, 1);
   add(grid);
@@ -65,6 +89,19 @@ void MainWindow::showEditView() {
   if(content) delete content;
   content = new EditView(this);
   show_all_children();
+}
+
+void MainWindow::showAbout() {
+  Gtk::AboutDialog dialog;
+  std::vector<Glib::ustring> authors;
+  authors.push_back("Jakub Król");
+  authors.push_back("Maciej Suchecki");
+  authors.push_back("Jacek Witkowski");
+  dialog.set_program_name("ImgView 0.0.2");
+  dialog.set_comments("GTK+ simple photo organiser");
+  dialog.set_authors(authors);
+  //TODO set logo
+  dialog.run();
 }
 
 //method for changing displayed Photo
@@ -178,12 +215,12 @@ EditView::EditView(MainWindow *w) : window(w),
   window->display.add(image);
 
   //connecting signals
-  window->notebook.signal_switch_page().connect(sigc::mem_fun(this, &EditView::onPageSwitch));
   right_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::nextImage));
   left_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
   library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
   zoom_signal = window->zoom_slider.signal_value_changed().connect(sigc::mem_fun(this, &EditView::zoomImage));
   fit_signal = window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &EditView::fitImage));
+  page_signal = window->notebook.signal_switch_page().connect(sigc::mem_fun(this, &EditView::onPageSwitch));
 
   //loading image
   loadImage();
@@ -201,6 +238,7 @@ EditView::~EditView() {
   window->display.remove();
   zoom_signal.disconnect();
   fit_signal.disconnect();
+  page_signal.disconnect();
 }
 
 void EditView::onPageSwitch(Gtk::Widget *page, guint number) {
