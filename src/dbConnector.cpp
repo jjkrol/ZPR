@@ -79,42 +79,86 @@ int SQLiteConnector::open(const string f) {
   return FAILURE;
 }
 
-
-bool SQLiteConnector::hasChanged() const{
-  int originalChecksum = 0;
-  if(! getChecksumFromDB(originalChecksum))
-    return true;
-  return !(originalChecksum == calculateChecksum());
-}
-
-void SQLiteConnector::addDirectories(const vector<path> &input_dirs) {
-//  directories.insert(directories.end(), input_dirs.begin(), input_dirs.end());
-  sqlite3_stmt *stmt;
-}
-
-bool SQLiteConnector::addPhotos(const vector<path> &photos) {
-  //add every photo from each of directories stored in a class member vector
-  //directories to the database (non-recursively)
-  Disk *disk_space = Disk::getInstance();
-
-  for(vector<path>::const_iterator i = directories.begin();
-      i != directories.end() ; i++) {
-    vector<path> photos = disk_space->getPhotosPaths(*i);
-    for(vector<path>::const_iterator i = photos.begin() ;
-        i != photos.end() ; i++) {
-      if(!addPhoto(*i))
-        return false;
-    }
-  }
-  return true;
-}
-
 void SQLiteConnector::close() {
   saveSettings();
   sqlite3_close(database);
 
   database = 0;
   filename.erase();
+}
+
+bool SQLiteConnector::hasChanged() const{
+  int originalChecksum = 0;
+  if(! getChecksumFromDB(originalChecksum))
+    return true;
+  return originalChecksum != calculateChecksum();
+}
+
+bool SQLiteConnector::addPhotosFromDirectories(
+  //add every photo from each of directories stored in a class member vector
+  //directories to the database (non-recursively)
+  const path &main_dir,
+  const vector<DirectoryPath> &excluded_dirs) {
+  static Disk *disk = Disk::getInstance();
+
+  //1. Add photos from the main directory
+  //2. Get subdirectories from main dir, which are not specified in excluded
+  //   directories.
+  //3. For each of subdirecories call addPhotosFromDirectories(vector).
+
+  vector<DirectoryPath> subdirs = disk->getSubdirectoriesPaths(main_dir);
+
+  //Firstly, excluded dirs should be removed from the subdirectories
+  //of the main directory
+  for(vector<DirectoryPath>::const_iterator i = excluded_dirs.begin();
+      i != excluded_dirs.end() ; i++) {
+    vector<DirectoryPath>::iterator excluded =
+      find(subdirs.begin(), subdirs.end(), *i);
+    if(excluded != subdirs.end()) {
+      subdirs.erase(excluded);
+    }
+  }
+
+  //Secondly, photos from the main folder should be added to database
+  vector<PhotoPath> photos = disk->getPhotosPaths(main_dir);
+  for(vector<PhotoPath>::const_iterator i = photos.begin() ;
+      i != photos.end() ; i++){
+    addPhoto(*i);
+  }
+
+  //Thirdly, photos from the rest of directories should be added recursively
+  return addPhotosFromDirectories(subdirs);
+}
+
+bool SQLiteConnector::addPhotosFromDirectories(
+  const vector<DirectoryPath> &dirs) {
+
+  for(vector<DirectoryPath>::const_iterator i = dirs.begin();
+      i != dirs.end() ; i++) {
+    if(! addPhotosFromDirectory(*i) )
+      return false;
+  }
+  return true;
+}
+
+bool SQLiteConnector::addPhotosFromDirectory(const DirectoryPath &dir){
+  static Disk *disk = Disk::getInstance();
+  vector<DirectoryPath> subdirectories = disk->getSubdirectoriesPaths(dir);
+
+  for(vector<DirectoryPath>::iterator i = subdirectories.begin();
+      i != subdirectories.end() ; i++) {
+    if(! addPhotosFromDirectory(*i))
+      return false;  
+  }
+
+  vector<PhotoPath> photos = disk->getPhotosPaths(dir);
+  for(vector<PhotoPath>::const_iterator i = photos.begin();
+      i != photos.end() ; i++) {
+    if(! addPhoto(*i))
+      return false;
+  }
+
+  return true;
 }
 
 bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
@@ -161,20 +205,6 @@ bool SQLiteConnector::createDB() {
         "FOREIGN KEY(photo_id) REFERENCES photos(id),"
         "FOREIGN KEY(tag_id) REFERENCES tags(id));";
 
- // if(sqlite3_prepare_v2(database, query, -1, &stmt, 0) == SQLITE_OK) {
-    //while(sqlite3_step(stmt) != SQLITE_DONE);
-  //  sqlite3_step(stmt);
-   // sqlite3_finalize(stmt);
-
-    //string error = sqlite3_errmsg(database);
-    //if(error != "not an error") {
-     // std::cout << query << " " << error << std::endl;
-     // return false;
-   // }
-  //  return true;
-  //}
-
-  //return false;
   if(sqlite3_exec(database, query, NULL, NULL, NULL) == SQLITE_OK)
     return true;
 
@@ -227,7 +257,7 @@ bool SQLiteConnector::saveSettings() {
 }*/
 
 bool SQLiteConnector::addPhoto(const path &photo) {
-  //inserting NULL as a id value is used for autoincrementing id numbers
+  //inserting NULL as id value is used for autoincrementing id numbers
   const char *query = "INSERT INTO photos VALUES (NULL,?);";
   sqlite3_stmt *stmt;
   int rc;
@@ -237,7 +267,7 @@ bool SQLiteConnector::addPhoto(const path &photo) {
     if(rc != SQLITE_OK)
       return false;
 
-    sqlite3_bind_blob(stmt, 1,&photo, sizeof(photo), SQLITE_STATIC );
+    sqlite3_bind_blob(stmt, 1, &photo, sizeof(photo), SQLITE_STATIC );
     rc = sqlite3_step(stmt);
     
     if(rc == SQLITE_ROW)
@@ -247,12 +277,7 @@ bool SQLiteConnector::addPhoto(const path &photo) {
 
   } while (rc==SQLITE_SCHEMA);
 
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error"){
-    std::cout << query << " " << error << std::endl;
-    return false;
-  }
-  return true;
+  return !reportErrors(query);
 }
 
 bool SQLiteConnector::getDirectoriesFromDB(
@@ -319,7 +344,7 @@ bool SQLiteConnector::reportErrors(const char * query) const {
 
 //Methods defined beneath this line are used only for tests and should not
 //be included into final version of the program
-ResultTable SQLiteConnector::sendQuery(string query) {
+/*ResultTable SQLiteConnector::sendQuery(string query) {
   sqlite3_stmt *statement;
   vector<vector<string> > results;
 
@@ -349,5 +374,5 @@ ResultTable SQLiteConnector::sendQuery(string query) {
     std::cout << query << " " << error << std::endl;
 
   return results;
-}
+}*/
 

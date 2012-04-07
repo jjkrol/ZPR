@@ -82,23 +82,19 @@ public:
   enum Flags {
     FAILURE = 0x0,
     OPENED  = 0x1,
-    CREATED = 0x2,
-    CHANGED = 0x4
+    CREATED = 0x2
   };
 
   virtual int open(const std::string filename) = 0;
+  virtual void close() = 0;
   virtual inline bool hasChanged() const = 0;
 
-  //DON'T KNOW IF THE FUNCTIONS BELOW THIS LINE SHOULD BE AVAILABLE
-  //IF NOT FEEL FREE TO COMMENT THEM
-  virtual inline void addDirectories(
-    const std::vector<DirectoryPath> &directories) = 0;
-  virtual bool addPhotos(
-    const std::vector<PhotoPath> &photos) = 0;
+  virtual bool addPhotosFromDirectories(
+    const boost::filesystem::path &main_dir,
+    const std::vector<DirectoryPath> &excluded_dirs) = 0;
+  virtual bool addPhotosFromDirectories(
+    const std::vector<DirectoryPath> &dirs) = 0;
   virtual bool addPhoto(const PhotoPath &photo) = 0;
-  //END;
-
-  virtual void close() = 0;
 
   virtual bool movePhoto(
     const PhotoPath &old_path,
@@ -135,20 +131,20 @@ public:
   * @returns falgs defined in DBConnector::Flags
   *
 */
-  ResultTable sendQuery(std::string query);
-
   int open(const std::string filename);
-  inline bool hasChanged() const;
-  inline void addDirectories(
-    const std::vector<boost::filesystem::path> &directories);
-  bool addPhotos(const std::vector<boost::filesystem::path> &photos);
-  bool addPhoto(const boost::filesystem::path &photo);
   void close();
+  inline bool hasChanged() const;
 
+  bool addPhotosFromDirectories(
+    const boost::filesystem::path &main_dir,
+    const std::vector<DirectoryPath> &excluded_dirs);
+  bool addPhotosFromDirectories(
+    const std::vector<DirectoryPath> &dirs);
+  bool addPhoto(const PhotoPath &photo);
   bool movePhoto(
-    const boost::filesystem::path &old_path,
-    const boost::filesystem::path &new_path);
-  bool deletePhoto(const boost::filesystem::path &photos_path);
+    const PhotoPath &old_path,
+    const PhotoPath &new_path);
+  bool deletePhoto(const PhotoPath &photos_path);
 
 private:
   SQLiteConnector(){}; //private constructor is a part of singleton pattern
@@ -202,18 +198,19 @@ private:
 
   sqlite3 *database;
   std::string filename;
-  std::vector<boost::filesystem::path> directories;
+  std::vector<DirectoryPath> directories;
 
   static DBConnector *instance;
   static DBConnector * getInstance();
 
-  bool createDB();
+  bool addPhotosFromDirectory(const DirectoryPath &dir);
 
+  bool createDB();
   bool saveSettings();
 
   bool getDirectoriesFromDB(
     boost::filesystem::path &main_dir,
-    std::vector<boost::filesystem::path> &dirs) const;
+    std::vector<DirectoryPath> &dirs) const;
   bool getChecksumFromDB(int &checksum) const;
 
   int calculateChecksum() const;
