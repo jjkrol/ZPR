@@ -95,11 +95,12 @@ bool SQLiteConnector::hasChanged() const{
 }
 
 bool SQLiteConnector::addPhotosFromDirectories(
-  //add every photo from each of directories stored in a class member vector
-  //directories to the database (non-recursively)
   const path &main_dir,
   const vector<DirectoryPath> &excluded_dirs) {
   static Disk *disk = Disk::getInstance();
+
+  //add every photo from each of directories stored in a class member vector
+  //directories to the database (non-recursively)
 
   //1. Add photos from the main directory
   //2. Get subdirectories from main dir, which are not specified in excluded
@@ -158,7 +159,24 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoryPath &dir){
       return false;
   }
 
+  if(!addDirectoryToDB(dir))
+    return false;
+
   return true;
+}
+
+bool SQLiteConnector::addDirectoryToDB(const DirectoryPath &dir) {
+  sqlite3_stmt *stmt;
+  const char *query = "INSERT INTO directories VALUES (?);";
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+    return false;
+
+  sqlite3_bind_blob(stmt, 1, &dir, sizeof(DirectoryPath), SQLITE_STATIC);
+  sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  return !(reportErrors(query));
 }
 
 bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
@@ -216,72 +234,40 @@ bool SQLiteConnector::saveSettings() {
   sqlite3_stmt *stmt;
   const char *query =
             "INSERT OR REPLACE INTO settings VALUES (\"checksum\",?);";
-  int rc, checksum = calculateChecksum();
+  int checksum = calculateChecksum();
 
   do {
-    rc = sqlite3_prepare_v2(database, query, -1, &stmt, 0);
-    if(rc != SQLITE_OK)
+    if((sqlite3_prepare_v2(database, query, -1, &stmt, 0) != SQLITE_OK))
       return false;
 
     sqlite3_bind_blob(stmt, 1, &checksum, sizeof(checksum), SQLITE_STATIC );
-    rc = sqlite3_step(stmt);
-    
-    if(rc == SQLITE_ROW)
+    if(sqlite3_step(stmt) == SQLITE_ROW)
       return false;
     
-    rc = sqlite3_finalize(stmt);
-
-  } while (rc==SQLITE_SCHEMA);
+  } while (sqlite3_finalize(stmt) == SQLITE_SCHEMA);
 
   return !(reportErrors(query));
 }
-/*bool SQLiteConnector::saveDirectories() {
-  sqlite3_stmt *stmt;
-  const char *query = "INSERT INTO directories VALUES(?);";
-  
-  unique(directories.begin(),directories.end());
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
-    for(vector<path>::const_iterator i = directories.begin() ;
-        i != directories.end() ; i++) {
-      sqlite3_bind_blob(stmt, 1, &(*i), sizeof(path), SQLITE_STATIC);
-      sqlite3_step(stmt);
-
-      sqlite3_reset(stmt);
-      sqlite3_clear_bindings(stmt);
-    }
-    sqlite3_finalize(stmt);
-  }
-
-  return reportErrors(query);
-}*/
 
 bool SQLiteConnector::addPhoto(const path &photo) {
   //inserting NULL as id value is used for autoincrementing id numbers
   const char *query = "INSERT INTO photos VALUES (NULL,?);";
   sqlite3_stmt *stmt;
-  int rc;
 
   do {
-    rc = sqlite3_prepare_v2(database, query, -1, &stmt, 0);
-    if(rc != SQLITE_OK)
+    if(( sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK)
       return false;
 
     sqlite3_bind_blob(stmt, 1, &photo, sizeof(photo), SQLITE_STATIC );
-    rc = sqlite3_step(stmt);
-    
-    if(rc == SQLITE_ROW)
+    if(sqlite3_step(stmt) == SQLITE_ROW)
       return false;
     
-    rc = sqlite3_finalize(stmt);
-
-  } while (rc==SQLITE_SCHEMA);
+  } while ((sqlite3_finalize(stmt)) == SQLITE_SCHEMA);
 
   return !reportErrors(query);
 }
 
-bool SQLiteConnector::getDirectoriesFromDB(
-    path &main_dir, vector<path> &directories) const {
+bool SQLiteConnector::getDirectoriesFromDB(vector<path> &directories) const {
   sqlite3_stmt *stmt;
   const char *query = "SELECT path FROM directories;";
   directories.clear();
@@ -303,15 +289,12 @@ bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
   const char *query = "SELECT value FROM settings WHERE key=\"checksum\";";
   int rc;
   do {
-    rc=sqlite3_prepare_v2(database, query, -1, &stmt, NULL);
-    if(rc != SQLITE_OK)
+    if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
       return false;
 
-    rc=sqlite3_step(stmt);
-    if(rc == SQLITE_ROW) {
+    if((rc = sqlite3_step(stmt)) == SQLITE_ROW)
       checksum = *(static_cast<const int *>(sqlite3_column_blob(stmt,0)));
-    }
-  } while (rc==SQLITE_SCHEMA);
+  } while (rc == SQLITE_SCHEMA);
 
   return !reportErrors(query);
 }
@@ -320,13 +303,16 @@ int SQLiteConnector::calculateChecksum() const{
   int checksum_tmp = 0;
   vector<path> photo_paths;
   Disk * disk = Disk::getInstance();
+  vector<DirectoryPath> directories;
+  if(!getDirectoriesFromDB(directories))
+    return 0;
   
-  for(vector<path>::const_iterator i = directories.begin();
+  for(vector<path>::iterator i = directories.begin();
       i != directories.end(); i++) {
     photo_paths = disk->getPhotosPaths(*i);
-    for(vector<path>::const_iterator j = photo_paths.begin();
+    for(vector<path>::iterator j = photo_paths.begin();
         j != photo_paths.end() ; j++) {
-      checksum_tmp += hash((j->string()).c_str());
+      checksum_tmp += hash(j->string().c_str());
     }
   }
 

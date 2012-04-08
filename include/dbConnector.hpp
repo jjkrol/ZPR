@@ -204,13 +204,12 @@ private:
   static DBConnector * getInstance();
 
   bool addPhotosFromDirectory(const DirectoryPath &dir);
+  bool addDirectoryToDB(const DirectoryPath &dir);
 
   bool createDB();
   bool saveSettings();
 
-  bool getDirectoriesFromDB(
-    boost::filesystem::path &main_dir,
-    std::vector<DirectoryPath> &dirs) const;
+  bool getDirectoriesFromDB(std::vector<DirectoryPath> &dirs) const;
   bool getChecksumFromDB(int &checksum) const;
 
   int calculateChecksum() const;
