@@ -34,13 +34,14 @@ class MainWindow : public Gtk::Window {
     //menubar creating
     Glib::RefPtr<Gtk::UIManager> ui_manager;
     Glib::RefPtr<Gtk::ActionGroup> action_group;
+    Glib::RefPtr<Gtk::RadioAction> library_view, edit_view;
 
     //bottom bar widgets
     Gtk::Scale zoom_slider;
     Gtk::Image zoom_icon;
     Gtk::Label statusbar;
 
-    //top-down buttons
+    //toolbar
     Gtk::ToolButton save_button, delete_button;
     Gtk::ToolButton star_button, tags_button;
 
@@ -137,7 +138,6 @@ class LibraryView : public WindowContent {
     Gtk::DrawingArea images;
     Gtk::TreeView directory_tree;
     Gtk::Label tags_label;
-    Gtk::Button edit_button;
 
     virtual void changePhoto(Photo *) {};
 };

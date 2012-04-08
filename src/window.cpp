@@ -1,6 +1,7 @@
 #include "../include/gui.hpp"
 #include "../include/photo.hpp"
 #include "../include/window.hpp"
+#include <iostream>
 
 //MainWindow constructor
 MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
@@ -21,6 +22,7 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   zoom_slider.set_size_request(200, -1);
 
   //menubar creating
+  Gtk::RadioAction::Group view_type;
   action_group = Gtk::ActionGroup::create();
   action_group->add(Gtk::Action::create("FileMenu", "File")); 
   action_group->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT, "_Quit",
@@ -29,6 +31,11 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   action_group->add(Gtk::Action::create("EditPreferences",
                     Gtk::Stock::PREFERENCES, "_Preferences", "Preferences"),
                     sigc::mem_fun(*this, &MainWindow::editPreferences));
+  action_group->add(Gtk::Action::create("ViewMenu", "View")); 
+  library_view = Gtk::RadioAction::create(view_type, "LibraryView", "Library View");
+  action_group->add(library_view, sigc::mem_fun(*this, &MainWindow::showLibraryView));
+  edit_view = Gtk::RadioAction::create(view_type, "EditView", "Edit View");
+  action_group->add(edit_view, sigc::mem_fun(*this, &MainWindow::showEditView));
   action_group->add(Gtk::Action::create("HelpMenu", "Help")); 
   action_group->add(Gtk::Action::create("HelpAbout", Gtk::Stock::ABOUT, "_About",
                     "About"), sigc::mem_fun(*this, &MainWindow::showAbout));
@@ -80,12 +87,14 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
 }
 
 void MainWindow::showLibraryView() {
+  //TODO set menubar item active
   if(content) delete content;
   content = new LibraryView(this);
   show_all_children();
 }
 
 void MainWindow::showEditView() {
+  //TODO set menubar item active
   if(content) delete content;
   content = new EditView(this);
   show_all_children();
@@ -94,9 +103,9 @@ void MainWindow::showEditView() {
 void MainWindow::showAbout() {
   Gtk::AboutDialog dialog;
   std::vector<Glib::ustring> authors;
-  authors.push_back("Jakub Król");
-  authors.push_back("Maciej Suchecki");
-  authors.push_back("Jacek Witkowski");
+  authors.push_back(" Jakub Król");
+  authors.push_back(" Maciej Suchecki");
+  authors.push_back(" Jacek Witkowski");
   dialog.set_program_name("ImgView 0.0.2");
   dialog.set_comments("GTK+ simple photo organiser");
   dialog.set_authors(authors);
@@ -117,15 +126,17 @@ void EditView::loadImage() {
   Gdk::Rectangle rectangle = window->display.get_allocation();
   if(!pixbuf) return;
 
-  //displaying filename and resetting zoom widget
+  //displaying filename
   window->statusbar.set_label((current_photo->getFilename()).string());
-  window->zoom_slider.set_range(100.0, 400.0);
-  window->zoom_slider.set_value(100.0);
 
   //fitting image if needed
   if(rectangle.get_width() < pixbuf->get_width() ||
      rectangle.get_height() < pixbuf->get_height())
     pixbuf = resizeImage(pixbuf, rectangle);
+  else {
+    window->zoom_slider.set_range(100.0, 400.0);
+    window->zoom_slider.set_value(100.0);
+  }
 
   //resizing and setting image
   image.set(pixbuf);
@@ -200,7 +211,6 @@ EditView::EditView(MainWindow *w) : window(w),
   basic_box.pack_start(basic_label, true, true);
   colors_box.pack_start(colors_label, true, true);
   effects_box.pack_start(effects_label, true, true);
-  basic_box.pack_end(edit_buttons, false, false);
   window->left_box.remove(window->notebook);
   window->left_box.remove(window->toolbar);
   window->left_box.pack_start(library_button, false, false);
@@ -232,7 +242,6 @@ EditView::~EditView() {
   window->notebook.remove_page(colors_label);
   window->notebook.remove_page(effects_label);
   window->left_box.remove(library_button);
-  window->left_box.remove(edit_buttons);
   window->bottom_box.remove(left_button);
   window->bottom_box.remove(right_button);
   window->display.remove();
@@ -247,7 +256,7 @@ void EditView::onPageSwitch(Gtk::Widget *page, guint number) {
 }
 
 LibraryView::LibraryView(MainWindow *w) : window(w),
-  tags_label("tags browsing"), edit_button("Edit picture") {
+  tags_label("tags browsing") {
 
   //obtaining UserInterface instance
   gui = UserInterface::getInstance();
@@ -255,20 +264,15 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   //organising widgets
   window->left_box.remove(window->notebook);
   window->left_box.remove(window->toolbar);
-  window->left_box.pack_start(edit_button, false, false);
   window->left_box.pack_start(window->toolbar, false, false);
   window->left_box.pack_start(window->notebook, true, true);
   window->notebook.append_page(directory_tree, "Folders");
   window->notebook.append_page(tags_label, "Tags");
   window->display.add(images);
-
-  //connecting signals
-  edit_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showEditView));
 }
 
 LibraryView::~LibraryView() {
   window->statusbar.set_label("");
   window->notebook.remove_page(directory_tree);
   window->notebook.remove_page(tags_label);
-  window->left_box.remove(edit_button);
 }
