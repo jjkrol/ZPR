@@ -10,9 +10,8 @@ class Photo;
 
 /** @class UserInterface
  *  @brief Singleton class representing Graphical User Interface.
- *
- *  Class uses GTKmm, it serves as a link between user and program
- *  taking commands from user and sending them to the Core class.
+ *         Class uses GTKmm, it serves as a link between user and program
+ *         taking commands from user and sending them to the Core class.
  */
 
 class UserInterface {

@@ -80,8 +80,8 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   bottom_box.pack_end(statusbar, true, true);
   right_box.pack_start(display, true, true);
   right_box.pack_end(bottom_box, false, false);
-  left_box.pack_end(toolbar, true, true);
   left_box.pack_end(notebook, true, true);
+  left_box.pack_end(toolbar, false, false);
   grid.attach(left_box, 0, 2, 1, 1);
   grid.attach(right_box, 1, 2, 1, 1);
   add(grid);

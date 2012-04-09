@@ -10,7 +10,7 @@ EditView::EditView(MainWindow *w) : window(w),
   basic_box(Gtk::ORIENTATION_VERTICAL), colors_box(Gtk::ORIENTATION_VERTICAL),
   effects_box(Gtk::ORIENTATION_VERTICAL), basic_label("Basic editing"),
   colors_label("Colors modification"), effects_label("Other effects"),
-  library_button("Back to library"), undo_button(Gtk::Stock::UNDO),
+  library_button(Gtk::Stock::QUIT), undo_button(Gtk::Stock::UNDO),
   redo_button(Gtk::Stock::REDO) {
 
   //obtaining UserInterface instance
@@ -29,11 +29,7 @@ EditView::EditView(MainWindow *w) : window(w),
   basic_box.pack_start(basic_label, true, true);
   colors_box.pack_start(colors_label, true, true);
   effects_box.pack_start(effects_label, true, true);
-  window->left_box.remove(window->notebook);
-  window->left_box.remove(window->toolbar);
-  window->left_box.pack_start(library_button, false, false);
-  window->left_box.pack_start(window->toolbar, false, false);
-  window->left_box.pack_start(window->notebook, true, true);
+  window->toolbar.pack_end(library_button, false, false);
   window->left_box.pack_start(edit_buttons, false, false);
   window->notebook.append_page(basic_box, "Basic");
   window->notebook.append_page(colors_box, "Colors");
@@ -51,8 +47,6 @@ EditView::EditView(MainWindow *w) : window(w),
   page_signal = window->notebook.signal_switch_page().connect(sigc::mem_fun(this, &EditView::onPageSwitch));
 
   //loading image
-  //current_photo = *(gui->current_photo);
-  //current_pixbuf = current_photo->getPixbuf();
   updatePixbuf();
 }
 
@@ -63,7 +57,7 @@ EditView::~EditView() {
   window->notebook.remove_page(basic_label);
   window->notebook.remove_page(colors_label);
   window->notebook.remove_page(effects_label);
-  window->left_box.remove(library_button);
+  window->toolbar.remove(library_button);
   window->bottom_box.remove(left_button);
   window->bottom_box.remove(right_button);
   window->display.remove();

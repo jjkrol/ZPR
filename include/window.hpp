@@ -95,7 +95,8 @@ class EditView : public WindowContent {
     Gtk::ToolButton left_button, right_button;
     Gtk::Box basic_box, colors_box, effects_box;
     Gtk::Label basic_label, colors_label, effects_label;
-    Gtk::Button library_button, undo_button, redo_button;
+    Gtk::ToolButton library_button;
+    Gtk::Button undo_button, redo_button;
 
     //storing pixbuf of current photo
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
