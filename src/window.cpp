@@ -103,10 +103,10 @@ void MainWindow::showEditView() {
 void MainWindow::showAbout() {
   Gtk::AboutDialog dialog;
   std::vector<Glib::ustring> authors;
-  authors.push_back(" Jakub Król");
-  authors.push_back(" Maciej Suchecki");
-  authors.push_back(" Jacek Witkowski");
-  dialog.set_program_name("ImgView 0.0.2");
+  authors.push_back(" jjkrol - Jakub Król");
+  authors.push_back(" mc - Maciej Suchecki");
+  authors.push_back(" nme - Jacek Witkowski");
+  dialog.set_program_name("ImgView");
   dialog.set_comments("GTK+ simple photo organiser");
   dialog.set_authors(authors);
   //TODO set logo
@@ -269,10 +269,43 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   window->notebook.append_page(directory_tree, "Folders");
   window->notebook.append_page(tags_label, "Tags");
   window->display.add(images);
+
+  //loading directory tree
+  fillDirectoryTree();
 }
 
 LibraryView::~LibraryView() {
   window->statusbar.set_label("");
   window->notebook.remove_page(directory_tree);
   window->notebook.remove_page(tags_label);
+}
+
+void LibraryView::fillDirectoryTree() {
+  directory_model = Gtk::TreeStore::create(columns);
+  directory_tree.set_model(directory_model);
+
+  Gtk::TreeModel::Row row = *(directory_model->append());
+  row[columns.name] = "2012";
+
+  Gtk::TreeModel::Row childrow = *(directory_model->append(row.children()));
+  childrow[columns.name] = "zdjecia1";
+
+  childrow = *(directory_model->append(row.children()));
+  childrow[columns.name] = "zdjecia2";
+
+  row = *(directory_model->append());
+  row[columns.name] = "2011";
+
+  childrow = *(directory_model->append(row.children()));
+  childrow[columns.name] = "zdjecia3";
+
+  directory_tree.append_column("", columns.name);
+  
+  directory_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
+}
+
+void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
+  Gtk::TreeModel::iterator row = directory_model->get_iter(path);
+  if(!row) return;
+  std::cout << (*row)[columns.name] << " selected" << std::endl;
 }

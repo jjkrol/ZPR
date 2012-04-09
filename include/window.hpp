@@ -49,7 +49,7 @@ class MainWindow : public Gtk::Window {
     MainWindow();
     ~MainWindow() {};
 
-    //signal handlers for changing type if view
+    //signal handlers for changing type of view
     void showLibraryView();
     void showEditView();
 
@@ -136,8 +136,25 @@ class LibraryView : public WindowContent {
 
     //widgets
     Gtk::DrawingArea images;
-    Gtk::TreeView directory_tree;
     Gtk::Label tags_label;
 
+    //directory tree
+    class ModelColumns : public Gtk::TreeModel::ColumnRecord {
+      public:
+        ModelColumns() {
+          add(name);
+        }
+        Gtk::TreeModelColumn<Glib::ustring> name;
+    };
+
+    ModelColumns columns;
+    Gtk::TreeView directory_tree;
+    Glib::RefPtr<Gtk::TreeStore> directory_model;
+
+    //signal handlers
+    void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
+
+    //other methods
     virtual void changePhoto(Photo *) {};
+    void fillDirectoryTree();
 };
