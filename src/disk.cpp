@@ -1,6 +1,9 @@
+#include <set>
+
 #include "../include/disk.hpp"
 #include "../include/core.hpp"
 #include "../include/photo.hpp"
+#include "../boost/algorithm/string/case_conv.hpp"
 
 using namespace boost::filesystem;
 using namespace std;
@@ -83,7 +86,7 @@ void * Disk::internalGetPhotosPaths(boost::filesystem::path directoryPath){
 
   for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
     if(!is_directory(*it))
-      if( (*it).extension()==".jpg" || (*it).extension() == ".png") // right now we only use jpg
+      if( isAcceptableExtension((*it).extension().string())) // right now we only use jpg
         photos->push_back((*it).filename());
 
   } 
@@ -156,4 +159,18 @@ path Disk::makeAbsolutePath(path relativePath){\
   path absolutePath = libraryDirectoryPath;
   absolutePath /= relativePath.relative_path();
   return absolutePath;
+}
+
+bool Disk::isAcceptableExtension(string givenExtension){
+  set<string> extensions; 
+  boost::algorithm::to_lower(givenExtension);
+  extensions.insert(".jpeg");
+  extensions.insert(".jpg");
+  extensions.insert(".png");
+  extensions.insert(".bmp");
+  extensions.insert(".ico");
+  if(extensions.count(givenExtension) > 0)
+    return true;
+  else
+    return false;
 }

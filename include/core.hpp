@@ -6,16 +6,19 @@
 #include <boost/thread.hpp>
 
 
+
 class Disk;
+class Photo;
 class Directory;
 class UserInterface;
 class ConfigurationManager;
+
+typedef std::vector<Photo*> photos_t;
 
 /**
  * @class CoreController
  * @brief A singleton class acting as a main application controller
  */
-
 class CoreController {
 
 public:
@@ -53,6 +56,27 @@ public:
    * @returns Absolute path to the LibraryDirectory
    */
   boost::filesystem::path getLibraryDirectoryPath();
+
+  /**
+   * @returns all tags
+   */
+  
+  std::vector<std::string> getAllTags();
+
+  /**
+   *@returns tags similar to the query
+   */
+  std::vector<std::string> getTagsLike(std::string query);
+
+  /**
+   *
+   */
+  photos_t getPhotosWithTags(std::vector<std::string>);
+
+  /**
+   *
+   */
+  std::vector<std::string> getSearchHistory();
 
 private:
   CoreController (std::string forcedConfigPath="");
