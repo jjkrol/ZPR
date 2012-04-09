@@ -47,7 +47,7 @@ class MainWindow : public Gtk::Window {
 
     //constructor and desctructor
     MainWindow();
-    ~MainWindow() {};
+    ~MainWindow();
 
     //signal handlers for changing type of view
     void showLibraryView();
@@ -79,6 +79,7 @@ class EditView : public WindowContent {
   public:
     friend class MainWindow;
     friend class UserInterface;
+
   private:
     EditView() {};
     ~EditView();
@@ -125,6 +126,7 @@ class LibraryView : public WindowContent {
   public:
     friend class MainWindow;
     friend class UserInterface;
+
   private:
     LibraryView() {};
     ~LibraryView();
@@ -141,13 +143,10 @@ class LibraryView : public WindowContent {
     //directory tree
     class ModelColumns : public Gtk::TreeModel::ColumnRecord {
       public:
-        ModelColumns() {
-          add(name);
-        }
+        ModelColumns() { add(name); }
         Gtk::TreeModelColumn<Glib::ustring> name;
-    };
+    } columns;
 
-    ModelColumns columns;
     Gtk::TreeView directory_tree;
     Glib::RefPtr<Gtk::TreeStore> directory_model;
 

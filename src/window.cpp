@@ -1,9 +1,10 @@
 #include "../include/gui.hpp"
 #include "../include/photo.hpp"
 #include "../include/window.hpp"
-#include <iostream>
 
-//MainWindow constructor
+/// @fn MainWindow::MainWindow()
+/// @brief MainWindow constructor - connects to UserInterface, creates menubar,
+///        and builds GUI widgets common for both views.
 MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   zoom_icon(Gtk::Stock::FIND, Gtk::ICON_SIZE_BUTTON),
   save_button(Gtk::Stock::FLOPPY), delete_button(Gtk::Stock::DELETE),
@@ -86,20 +87,32 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   add(grid);
 }
 
+/// @fn MainWindow::~MainWindow()
+/// @brief MainWindow descrutor - destroys active WindowContent.
+MainWindow::~MainWindow() {
+  if(content) delete content;
+}
+
+/// @fn MainWindow::showLibraryView()
+/// @brief Method responsible for switching to library view.
 void MainWindow::showLibraryView() {
-  //TODO set menubar item active
+  /// @todo set menubar item active
   if(content) delete content;
   content = new LibraryView(this);
   show_all_children();
 }
 
+/// @fn MainWindow::showEditView()
+/// @brief Method responsible for switching to edit view.
 void MainWindow::showEditView() {
-  //TODO set menubar item active
+  /// @todo set menubar item active
   if(content) delete content;
   content = new EditView(this);
   show_all_children();
 }
 
+/// @fn MainWindow::showAbout()
+/// @brief Method responsible for displaying About dialog.
 void MainWindow::showAbout() {
   Gtk::AboutDialog dialog;
   std::vector<Glib::ustring> authors;
@@ -109,203 +122,6 @@ void MainWindow::showAbout() {
   dialog.set_program_name("ImgView");
   dialog.set_comments("GTK+ simple photo organiser");
   dialog.set_authors(authors);
-  //TODO set logo
+  /// @todo set logo
   dialog.run();
-}
-
-//method for changing displayed Photo
-void EditView::changePhoto(Photo *photo) {
-  if(!photo) return;
-  current_photo = photo;
-  current_pixbuf = photo->getPixbuf();
-}
-
-//method for loading image into Gtk::Image widget
-void EditView::loadImage() {
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
-  Gdk::Rectangle rectangle = window->display.get_allocation();
-  if(!pixbuf) return;
-
-  //displaying filename
-  window->statusbar.set_label((current_photo->getFilename()).string());
-
-  //fitting image if needed
-  if(rectangle.get_width() < pixbuf->get_width() ||
-     rectangle.get_height() < pixbuf->get_height())
-    pixbuf = resizeImage(pixbuf, rectangle);
-  else {
-    window->zoom_slider.set_range(100.0, 400.0);
-    window->zoom_slider.set_value(100.0);
-  }
-
-  //resizing and setting image
-  image.set(pixbuf);
-}
-
-//additional function for fitting pixbuf into window
-Glib::RefPtr<Gdk::Pixbuf> EditView::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf,
-                                           Gdk::Rectangle rectangle) {
-  int width, height;
-  double zoom_raito;
-  double widget_raito = (double)rectangle.get_width() / (double)rectangle.get_height();
-  double image_raito = (double)pixbuf->get_width() / (double)pixbuf->get_height();
-
-  //calculating desired width and height
-  if(widget_raito >= image_raito) {
-    height = rectangle.get_height() - 4;
-    width = height * image_raito;
-    zoom_raito = (double)rectangle.get_height() / (double)pixbuf->get_height();
-  } else {
-    width = rectangle.get_width() - 4;
-    height = width / image_raito;
-    zoom_raito = (double)rectangle.get_width() / (double)pixbuf->get_width();
-  }
-
-  //zoom widget adjusting
-  window->zoom_slider.set_range(zoom_raito * 100.0, 400.0);
-  window->zoom_slider.set_value(zoom_raito * 100.0);
-
-  //image resizing
-  return pixbuf->scale_simple(width, height, Gdk::INTERP_BILINEAR);
-}
-
-//method for zooming image
-void EditView::zoomImage() {
-  if(!current_pixbuf) return;
-  double zoom = window->zoom_slider.get_value() / 100;
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
-  pixbuf = pixbuf->scale_simple(pixbuf->get_width() * zoom,
-                                pixbuf->get_height() * zoom, Gdk::INTERP_BILINEAR);
-  image.set(pixbuf);
-}
-
-//method for automatic image resizing
-void EditView::fitImage(Gtk::Allocation &allocation) {
-  if(window->zoom_slider.get_state_flags() & Gtk::STATE_FLAG_FOCUSED)
-    return;
-  loadImage();
-  return;
-}
-
-EditView::EditView(MainWindow *w) : window(w),
-  left_button(Gtk::Stock::GO_BACK), right_button(Gtk::Stock::GO_FORWARD),
-  basic_box(Gtk::ORIENTATION_VERTICAL), colors_box(Gtk::ORIENTATION_VERTICAL),
-  effects_box(Gtk::ORIENTATION_VERTICAL), basic_label("Basic editing"),
-  colors_label("Colors modification"), effects_label("Other effects"),
-  library_button("Back to library"), undo_button(Gtk::Stock::UNDO),
-  redo_button(Gtk::Stock::REDO) {
-
-  //obtaining UserInterface instance
-  gui = UserInterface::getInstance();
-
-  //editing widgets
-  edit_buttons.set_margin_left(2);
-  edit_buttons.set_margin_right(2);
-  edit_buttons.set_margin_top(1);
-  edit_buttons.set_margin_bottom(1);
-  edit_buttons.set_spacing(2);
-
-  //organising widgets
-  edit_buttons.pack_start(undo_button, true, true);
-  edit_buttons.pack_start(redo_button, true, true);
-  basic_box.pack_start(basic_label, true, true);
-  colors_box.pack_start(colors_label, true, true);
-  effects_box.pack_start(effects_label, true, true);
-  window->left_box.remove(window->notebook);
-  window->left_box.remove(window->toolbar);
-  window->left_box.pack_start(library_button, false, false);
-  window->left_box.pack_start(window->toolbar, false, false);
-  window->left_box.pack_start(window->notebook, true, true);
-  window->left_box.pack_start(edit_buttons, false, false);
-  window->notebook.append_page(basic_box, "Basic");
-  window->notebook.append_page(colors_box, "Colors");
-  window->notebook.append_page(effects_box, "Effects");
-  window->bottom_box.pack_start(left_button, false, false);
-  window->bottom_box.pack_start(right_button, false, false);
-  window->display.add(image);
-
-  //connecting signals
-  right_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::nextImage));
-  left_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
-  library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
-  zoom_signal = window->zoom_slider.signal_value_changed().connect(sigc::mem_fun(this, &EditView::zoomImage));
-  fit_signal = window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &EditView::fitImage));
-  page_signal = window->notebook.signal_switch_page().connect(sigc::mem_fun(this, &EditView::onPageSwitch));
-
-  //loading image
-  loadImage();
-}
-
-EditView::~EditView() {
-  window->statusbar.set_label("");
-  window->notebook.remove_page(basic_label);
-  window->notebook.remove_page(colors_label);
-  window->notebook.remove_page(effects_label);
-  window->left_box.remove(library_button);
-  window->bottom_box.remove(left_button);
-  window->bottom_box.remove(right_button);
-  window->display.remove();
-  zoom_signal.disconnect();
-  fit_signal.disconnect();
-  page_signal.disconnect();
-}
-
-void EditView::onPageSwitch(Gtk::Widget *page, guint number) {
-  edit_buttons.get_parent()->remove(edit_buttons);
-  dynamic_cast<Gtk::Box *>(page)->pack_end(edit_buttons, false, false);
-}
-
-LibraryView::LibraryView(MainWindow *w) : window(w),
-  tags_label("tags browsing") {
-
-  //obtaining UserInterface instance
-  gui = UserInterface::getInstance();
-
-  //organising widgets
-  window->left_box.remove(window->notebook);
-  window->left_box.remove(window->toolbar);
-  window->left_box.pack_start(window->toolbar, false, false);
-  window->left_box.pack_start(window->notebook, true, true);
-  window->notebook.append_page(directory_tree, "Folders");
-  window->notebook.append_page(tags_label, "Tags");
-  window->display.add(images);
-
-  //loading directory tree
-  fillDirectoryTree();
-}
-
-LibraryView::~LibraryView() {
-  window->statusbar.set_label("");
-  window->notebook.remove_page(directory_tree);
-  window->notebook.remove_page(tags_label);
-}
-
-void LibraryView::fillDirectoryTree() {
-  directory_model = Gtk::TreeStore::create(columns);
-  directory_tree.set_model(directory_model);
-
-  Gtk::TreeModel::Row row = *(directory_model->append());
-  row[columns.name] = "2012";
-
-  Gtk::TreeModel::Row childrow = *(directory_model->append(row.children()));
-  childrow[columns.name] = "zdjecia1";
-
-  childrow = *(directory_model->append(row.children()));
-  childrow[columns.name] = "zdjecia2";
-
-  row = *(directory_model->append());
-  row[columns.name] = "2011";
-
-  childrow = *(directory_model->append(row.children()));
-  childrow[columns.name] = "zdjecia3";
-
-  directory_tree.append_column("", columns.name);
-  
-  directory_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
-}
-
-void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
-  Gtk::TreeModel::iterator row = directory_model->get_iter(path);
-  if(!row) return;
-  std::cout << (*row)[columns.name] << " selected" << std::endl;
 }
