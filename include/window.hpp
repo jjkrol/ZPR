@@ -67,7 +67,7 @@ class WindowContent {
   public:
     WindowContent() {};
     virtual ~WindowContent() {};
-    virtual void changePhoto(Photo *) = 0;
+    virtual void updatePixbuf() = 0;
 };
 
 /** @class EditView
@@ -97,8 +97,7 @@ class EditView : public WindowContent {
     Gtk::Label basic_label, colors_label, effects_label;
     Gtk::Button library_button, undo_button, redo_button;
 
-    //storing current photo
-    Photo *current_photo;
+    //storing pixbuf of current photo
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
     //handling signals
@@ -114,7 +113,7 @@ class EditView : public WindowContent {
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
 
     //allows UserInterface class to change displayed Photo
-    virtual void changePhoto(Photo *);
+    virtual void updatePixbuf();
 };
 
 /** @class LibraryView
@@ -154,6 +153,6 @@ class LibraryView : public WindowContent {
     void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 
     //other methods
-    virtual void changePhoto(Photo *) {};
+    virtual void updatePixbuf() {};
     void fillDirectoryTree();
 };

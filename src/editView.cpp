@@ -51,7 +51,9 @@ EditView::EditView(MainWindow *w) : window(w),
   page_signal = window->notebook.signal_switch_page().connect(sigc::mem_fun(this, &EditView::onPageSwitch));
 
   //loading image
-  loadImage();
+  //current_photo = *(gui->current_photo);
+  //current_pixbuf = current_photo->getPixbuf();
+  updatePixbuf();
 }
 
 /// @fn EditView::~EditView()
@@ -70,13 +72,10 @@ EditView::~EditView() {
   page_signal.disconnect();
 }
 
-/// @fn void EditView::changePhoto(Photo *photo)
+/// @fn void EditView::updatePixbuf()
 /// @brief Method for changing displayed Photo.
-/// @param photo Photo object that will be set by this method as current.
-void EditView::changePhoto(Photo *photo) {
-  if(!photo) return;
-  current_photo = photo;
-  current_pixbuf = photo->getPixbuf();
+void EditView::updatePixbuf() {
+  current_pixbuf = ((*gui->current_photo))->getPixbuf();
 }
 
 /// @fn void EditView::loadImage()
@@ -88,7 +87,7 @@ void EditView::loadImage() {
   if(!pixbuf) return;
 
   //displaying filename
-  window->statusbar.set_label((current_photo->getFilename()).string());
+  window->statusbar.set_label(((*(gui->current_photo))->getFilename()).string());
 
   //fitting image if needed
   if(rectangle.get_width() < pixbuf->get_width() ||
