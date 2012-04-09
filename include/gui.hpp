@@ -17,6 +17,7 @@ class Photo;
 class UserInterface {
   public:
     friend class MainWindow;
+    friend class LibraryView;
     friend class EditView;
 
     //allows access to unique class instance
@@ -32,7 +33,7 @@ class UserInterface {
 
     //communication with CoreController
     CoreController *core;
-    Directory *current_dir;
+    Directory *root_dir, *current_dir;
     std::vector<Photo*> photos;
     std::vector<Photo*>::iterator current_photo;
 

@@ -22,8 +22,8 @@ UserInterface* UserInterface::getInstance(int argc, char *argv[]) {
 /// @param argv Table of parameters (for handling GTK+ command line arguments). 
 UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
   core = CoreController::getInstance();
-  current_dir = core->getDirectoryTree();
-  photos = current_dir->getPhotos();
+  root_dir = core->getDirectoryTree();
+  photos = root_dir->getPhotos();
   current_photo = photos.begin();
 }
 
@@ -31,7 +31,7 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
 /// @brief Method responsible for creating MainWindow and loading Photo object.
 void UserInterface::init() {
   main_window = new MainWindow();
-  main_window->showEditView();
+  main_window->showLibraryView();
   main_window->show_all_children();
   if(main_window) kit.run(*main_window);
 }

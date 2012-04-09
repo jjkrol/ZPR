@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 
 class WindowContent;
+class Directory;
 
 /** @class MainWindow
  *  @brief Class representing main window of an application.
@@ -156,4 +157,5 @@ class LibraryView : public WindowContent {
     //other methods
     virtual void updatePixbuf() {};
     void fillDirectoryTree();
+    void addSubdirectories(Directory *, Gtk::TreeModel::Row &);
 };
