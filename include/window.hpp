@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 
 class WindowContent;
+class Directory;
 
 /** @class MainWindow
  *  @brief Class representing main window of an application.
@@ -34,21 +35,22 @@ class MainWindow : public Gtk::Window {
     //menubar creating
     Glib::RefPtr<Gtk::UIManager> ui_manager;
     Glib::RefPtr<Gtk::ActionGroup> action_group;
+    Glib::RefPtr<Gtk::RadioAction> library_view, edit_view;
 
     //bottom bar widgets
     Gtk::Scale zoom_slider;
     Gtk::Image zoom_icon;
     Gtk::Label statusbar;
 
-    //top-down buttons
+    //toolbar
     Gtk::ToolButton save_button, delete_button;
     Gtk::ToolButton star_button, tags_button;
 
     //constructor and desctructor
     MainWindow();
-    ~MainWindow() {};
+    ~MainWindow();
 
-    //signal handlers for changing type if view
+    //signal handlers for changing type of view
     void showLibraryView();
     void showEditView();
 
@@ -66,7 +68,7 @@ class WindowContent {
   public:
     WindowContent() {};
     virtual ~WindowContent() {};
-    virtual void changePhoto(Photo *) = 0;
+    virtual void updatePixbuf() = 0;
 };
 
 /** @class EditView
@@ -78,6 +80,7 @@ class EditView : public WindowContent {
   public:
     friend class MainWindow;
     friend class UserInterface;
+
   private:
     EditView() {};
     ~EditView();
@@ -93,10 +96,10 @@ class EditView : public WindowContent {
     Gtk::ToolButton left_button, right_button;
     Gtk::Box basic_box, colors_box, effects_box;
     Gtk::Label basic_label, colors_label, effects_label;
-    Gtk::Button library_button, undo_button, redo_button;
+    Gtk::ToolButton library_button;
+    Gtk::Button undo_button, redo_button;
 
-    //storing current photo
-    Photo *current_photo;
+    //storing pixbuf of current photo
     Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
 
     //handling signals
@@ -112,7 +115,7 @@ class EditView : public WindowContent {
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
 
     //allows UserInterface class to change displayed Photo
-    virtual void changePhoto(Photo *);
+    virtual void updatePixbuf();
 };
 
 /** @class LibraryView
@@ -124,6 +127,7 @@ class LibraryView : public WindowContent {
   public:
     friend class MainWindow;
     friend class UserInterface;
+
   private:
     LibraryView() {};
     ~LibraryView();
@@ -135,9 +139,23 @@ class LibraryView : public WindowContent {
 
     //widgets
     Gtk::DrawingArea images;
-    Gtk::TreeView directory_tree;
     Gtk::Label tags_label;
-    Gtk::Button edit_button;
 
-    virtual void changePhoto(Photo *) {};
+    //directory tree
+    class ModelColumns : public Gtk::TreeModel::ColumnRecord {
+      public:
+        ModelColumns() { add(name); }
+        Gtk::TreeModelColumn<Glib::ustring> name;
+    } columns;
+
+    Gtk::TreeView directory_tree;
+    Glib::RefPtr<Gtk::TreeStore> directory_model;
+
+    //signal handlers
+    void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
+
+    //other methods
+    virtual void updatePixbuf() {};
+    void fillDirectoryTree();
+    void addSubdirectories(Directory *, Gtk::TreeModel::Row &);
 };

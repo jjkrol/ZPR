@@ -16,7 +16,9 @@ asynchronous = [
 ]
 gui = [
     'src/gui.cpp',
-    'src/window.cpp'
+    'src/window.cpp',
+    'src/libraryView.cpp',
+    'src/editView.cpp'
 ]
 database = [
     'src/dbConnector.cpp',

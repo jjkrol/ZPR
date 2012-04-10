@@ -6,6 +6,10 @@
     <menu action='EditMenu'>
       <menuitem action='EditPreferences'/>
     </menu>
+    <menu action='ViewMenu'>
+      <menuitem action='LibraryView'/>
+      <menuitem action='EditView'/>
+    </menu>
     <menu action='HelpMenu'>
       <menuitem action='HelpAbout'/>
     </menu>

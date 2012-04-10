@@ -10,14 +10,14 @@ class Photo;
 
 /** @class UserInterface
  *  @brief Singleton class representing Graphical User Interface.
- *
- *  Class uses GTKmm, it serves as a link between user and program
- *  taking commands from user and sending them to the Core class.
+ *         Class uses GTKmm, it serves as a link between user and program
+ *         taking commands from user and sending them to the Core class.
  */
 
 class UserInterface {
   public:
     friend class MainWindow;
+    friend class LibraryView;
     friend class EditView;
 
     //allows access to unique class instance
@@ -33,7 +33,7 @@ class UserInterface {
 
     //communication with CoreController
     CoreController *core;
-    Directory *current_dir;
+    Directory *root_dir, *current_dir;
     std::vector<Photo*> photos;
     std::vector<Photo*>::iterator current_photo;
 
