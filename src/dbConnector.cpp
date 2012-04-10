@@ -54,16 +54,15 @@ DBConnector* SQLiteConnector::getInstance() {
 ////////////////////////////////////////////////////////////////////////////////
 //Public methods
 ////////////////////////////////////////////////////////////////////////////////
-int SQLiteConnector::open(const string f) {
-  //first the name of a database file stored in this object is changed
-  if(filename.empty())
-    filename=f;
-  else
+int SQLiteConnector::open(const string filename) {
+  //if the name of the database is empty or database has been already opened
+  //then the FAILURE flag should be returned at the very beginning
+  if(filename.empty() || database)
     return FAILURE;
 
   //if the object exists, function tries to open the database
   if(Disk::exists(filename)) {
-    if(sqlite3_open(filename.c_str(),&database) != SQLITE_OK)
+    if(sqlite3_open(filename.c_str(), &database) == SQLITE_OK)
       return OPENED;
     return FAILURE;
   }
@@ -79,12 +78,13 @@ int SQLiteConnector::open(const string f) {
   return FAILURE;
 }
 
-void SQLiteConnector::close() {
-  saveSettings();
-  sqlite3_close(database);
+int SQLiteConnector::close() {
+  if(! (database && saveSettings()) )
+    return FAILURE;
 
+  sqlite3_close(database);
   database = 0;
-  filename.erase();
+  return CLOSED;
 }
 
 bool SQLiteConnector::hasChanged() const{
@@ -195,18 +195,38 @@ bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
 }
 
 bool SQLiteConnector::deletePhoto(const path &photos_path) {
-  //TODO deleting adequate row from tags_photos table
   sqlite3_stmt *stmt;
-  const char *query = "DELETE FROM photos WHERE path=? ;";
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) == SQLITE_OK) {
-    sqlite3_bind_blob(stmt, 1,&photos_path, sizeof(photos_path), SQLITE_STATIC);
+  //Firstly, photo should be deleted from table of photos
+  string query = "DELETE FROM photos WHERE path=? ;";
 
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-  }
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
+      != SQLITE_OK)
+    return false;
 
-  return !(reportErrors(query));
+  sqlite3_bind_blob(stmt, 1,&photos_path, sizeof(photos_path), SQLITE_STATIC);
+  sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  if(reportErrors(query.c_str()))
+    return false;
+
+  //@todo
+  //Secondly, all entries with adequate photo_ids in table linking
+  //photos with corresponding tags should be removed.
+  //Jak usuwać w SQLu wpisy z tabel gdzie wartość photo_id robi za klucz
+  //obcy?
+  /*query = "DELETE";
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+    return false;
+
+  sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  */
+
+  return !reportErrors(query.c_str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -328,37 +348,68 @@ bool SQLiteConnector::reportErrors(const char * query) const {
   return false;
 }
 
-//Methods defined beneath this line are used only for tests and should not
-//be included into final version of the program
-/*ResultTable SQLiteConnector::sendQuery(string query) {
-  sqlite3_stmt *statement;
-  vector<vector<string> > results;
-
-  if(sqlite3_prepare_v2(database,query.c_str(),-1,&statement,0) == SQLITE_OK) {
-    int columns = sqlite3_column_count(statement);
-
-    while(sqlite3_step(statement) == SQLITE_ROW) {
-      //if result_state equals SQLITE_ROWS that means that there is
-      //result_state = sqlite3_step(statement);
-      vector<string> values;
-      for(int i=0 ; i<columns ; ++i) {
-        //NULL can be returned as a result what would cause
-        //a runtime error, if not proceeded appropriately.
-        //That's why if NULL is returned the empty string is pushed
-        //to the vector (line)
-        string s;
-        char *tmp = (char*)sqlite3_column_text(statement,i);
-        if(tmp) s=tmp;
-        values.push_back(s);
-      }
-      results.push_back(values);
-    }
-    sqlite3_finalize(statement);
+bool SQLiteConnector::addTags(
+     const PhotoPath &photo, const vector<string> &tags) {
+  for(vector<string>::const_iterator i = tags.begin();
+      i != tags.end() ; i++) {
+    if(!addTag(photo,*i))
+      return false;
   }
-  string error = sqlite3_errmsg(database);
-  if(error != "not an error")
-    std::cout << query << " " << error << std::endl;
 
-  return results;
-}*/
+  return true;
+}
 
+bool SQLiteConnector::addTag(const PhotoPath &photo, const string &tag) {
+  //If a tag haven't existed before it should be created into tags table
+  //first. Then entry linking photo with a tag should be inserterted
+  //into photos_taggs table.
+  sqlite3_stmt *stmt;
+
+  //@todo
+  //Is the following query correct? To be continued...
+  string query = "IF NOT EXISTS (SELECT * FROM tags WHERE name=" + tag + ") "
+                  "THEN INSERT INTO tags VALUES(NULL," + tag + ") ;";
+
+  do {
+    if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0))
+        != SQLITE_OK)
+      return false;
+
+    if(sqlite3_step(stmt) != SQLITE_OK)
+      return false;
+    
+  } while ((sqlite3_finalize(stmt)) == SQLITE_SCHEMA);
+
+  //@todo
+  //Now it's time to get photo_id and tag_id using some smart SQL query.
+  //query = "INSERT OR REPLACE INTO photos_tags VALUES(?,?);";
+  return true;
+}
+
+bool SQLiteConnector::getPhotosWithTags(
+     const std::vector<std::string> &tags, std::vector<PhotoPath> &photos) {
+  //@todo
+  //Warnigs:
+  //1. If vector of tags is empty, return false immediately.
+  //2. Make vector of tag_ids corresponding to tags' names specified
+  //   in the first argument.
+  //3. Make a vector of photos that are linked with all of the specified tags.
+
+  //query1: "SELECT paths FROM photos WHERE " + query2 + ";"
+  //query2: "EXISTS (SELECT tag_id1 FROM photos_tags)"
+  //        "AND EXISTS (SELECT tag_id2 FROM photos_tags);";
+  //
+  //vector<int>::iterator i = tag_ids.begin();
+  //string query2 = "EXISTS (SELECT " + *(i++) + " FROM photos_tags)";
+  //for(i ; i != tag_ids.end() ; i++) {
+  //  query2 += " AND EXISTS (SELECT " + *i + " FROM photos_tags)";
+  //}
+
+  return false;
+}
+
+bool SQLiteConnector::getPhotosTags(
+  const PhotoPath &photo, vector<string> &tags) {
+  //@todo
+  return false;
+}

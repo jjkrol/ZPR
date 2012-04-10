@@ -69,6 +69,47 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_CHECK(delta->hasPhotos() == false);
   }
 
+ /** BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
+   * Functions to test:
+   *  (private) bool createDB();
+   *  :: TESTED :: int open(const string filename);
+   *
+   *  (private) bool reportErrors(const char *query) const;
+   *  (private) bool saveSettings();
+   *  :: TESTED :: void close();
+   *
+   *  :: TESTED :: bool addPhoto(const PhotoPath &photo);
+   *  (private) bool addDirectoryToDB(const DirectoryPath &dir);
+   *  (private) bool addPhotosFromDirectory(const DirectoryPath &dir);
+   *  bool addPhotosFromDirectories(vector<DirectoryPath> &dirs);
+   *  bool addPhotosFromDirectories(
+   *    const path &main_dir, vector<DirectoryPath> &excluded_dirs);
+   *  
+   *  (private) bool getDirectoriesFromDB(vector<DirectoryPath> &dirs) const;
+   *  (private) int calulateChecksum() const;
+   *  (private) bool getChecksumFromDB(int &checksum) const;
+   *  bool hasChanged() const;
+   *
+   *  bool movePhoto(
+   *    const PhotoPath &old_path, const PhotoPath &new_path);
+   *  
+   *  bool deletePhoto(const PhotoPath &photos_path);
+   *
+    DBConnector *sqlconnector = DBConnectorFactory::getInstance(" ");
+
+    BOOST_CHECK(sqlconnector->close() == DBConnector::FAILURE);
+    BOOST_REQUIRE(sqlconnector->open("DB.sqlite")
+                  == (DBConnector::OPENED | DBConnector::CREATED));
+    BOOST_REQUIRE(sqlconnector->close() == DBConnector::CLOSED);
+
+    BOOST_REQUIRE(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
+    BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::FAILURE);
+
+    BOOST_CHECK((sqlconnector->addPhoto("test_tree/1.jpg")));
+
+    //BOOST_CHECK(addPhotosFromDirectories());
+    sqlconnector->close();
+  }*/
 
 BOOST_AUTO_TEST_SUITE_END()
 

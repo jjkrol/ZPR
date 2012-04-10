@@ -62,31 +62,68 @@ public:
  *  structures.
  *  @returns flags defined in DBConnector::Flags
  *
+ *  @fn virtual virtual void close() = 0;
+ *  @brief closes the connection with database
+ * 
  *  @fn virtual inline bool hasChanged() const = 0;
  *  @brief Tells if database was changed since last usage of imgview
  *  @returns true if database has changed 
  *  
- *  @fn virtual virtual void close() = 0;
- *  @brief closes the connection with database
- * 
+ *  @fn virtual bool addPhotosFromDirectories(
+ *        const boost::filesystem::path &main_dir,
+ *        const srd::vector<DirectoryPath> &excluded_dirs) = 0
+ *  @brief adds photos from the main directory recursively excluding
+ *  directories specified in the second argument as a vector of paths.
+ *  @returns true if run successfully and false otherwise
+ *
+ *  @fn virtual bool addPhotosFromDirectories(
+ *        const std::vector<DirectoryPath> &dirs
+ *      ) = 0;
+ *  @brief adds photos from the directories included in the vector
+ *  (recursively).
+ *  @returns true value when run successfully and false value otherwise
+ *
+ *  @fn virtual bool addPhoto(const PhotoPath &photo) = 0;
+ *  @brief adds a single photo to database
+ *  @returns a true value when run successfully and false otherwise
+ *
  *  @fn virtual bool movePhoto(
  *        const PhotoPath &old_path,
  *        const PhotoPath &new_path) = 0;
- *  @brief moves photo from old_path to new path
+ *  @brief moves photo from old path to new path
  *  @returns true if photo has been moved successfully and false otherwise
  *
- *  @fn virtual bool deletePhoto(const PhotoPath &photos_path) =0;
+ *  @fn virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
  *  @brief removes photo from database
  *  @returns true if photo has been removed successfully and false otherwise
+ *
+ *  @fn virtual bool addTags(
+ *        const PhotoPath &photo, const std::vector<std::string> &tags) = 0;
+ *  @brief add tags to photo specified in the first argument.
+ *  @returns true value if run successfully and false value otherwise
+ *
+ *  @fn virtual bool getPhotosWithTags(
+ *        const std::vector<std::string> &tags,
+ *        std::vector<PhotoPath> &photos_output) = 0;
+ *  @brief takes tags specified in a first argument and puts photos
+ *  that are tagged with all specified tags in result vector: photos_output
+ *  @returns true value when run successfully and false value otherwise
+ *
+ *  @fn virtual bool getPhotosTags(
+ *        const PhotoPath &photo, std::vector<std::string> &tags_output) = 0;
+ *  @brief takes a path of photo and puts all corresponding tags in a vector
+ *  specified in a second argument (tags_output)
+ *  @returns a true value when run successfully and a false value otherwise
 */
   enum Flags {
     FAILURE = 0x0,
     OPENED  = 0x1,
-    CREATED = 0x2
+    CREATED = 0x2,
+    CLOSED  = 0x4
   };
 
   virtual int open(const std::string filename) = 0;
-  virtual void close() = 0;
+  virtual int close() = 0;
   virtual inline bool hasChanged() const = 0;
 
   virtual bool addPhotosFromDirectories(
@@ -97,9 +134,15 @@ public:
   virtual bool addPhoto(const PhotoPath &photo) = 0;
 
   virtual bool movePhoto(
-    const PhotoPath &old_path,
-    const PhotoPath &new_path) = 0;
+    const PhotoPath &old_path, const PhotoPath &new_path) = 0;
   virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
+  virtual bool addTags(
+    const PhotoPath &photo, const std::vector<std::string> &tags) = 0;
+  virtual bool getPhotosWithTags(
+    const std::vector<std::string> &tags,
+    std::vector<PhotoPath> &photos_output) = 0;
+  virtual bool getPhotosTags(
+    const PhotoPath &photo, std::vector<std::string> &tags_output) = 0;
 
 protected:
   virtual ~DBConnector(){};
@@ -132,7 +175,7 @@ public:
   *
 */
   int open(const std::string filename);
-  void close();
+  int close();
   inline bool hasChanged() const;
 
   bool addPhotosFromDirectories(
@@ -145,9 +188,17 @@ public:
     const PhotoPath &old_path,
     const PhotoPath &new_path);
   bool deletePhoto(const PhotoPath &photos_path);
+  bool addTags(const PhotoPath &photo, const std::vector<std::string> &tags);
+  bool getPhotosWithTags(
+    const std::vector<std::string> &tags,
+    std::vector<PhotoPath> &photos_output);
+  bool getPhotosTags(
+    const PhotoPath &photo, std::vector<std::string> &tags_output);
 
 private:
-  SQLiteConnector(){}; //private constructor is a part of singleton pattern
+  SQLiteConnector(){
+    database = 0;
+  }; //private constructor is a part of singleton pattern
 
   /*! @var sqlite3 *database;
    *  @brief holds a pointer to opened database
@@ -197,8 +248,6 @@ private:
   */
 
   sqlite3 *database;
-  std::string filename;
-  std::vector<DirectoryPath> directories;
 
   static DBConnector *instance;
   static DBConnector * getInstance();
@@ -211,6 +260,7 @@ private:
 
   bool getDirectoriesFromDB(std::vector<DirectoryPath> &dirs) const;
   bool getChecksumFromDB(int &checksum) const;
+  bool addTag(const PhotoPath &photo, const std::string &tag);
 
   int calculateChecksum() const;
   inline bool reportErrors(const char *query) const;
