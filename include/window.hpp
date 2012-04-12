@@ -72,7 +72,7 @@ class WindowContent {
 };
 
 /** @class EditView
- *  @brief Uses Decorator pattern to switch MainWindow to photo edit view
+ *  @brief Uses Decorator pattern to switch MainWindow to photo echeckDatabasedit view
  *         and handles tasks associated with this view.
  */
 
@@ -141,6 +141,9 @@ class LibraryView : public WindowContent {
     Gtk::DrawingArea images;
     Gtk::Label tags_label;
 
+    //database prompt
+    Gtk::InfoBar *db_prompt;
+
     //directory tree
     class ModelColumns : public Gtk::TreeModel::ColumnRecord {
       public:
@@ -157,5 +160,6 @@ class LibraryView : public WindowContent {
     //other methods
     virtual void updatePixbuf() {};
     void fillDirectoryTree();
+    void promptAboutDatabase();
     void addSubdirectories(Directory *, Gtk::TreeModel::Row &);
 };

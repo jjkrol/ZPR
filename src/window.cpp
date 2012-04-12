@@ -14,7 +14,7 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   gui = UserInterface::getInstance();
 
   //customizing window
-  set_title("Image Viewer");
+  set_title("Imagine");
   maximize();
 
   //editing widgets
@@ -119,9 +119,10 @@ void MainWindow::showAbout() {
   authors.push_back(" jjkrol - Jakub Król");
   authors.push_back(" mc - Maciej Suchecki");
   authors.push_back(" nme - Jacek Witkowski");
-  dialog.set_program_name("ImgView");
-  dialog.set_comments("GTK+ simple photo organiser");
+  dialog.set_program_name("Imagine");
+  dialog.set_copyright("IMAGINE - Image Manipulation And orGanisation Is Now Easy!");
+  dialog.set_comments("GTK+ smart photo organiser and editor");
+  //dialog.set_logo(Gdk::Pixbuf::create_from_file("logo_beta.png"));
   dialog.set_authors(authors);
-  /// @todo set logo
   dialog.run();
 }
