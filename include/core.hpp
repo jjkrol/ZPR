@@ -4,12 +4,13 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/thread.hpp>
-
+#include "asynchronous.hpp"
 
 
 class Disk;
 class Photo;
 class Directory;
+class DBConnector;
 class UserInterface;
 class ConfigurationManager;
 
@@ -73,11 +74,6 @@ public:
    */
   photos_t getPhotosWithTags(std::vector<std::string>);
 
-  /**
-   *
-   */
-  std::vector<std::string> getSearchHistory();
-
 private:
   CoreController (std::string forcedConfigPath="");
   CoreController& operator= (const CoreController&);
@@ -86,11 +82,13 @@ private:
 
   void manageConfig(std::string);
   void manageDisk();
+  void manageDatabase();
   void doSomeLongLastingTask();
 
   static CoreController* instance;
+  DBConnector* db;
   UserInterface *gui;
   ConfigurationManager* configManager;
   Disk* disk;
-  boost::thread disk_thread;
+  boost::thread guiThread;
 };
