@@ -37,13 +37,11 @@ class Photo {
     /**
      * @TODO Implement this
      */
-    boost::gil::rgb8_image_t getThumbnail();
+    Glib::RefPtr<Gdk::Pixbuf> getThumbnail();
 
     /**
      * @TODO optimisation, implement various image types
      */
-    boost::gil::rgb8_image_t getImage();
-
     Glib::RefPtr<Gdk::Pixbuf> getPixbuf();
 
     /**
@@ -52,17 +50,14 @@ class Photo {
     boost::filesystem::path getPath();
     boost::filesystem::path getFilename();
 
-    /// 
     /**
      * @brief moves photo to a new destination in the filesystem 
      * and updates the database
-     *@TODO db function needed
      */
     void      move(boost::filesystem::path destinationPath);
 
     /**
      * @brief deletes the photo only from library (stays on disk)
-     * @TODO db function needed
      * @warning this function also destroys the photo object
      */
     void      deleteFromLibrary();
@@ -73,12 +68,22 @@ class Photo {
      */
     void      deleteFromLibraryAndDisk();
 
+    /**
+     * @brief adds a new tag to the photo
+     */
     void      addTag(std::string tag);
 
+    /**
+     * removes tag from the photo
+     * @TODO db function
+     */
     void      removeTag(std::string tag);
 
     taglist_t getTags();
 
+    /**
+     * checks if the photo has tag a certain tag
+     */
     bool      hasTag(std::string tag);
 
   private:

@@ -14,6 +14,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <string>
 #include <boost/filesystem.hpp>
 #include <sqlite3.h>
@@ -92,19 +93,19 @@ public:
  *  @returns true if photo has been removed successfully and false otherwise
  *
  *  @fn virtual bool addTags(
- *        const PhotoPath &photo, const std::vector<std::string> &tags) = 0;
+ *        const PhotoPath &photo, const std::set<std::string> &tags) = 0;
  *  @brief add tags to photo specified in the first argument.
  *  @returns true value if run successfully and false value otherwise
  *
  *  @fn virtual bool getPhotosWithTags(
- *        const std::vector<std::string> &tags,
+ *        const std::set<std::string> &tags,
  *        std::vector<PhotoPath> &photos_output) = 0;
  *  @brief takes tags specified in a first argument and puts photos
  *  that are tagged with all specified tags in result vector: photos_output
  *  @returns true value when run successfully and false value otherwise
  *
  *  @fn virtual bool getPhotosTags(
- *        const PhotoPath &photo, std::vector<std::string> &tags_output) = 0;
+ *        const PhotoPath &photo, std::set<std::string> &tags_output) = 0;
  *  @brief takes a path of photo and puts all corresponding tags in a vector
  *  specified in a second argument (tags_output)
  *  @returns a true value when run successfully and a false value otherwise
@@ -130,12 +131,12 @@ public:
   virtual bool deleteDirectories(const std::vector<DirectoriesPath> &dirs) = 0;
 
   virtual bool addTags(
-    const PhotoPath &photo, const std::vector<std::string> &tags) = 0;
+    const PhotoPath &photo, const std::set<std::string> &tags) = 0;
   virtual bool getPhotosWithTags(
-    const std::vector<std::string> &tags,
+    const std::set<std::string> &tags,
     std::vector<PhotoPath> &photos_output) = 0;
   virtual bool getPhotosTags(
-    const PhotoPath &photo, std::vector<std::string> &tags_output) = 0;
+    const PhotoPath &photo, std::set<std::string> &tags_output) = 0;
 
 protected:
   virtual ~DBConnector(){};
@@ -183,12 +184,12 @@ public:
     const PhotoPath &old_path,
     const PhotoPath &new_path);
   bool deletePhoto(const PhotoPath &photos_path);
-  bool addTags(const PhotoPath &photo, const std::vector<std::string> &tags);
+  bool addTags(const PhotoPath &photo, const std::set<std::string> &tags);
   bool getPhotosWithTags(
-    const std::vector<std::string> &tags,
+    const std::set<std::string> &tags,
     std::vector<PhotoPath> &photos_output);
   bool getPhotosTags(
-    const PhotoPath &photo, std::vector<std::string> &tags_output);
+    const PhotoPath &photo, std::set<std::string> &tags_output);
 
 private:
   SQLiteConnector(){

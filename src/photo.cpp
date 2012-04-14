@@ -5,6 +5,10 @@
 using namespace boost::gil;
 using namespace std;
 
+/**
+ * @TODO optimize tags (caching)
+ */
+
 Photo* Photo::getInstance(boost::filesystem::path argumentPath){
   /// photos are saved in a map indexed by paths, so you can't initialize
   /// two instances of the same photo.
@@ -26,8 +30,7 @@ Photo* Photo::getInstance(boost::filesystem::path argumentPath){
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
   db = DBConnectorFactory::getInstance("kotek");
 
-  //@TODO load photos from db
-  
+  db->getPhotosTags(photoPath.string(), tags);  
   disk = Disk::getInstance();
 }
 
@@ -36,12 +39,8 @@ Photo::~Photo(){
   initializedPhotos.erase(photoPath);
 }
 
-rgb8_image_t Photo::getThumbnail(){
-  return getImage();
-}
-
-rgb8_image_t Photo::getImage(){
-  //FIXME
+Glib::RefPtr<Gdk::Pixbuf> Photo::getThumbnail(){
+  return getPixbuf();
 }
 
 Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
@@ -56,7 +55,6 @@ boost::filesystem::path Photo::getFilename(){
   return photoPath.filename();
 }
 
-//@TODO should be bool?
 void Photo::move(boost::filesystem::path destinationPath){
   boost::filesystem::path newPathWithFilename = destinationPath;
   newPathWithFilename /= getFilename();
@@ -69,7 +67,6 @@ void Photo::move(boost::filesystem::path destinationPath){
   moveThread.join();
 }
 
-//@TODO should be bool?
 void Photo::deleteFromLibrary(){
   db->deletePhoto(photoPath);
   delete this;
@@ -82,7 +79,9 @@ void Photo::deleteFromLibraryAndDisk(){
 }
 
 void      Photo::addTag(std::string tag ){
-  ///@TODO use db function
+  std::set<std::string> argVector;
+  argVector.insert(tag);
+  db->addTags(photoPath, argVector);
   tags.insert(tag);
 }
 

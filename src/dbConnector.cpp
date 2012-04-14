@@ -16,6 +16,7 @@ using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
+using std::set;
 
 /** @todo Concrete versions of DBConnector should
   * invoke the Register() function to register their types
@@ -378,9 +379,9 @@ bool SQLiteConnector::reportErrors(const char * query) const {
 }
 
 bool SQLiteConnector::addTags(
-     const PhotoPath &photo, const vector<string> &tags) {
-  for(vector<string>::const_iterator i = tags.begin();
-      i != tags.end() ; ++i) {
+     const PhotoPath &photo, const set<string> &tags) {
+  for(set<string>::const_iterator i = tags.begin();
+      i != tags.end() ; i++) {
     if(!addTag(photo,*i))
       return false;
   }
@@ -416,7 +417,7 @@ bool SQLiteConnector::addTag(const PhotoPath &photo, const string &tag) {
 }
 
 bool SQLiteConnector::getPhotosWithTags(
-     const std::vector<std::string> &tags, std::vector<PhotoPath> &photos) {
+     const std::set<std::string> &tags, std::vector<PhotoPath> &photos) {
   //@todo
   //Warnigs:
   //1. If vector of tags is empty, return false immediately.
@@ -438,7 +439,7 @@ bool SQLiteConnector::getPhotosWithTags(
 }
 
 bool SQLiteConnector::getPhotosTags(
-  const PhotoPath &photo, vector<string> &tags) {
+  const PhotoPath &photo, set<string> &tags) {
   //@todo
   return false;
 }
