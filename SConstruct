@@ -35,7 +35,7 @@ app = core + gui + database + asynchronous
 env = Environment(CCFLAGS = CCFLAGS, LINKFLAGS = LINKFLAGS)
 env.Append(LIBS=File('/usr/lib/libboost_unit_test_framework.a'))
 env.Program(
-  target = 'imgview',
+  target = 'imagine',
   source = app + main
     )
 

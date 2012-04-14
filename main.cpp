@@ -8,6 +8,7 @@
 int main(int argc, char *argv[]) {
   CoreController* core = CoreController::getInstance();
   core->startApplication(argc, argv);
+  core->destroy();
 
 // JUST FOR TESTS
   #if DATABASE_TESTING == true

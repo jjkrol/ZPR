@@ -3,14 +3,15 @@
 #include <boost/filesystem.hpp>
 #include <gtkmm.h>
 #include <unistd.h>
-
 #include "asynchronous.hpp"
+
 
 /**
  * this is a shorthand for frequently used vector
  * containing paths
  */
 typedef std::vector<boost::filesystem::path> paths_t;
+
 
 /** @class Disk
  *  @brief A class providing an adapter to the disk space.
@@ -30,7 +31,7 @@ class Disk : public Asynchronous {
     bool hasSubdirectories(boost::filesystem::path directoryPath);
 
     Glib::RefPtr<Gdk::Pixbuf> getPhotoFile(boost::filesystem::path photoPath);
-    
+
     void deletePhoto(boost::filesystem::path photoPath);
 
     boost::filesystem::path movePhoto(boost::filesystem::path sourcePath, boost::filesystem::path destinationPath);
@@ -45,7 +46,7 @@ class Disk : public Asynchronous {
     Disk (const Disk&);
     ~Disk (){};
 
-//internal functions
+    //internal functions
     void * internalGetPhotosPaths(boost::filesystem::path directoryPath);
     void * internalGetSubdirectoriesPaths(boost::filesystem::path directoryPath);
 
@@ -53,13 +54,15 @@ class Disk : public Asynchronous {
     void * internalHasSubdirectories(boost::filesystem::path directoryPath);
 
     void * internalGetPhotoFile(boost::filesystem::path photoPath);
-    
+
     void * internalDeletePhoto(boost::filesystem::path photoPath);
 
     void * internalMovePhoto(boost::filesystem::path sourcePath, boost::filesystem::path destinationPath);
 
-    static Disk* instance;
-    paths_t getDirectoryContents(boost::filesystem::path);
-    boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
-    boost::filesystem::path libraryDirectoryPath;
-};
+    bool isAcceptableExtension(std::string);
+
+      static Disk* instance;
+      paths_t getDirectoryContents(boost::filesystem::path);
+      boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
+      boost::filesystem::path libraryDirectoryPath;
+    };

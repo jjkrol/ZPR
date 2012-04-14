@@ -4,18 +4,22 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/thread.hpp>
+#include "asynchronous.hpp"
 
 
 class Disk;
+class Photo;
 class Directory;
+class DBConnector;
 class UserInterface;
 class ConfigurationManager;
+
+typedef std::vector<Photo*> photos_t;
 
 /**
  * @class CoreController
  * @brief A singleton class acting as a main application controller
  */
-
 class CoreController {
 
 public:
@@ -54,6 +58,22 @@ public:
    */
   boost::filesystem::path getLibraryDirectoryPath();
 
+  /**
+   * @returns all tags
+   */
+  
+  std::vector<std::string> getAllTags();
+
+  /**
+   *@returns tags similar to the query
+   */
+  std::vector<std::string> getTagsLike(std::string query);
+
+  /**
+   *
+   */
+  photos_t getPhotosWithTags(std::vector<std::string>);
+
 private:
   CoreController (std::string forcedConfigPath="");
   CoreController& operator= (const CoreController&);
@@ -62,11 +82,13 @@ private:
 
   void manageConfig(std::string);
   void manageDisk();
+  void manageDatabase();
   void doSomeLongLastingTask();
 
   static CoreController* instance;
+  DBConnector* db;
   UserInterface *gui;
   ConfigurationManager* configManager;
   Disk* disk;
-  boost::thread disk_thread;
+  boost::thread guiThread;
 };

@@ -4,7 +4,7 @@
 DB.sqlite
 *.log
 *.aux
-imgview
+imagine
 unit_test
 async
 kuba.sh
