@@ -124,10 +124,11 @@ public:
   virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs) = 0;
   virtual bool addPhoto(const PhotoPath &photo) = 0;
-
   virtual bool movePhoto(
     const PhotoPath &old_path, const PhotoPath &new_path) = 0;
   virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
+  virtual bool deleteDirectories(const std::vector<DirectoriesPath> &dirs) = 0;
+
   virtual bool addTags(
     const PhotoPath &photo, const std::vector<std::string> &tags) = 0;
   virtual bool getPhotosWithTags(
@@ -176,6 +177,7 @@ public:
   //  const std::vector<boost::filesystem::path> &excluded_dirs);
   bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs);
+  bool deleteDirectories(const std::vector<DirectoriesPath> &dirs);
   bool addPhoto(const PhotoPath &photo);
   bool movePhoto(
     const PhotoPath &old_path,
@@ -244,6 +246,7 @@ private:
   static DBConnector * getInstance();
 
   bool addPhotosFromDirectory(const DirectoriesPath &dir);
+  bool deleteDirectory(const DirectoriesPath &dir);
   bool addDirectoryToDB(const DirectoriesPath &dir);
 
   bool createDB();

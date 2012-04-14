@@ -105,10 +105,67 @@ bool SQLiteConnector::addPhotosFromDirectories(
   const vector<DirectoriesPath> &dirs) {
 
   for(vector<DirectoriesPath>::const_iterator i = dirs.begin();
-      i != dirs.end() ; i++) {
+      i != dirs.end() ; ++i) {
     if(! addPhotosFromDirectory(*i) )
       return false;
   }
+  return true;
+}
+
+bool SQLiteConnector::deleteDirectories(const vector<DirectoriesPath> &dirs) {
+  for(vector<DirectoriesPath>::const_iterator i = dirs.begin() ;
+      i != dirs.end() ; ++i) {
+    if(!deleteDirectory(*i))
+      return false;
+  }
+
+  return true;
+}
+
+bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
+  static Disk *disk = Disk::getInstance();
+
+  //If necessary, all subdirectories should be removed as well (with their
+  //photos ofcourse)
+
+  if(dir.recursively) {
+    vector<path> subdirectories = disk->getSubdirectoriesPaths(dir.path);
+    
+    for(vector<path>::iterator i = subdirectories.begin();
+        i != subdirectories.end() ; ++i) {
+    
+      if(! deleteDirectory(DirectoriesPath(*i,true)))
+        return false;
+    }
+  }
+
+  //Directory should be removed from 'directories' table
+
+  sqlite3_stmt *stmt;
+  const char *query = "DELETE FROM directories WHERE path = ?";
+
+  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+    return false;
+
+  sqlite3_bind_blob(stmt, 1, &dir, sizeof(dir), SQLITE_STATIC);
+  sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  if(reportErrors(query))
+    return false;
+  
+  //Finally, all which are directly in the directory should be removed
+
+  {
+    vector<PhotoPath> photos = disk->getPhotosPaths(dir.path);
+    for(vector<PhotoPath>::iterator i = photos.begin() ; 
+        i != photos.end() ; i++) {
+
+      if(! deletePhoto(*i))
+        return false;
+    }
+  }
+
   return true;
 }
 
@@ -118,7 +175,7 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
     vector<path> subdirectories = disk->getSubdirectoriesPaths(dir.path);
 
     for(vector<path>::iterator i = subdirectories.begin();
-        i != subdirectories.end() ; i++) {
+        i != subdirectories.end() ; ++i) {
       if(! addPhotosFromDirectory(DirectoriesPath(*i,true)))
         return false;  
     }
@@ -126,7 +183,7 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
 
   vector<PhotoPath> photos = disk->getPhotosPaths(dir.path);
   for(vector<PhotoPath>::const_iterator i = photos.begin();
-      i != photos.end() ; i++) {
+      i != photos.end() ; ++i) {
     if(! addPhoto(*i))
       return false;
   }
@@ -300,7 +357,7 @@ int SQLiteConnector::calculateChecksum() const{
     return 0;
   
   for(vector<DirectoriesPath>::iterator i = directories.begin();
-      i != directories.end(); i++) {
+      i != directories.end(); ++i) {
     photo_paths = disk->getPhotosPaths(i->path);
     for(vector<path>::iterator j = photo_paths.begin();
         j != photo_paths.end() ; j++) {
@@ -323,7 +380,7 @@ bool SQLiteConnector::reportErrors(const char * query) const {
 bool SQLiteConnector::addTags(
      const PhotoPath &photo, const vector<string> &tags) {
   for(vector<string>::const_iterator i = tags.begin();
-      i != tags.end() ; i++) {
+      i != tags.end() ; ++i) {
     if(!addTag(photo,*i))
       return false;
   }
@@ -373,7 +430,7 @@ bool SQLiteConnector::getPhotosWithTags(
   //
   //vector<int>::iterator i = tag_ids.begin();
   //string query2 = "EXISTS (SELECT " + *(i++) + " FROM photos_tags)";
-  //for(i ; i != tag_ids.end() ; i++) {
+  //for(i ; i != tag_ids.end() ; ++i) {
   //  query2 += " AND EXISTS (SELECT " + *i + " FROM photos_tags)";
   //}
 
