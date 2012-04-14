@@ -73,6 +73,9 @@ class Disk : public Asynchronous {
  *  (including subdirectories) or non-recursively.
  */
 struct DirectoriesPath {
-  boost::filesystem::path p;
+  boost::filesystem::path path;
   bool recursively;
+
+  DirectoriesPath(boost::filesystem::path p, bool rec):
+    path(p), recursively(rec) {};
 };

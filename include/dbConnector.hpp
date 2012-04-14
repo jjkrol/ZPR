@@ -41,10 +41,11 @@ class SQLiteConnector;
   * Class used to provide instances of adequate concrete versions
   * of database connectors (eg. SQLiteConnector)
 */
+struct DirectoriesPath;
+
 typedef std::vector< std::vector <std::string> > ResultTable;
 typedef DBConnector*(*Creator)(void);
 typedef boost::filesystem::path PhotoPath;
-typedef boost::filesystem::path DirectoryPath;
 
 class DBConnectorFactory {
 public:
@@ -70,14 +71,7 @@ public:
  *  @returns true if database has changed 
  *  
  *  @fn virtual bool addPhotosFromDirectories(
- *        const boost::filesystem::path &main_dir,
- *        const srd::vector<DirectoryPath> &excluded_dirs) = 0
- *  @brief adds photos from the main directory recursively excluding
- *  directories specified in the second argument as a vector of paths.
- *  @returns true if run successfully and false otherwise
- *
- *  @fn virtual bool addPhotosFromDirectories(
- *        const std::vector<DirectoryPath> &dirs
+ *        const std::vector<DirectoriesPath> &dirs
  *      ) = 0;
  *  @brief adds photos from the directories included in the vector
  *  (recursively).
@@ -125,12 +119,10 @@ public:
   virtual int open(const std::string filename) = 0;
   virtual int close() = 0;
   virtual inline bool hasChanged() const = 0;
+  virtual bool isEmpty() = 0;
 
   virtual bool addPhotosFromDirectories(
-    const boost::filesystem::path &main_dir,
-    const std::vector<DirectoryPath> &excluded_dirs) = 0;
-  virtual bool addPhotosFromDirectories(
-    const std::vector<DirectoryPath> &dirs) = 0;
+    const std::vector<DirectoriesPath> &dirs) = 0;
   virtual bool addPhoto(const PhotoPath &photo) = 0;
 
   virtual bool movePhoto(
@@ -177,12 +169,13 @@ public:
   int open(const std::string filename);
   int close();
   inline bool hasChanged() const;
+  bool isEmpty();
 
+  //bool addPhotosFromDirectories(
+  //  const boost::filesystem::path &main_dir,
+  //  const std::vector<boost::filesystem::path> &excluded_dirs);
   bool addPhotosFromDirectories(
-    const boost::filesystem::path &main_dir,
-    const std::vector<DirectoryPath> &excluded_dirs);
-  bool addPhotosFromDirectories(
-    const std::vector<DirectoryPath> &dirs);
+    const std::vector<DirectoriesPath> &dirs);
   bool addPhoto(const PhotoPath &photo);
   bool movePhoto(
     const PhotoPath &old_path,
@@ -227,7 +220,6 @@ private:
    *        std::vector<boost::filesystem::path> &dirs) const;
    *  @brief Gets a main directory from the database and the vector
    *  of directories that should be excluded form the database.
-   *  @todo it shouldn't get paths but DirectoryPaths
    *  @returns true if was executed successfully and false otherwise
    *
    *  @fn bool getChecksumFromDB(int &checksum) const;
@@ -240,7 +232,6 @@ private:
    *  @brief Takes a path of main directory and a vector of directories that
    *  should be excluded.
    *  @returns a checksum
-   *  @todo should take DirectoryPath instead of boost::filesystem::path
    *
    *  @fn inline bool reportErrors(const char *query) const;
    *  @brief Takes errors from the database and puts them in std::cerr stream
@@ -252,13 +243,13 @@ private:
   static DBConnector *instance;
   static DBConnector * getInstance();
 
-  bool addPhotosFromDirectory(const DirectoryPath &dir);
-  bool addDirectoryToDB(const DirectoryPath &dir);
+  bool addPhotosFromDirectory(const DirectoriesPath &dir);
+  bool addDirectoryToDB(const DirectoriesPath &dir);
 
   bool createDB();
   bool saveSettings();
 
-  bool getDirectoriesFromDB(std::vector<DirectoryPath> &dirs) const;
+  bool getDirectoriesFromDB(std::vector<DirectoriesPath> &dirs) const;
   bool getChecksumFromDB(int &checksum) const;
   bool addTag(const PhotoPath &photo, const std::string &tag);
 
