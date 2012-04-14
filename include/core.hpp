@@ -4,11 +4,13 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/thread.hpp>
+#include <set>
 #include "asynchronous.hpp"
 
 
 class Disk;
 class Photo;
+class PhotoData;
 class Directory;
 class DBConnector;
 class UserInterface;
@@ -36,10 +38,61 @@ public:
   void startApplication(int argc=0, char ** argv=NULL);
 
   /**
-   * @returns An object representing the top directory of the library. Lower levels of
-   * the library can be accessed through the getSubdirectories() function.
+   * @TODO implement
    */
+  bool hasLibraryPathSet();
+ 
+ /**
+  * sets the library path
+  */ 
+  void setLibraryPath(boost::filesystem::path libraryPath);
+
+  /**
+   * @returns an object representing the top directory of the library. 
+   */
+//  boost::property_tree::ptree getDirectoryTree();
   Directory* getDirectoryTree();
+
+  /**
+   * @returns data of the photos in a given directory
+   */
+  std::vector<PhotoData> getPhotos(boost::filesystem::path directoryPath);
+
+  /**
+   * @returns data of the thumbnails in a given directory
+   */
+  std::vector<PhotoData> getThumbnails(boost::filesystem::path directoryPath);
+
+  /**
+   * sets current photo, should setCurrentDirectory or setCurrentTagSet first
+   */
+  void setCurrentPhoto(boost::filesystem::path photoPath);
+
+  /**
+   * sets current directory
+   */
+  void setCurrentDirectory(boost::filesystem::path directoryPath);
+
+  /**
+   * sets current tag set, from which next and prev photos are taken
+   */
+  void setCurrentTagSet(std::set<std::string> tagSet);
+
+  /**
+   * @returns data of the current photo
+   */
+  PhotoData getCurrentPhoto();
+
+  /**
+   * @returns next photo and sets it as a current photo
+   */
+  PhotoData getNextPhoto();
+
+  /**
+   * @returns previous photo and sets it as the current photo
+   */
+  PhotoData getPreviousPhoto();
+
 
   /**
    * @returns A tree of key-value pairs extracted from the configuration file.
@@ -86,6 +139,12 @@ private:
   void doSomeLongLastingTask();
 
   static CoreController* instance;
+
+  std::vector<Photo*>::iterator currentPhoto;
+  Directory* currentDirectory;
+  std::set<std::string> currentTagSet;
+  std::vector<Photo*> currentPhotoSet;
+
   DBConnector* db;
   UserInterface *gui;
   ConfigurationManager* configManager;

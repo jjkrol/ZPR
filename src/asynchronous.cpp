@@ -14,7 +14,6 @@ Asynchronous::Asynchronous(){
   stopLoops = nietego;
   mainLoopThread = boost::thread(&Asynchronous::mainLoop, this) ;
   concurrentLoopThread = boost::thread(&Asynchronous::concurrentLoop, this);
-  std::cout<<"asynch constructor"<<std::endl;
 }
 
  Asynchronous::~Asynchronous(){
@@ -35,7 +34,6 @@ Asynchronous::Asynchronous(){
 }
 
  void Asynchronous::concurrentLoop(){ 
-   std::cout<<"entering councurrent loop"<<std::endl;
   boost::thread threadFromQueue;
   boost::unique_lock<boost::mutex> lock(concurrentMessageQueue.mut);
   while(!stopLoops){

@@ -18,7 +18,9 @@ public:
   /**
    * @returns A string value represented in configuration by the given key
    */
-  std::string getStringValue(std::string);
+  std::string getStringValue(std::string key);
+
+  void setStringValue(std::string key, std::string value);
 
   boost::property_tree::ptree getConfigurationTree();
 
@@ -27,6 +29,11 @@ public:
    * Saves the config in an appropriate file.
    */
   void putConfigurationTree(boost::property_tree::ptree);
+
+  /**
+   * writes configuration, so it can be recreated after the application is closed
+   */
+  void writeConfiguration();
 
 private:
 
