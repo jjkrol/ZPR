@@ -43,3 +43,13 @@ class Directory {
     std::vector<Photo*> photos;
     std::vector<Directory*> subdirectories;
 };
+
+/** @struct DirectoriesPath
+ *  @brief Used to send paths to database with additional atribute, saying
+ *  if photos from this directory should be added to database recursively
+ *  (including subdirectories) or non-recursively.
+ */
+struct DirectoriesPath {
+  boost::filesystem::path p;
+  bool recursively;
+};
