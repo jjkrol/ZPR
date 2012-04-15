@@ -2,40 +2,40 @@
 
 using namespace boost::property_tree;
 
-ConfigurationManager * ConfigurationManager::instance = NULL;
+ConfigurationManager * DiskConfigurationManager::instance = NULL;
 
-ConfigurationManager* ConfigurationManager::getInstance(boost::filesystem::path configFilePath){
+ConfigurationManager* DiskConfigurationManager::getInstance(boost::filesystem::path configFilePath){
 
 
   if(instance == NULL){
-    instance = new ConfigurationManager(configFilePath);
+    instance = new DiskConfigurationManager(configFilePath);
   }
 
   return instance;
 }
 
-std::string ConfigurationManager::getStringValue(std::string key){
+std::string DiskConfigurationManager::getStringValue(std::string key){
   return configTree.get<std::string>(key);
 }
 
-void ConfigurationManager::setStringValue(std::string key, std::string value){
+void DiskConfigurationManager::setStringValue(std::string key, std::string value){
   configTree.put<std::string>(key, value);
 }
 
-void ConfigurationManager::putConfigurationTree(ptree config){
+void DiskConfigurationManager::putConfigurationTree(ptree config){
   write_xml(configFilePath.string(), config);
   configTree = config;
 }
 
-void ConfigurationManager::writeConfiguration(){
+void DiskConfigurationManager::writeConfiguration(){
   write_xml(configFilePath.string(), configTree);
 }
 
-ptree ConfigurationManager::getConfigurationTree(){
+ptree DiskConfigurationManager::getConfigurationTree(){
   return configTree;
 }
 
-ConfigurationManager::ConfigurationManager(boost::filesystem::path configFilePath) : configFilePath(configFilePath){
+DiskConfigurationManager::DiskConfigurationManager(boost::filesystem::path configFilePath) : configFilePath(configFilePath){
   read_xml(configFilePath.string(), configTree);
 
 }

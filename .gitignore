@@ -9,3 +9,4 @@ unit_test
 async
 kuba.sh
 *.*.swp
+*.vsd

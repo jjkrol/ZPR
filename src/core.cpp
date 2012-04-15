@@ -176,7 +176,7 @@ CoreController::CoreController(string forcedConfigPath){
 
 void CoreController::manageConfig(string forcedConfigPath){
   string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
-  configManager = ConfigurationManager::getInstance(boost::filesystem::path(configPath));
+  configManager = DiskConfigurationManager::getInstance(boost::filesystem::path(configPath));
 
 }
 
