@@ -42,9 +42,12 @@ EditView::EditView(MainWindow *w) : window(w),
   right_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::nextImage));
   left_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
   library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
-  zoom_signal = window->zoom_slider.signal_value_changed().connect(sigc::mem_fun(this, &EditView::zoomImage));
-  fit_signal = window->signal_size_allocate().connect_notify(sigc::mem_fun(this, &EditView::fitImage));
-  page_signal = window->notebook.signal_switch_page().connect(sigc::mem_fun(this, &EditView::onPageSwitch));
+  zoom_signal = window->zoom_slider.signal_value_changed().connect(
+      sigc::mem_fun(this, &EditView::zoomImage));
+  fit_signal = window->signal_size_allocate().connect_notify(
+      sigc::mem_fun(this, &EditView::fitImage));
+  page_signal = window->notebook.signal_switch_page().connect(
+      sigc::mem_fun(this, &EditView::onPageSwitch));
 
   //loading image
   updatePixbuf();

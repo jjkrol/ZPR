@@ -72,7 +72,7 @@ class WindowContent {
 };
 
 /** @class EditView
- *  @brief Uses Decorator pattern to switch MainWindow to photo echeckDatabasedit view
+ *  @brief Uses Decorator pattern to switch MainWindow to photo edit view
  *         and handles tasks associated with this view.
  */
 
