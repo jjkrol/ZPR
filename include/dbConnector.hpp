@@ -194,7 +194,7 @@ public:
 private:
   SQLiteConnector(){
     database = 0;
-  }; //private constructor is a part of singleton pattern
+  };
 
   /*! @var sqlite3 *database;
    *  @brief holds a pointer to opened database

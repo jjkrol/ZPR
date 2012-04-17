@@ -227,8 +227,10 @@ bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
 bool SQLiteConnector::deletePhoto(const path &photos_path) {
   sqlite3_stmt *stmt;
 
-  //Firstly, photo should be deleted from table of photos
-  string query = "DELETE FROM photos WHERE path=? ;";
+  //Firstly, all tags of the photo should be removed.
+  string query = "DELETE FROM tags WHERE photo_id IN ("
+                  "  SELECT id FROM photos WHERE path = ?"
+                  ");";
 
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
       != SQLITE_OK)
@@ -241,20 +243,16 @@ bool SQLiteConnector::deletePhoto(const path &photos_path) {
   if(reportErrors(query.c_str()))
     return false;
 
-  //@todo
-  //Secondly, all entries with adequate photo_ids in table linking
-  //photos with corresponding tags should be removed.
-  //Jak usuwać w SQLu wpisy z tabel gdzie wartość photo_id robi za klucz
-  //obcy?
-  /*query = "DELETE";
+  //Now, photos should be removed from the photos table
+  query = "DELETE FROM photos WHERE path=? ;";
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
+      != SQLITE_OK)
     return false;
 
+  sqlite3_bind_blob(stmt, 1,&photos_path, sizeof(photos_path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
-
-  */
 
   return !reportErrors(query.c_str());
 }
@@ -265,8 +263,11 @@ bool SQLiteConnector::deletePhoto(const path &photos_path) {
 bool SQLiteConnector::createDB() {
   string errmsg;
   const char *query = 
-      "CREATE TABLE photos (id INTEGER PRIMARY KEY,path BLOB UNIQUE);"
-      "CREATE TABLE directories (path BLOB);"
+      "CREATE TABLE photos ("
+        "id INTEGER PRIMARY KEY,"
+        "path BLOB UNIQUE,"
+        "parent INTEGER);"
+      "CREATE TABLE directories (path BLOB, parent INTEGER);"
       "CREATE TABLE settings (key TEXT PRIMARY KEY, value BLOB);"
       "CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT);"
       "CREATE TABLE photos_tags (photo_id INTEGER, tag_id INTEGER,"
