@@ -2,6 +2,8 @@
 #include "../include/photo.hpp"
 #include "../include/window.hpp"
 #include "../include/directory.hpp"
+#include "../include/core.hpp"
+
 
 /// @fn LibraryView::LibraryView(MainWindow *w)
 /// @brief LibraryView constructor - connects to UserInterface and builds library view gui.
@@ -18,10 +20,10 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   window->display.add(images);
 
   //check for database - prompt if unavailable
-  if(true)
-    promptAboutDatabase();
-  else
+  if(gui->core->hasLibraryPathSet())
     fillDirectoryTree();
+  else
+    promptAboutDatabase();
 }
 
 /// @fn LibraryView::~LibraryView()
@@ -33,40 +35,13 @@ LibraryView::~LibraryView() {
 /// @fn void LibraryView::fillDirectoryTree()
 /// @brief Method responsible for loading directory tree from library.
 void LibraryView::fillDirectoryTree() {
-  directory_model = Gtk::TreeStore::create(columns);
+  directory_model = gui->core->getDirectoryTree();
   directory_tree.set_model(directory_model);
-
-  std::vector<Directory*> dirs = gui->root_dir->getSubdirectories();
-  Gtk::TreeModel::Row row;
-
-  //filling tree
-  for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-    row = *(directory_model->append());
-    row[columns.name] = (*it)->getName();                 //adding label
-    addSubdirectories(*it, row);                          //adding subdirectories
-  }
 
   directory_tree.append_column("", columns.name);
   directory_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
 }
 
-/// @fn void LibraryView::addSubdirectories()
-/// @brief Method responsible for adding subdirectories to directory tree.
-/// @param dir Directory in which we look for subdirectories.
-/// @param row Tree row to which we append new children.
-void LibraryView::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row) {
-  if(!dir->hasSubdirectories()) return;
-  std::vector<Directory*> dirs = dir->getSubdirectories();
-
-  Gtk::TreeModel::Row childrow;
-
-  //filling tree
-  for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-    childrow = *(directory_model->append(row.children()));
-    childrow[columns.name] = (*it)->getName();            //adding label
-    addSubdirectories(*it, childrow);                     //adding subdirectories
-  }
-}
 
 /// @fn void LibraryView::loadImages()
 /// @brief Method (signal handler) responsible for updating thumbnails in right panel.
@@ -91,13 +66,12 @@ void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColu
     buffer.pop();
   }
 
-  //creating directory object from path
-  gui->current_dir = new Directory(dir_path);
 
   //loading photos
-  if(gui->current_dir->hasPhotos()) {
-    gui->photos = gui->current_dir->getPhotos();
-    gui->current_photo = gui->photos.begin();
+  if(gui->core->hasPhotos(dir_path)) {
+    gui->core->setCurrentDirectory(dir_path);
+//    gui->photos = gui->current_dir->getPhotos();
+    gui->current_photo = gui->core->getCurrentPhoto();
     window->showEditView();
   }
 }

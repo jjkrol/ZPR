@@ -69,7 +69,7 @@ EditView::~EditView() {
 /// @fn void EditView::updatePixbuf()
 /// @brief Method for changing displayed Photo.
 void EditView::updatePixbuf() {
-  current_pixbuf = ((*gui->current_photo))->getPixbuf();
+  current_pixbuf = gui->current_photo.pixbuf;
 }
 
 /// @fn void EditView::loadImage()
@@ -81,7 +81,7 @@ void EditView::loadImage() {
   if(!pixbuf) return;
 
   //displaying filename
-  window->statusbar.set_label(((*(gui->current_photo))->getFilename()).string());
+  window->statusbar.set_label(gui->current_photo.path.string());
 
   //fitting image if needed
   if(rectangle.get_width() < pixbuf->get_width() ||

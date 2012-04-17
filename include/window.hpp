@@ -144,14 +144,13 @@ class LibraryView : public WindowContent {
     //database prompt
     Gtk::InfoBar *db_prompt;
 
-    //directory tree
+    Gtk::TreeView directory_tree;
+
     class ModelColumns : public Gtk::TreeModel::ColumnRecord {
       public:
         ModelColumns() { add(name); }
         Gtk::TreeModelColumn<Glib::ustring> name;
     } columns;
-
-    Gtk::TreeView directory_tree;
     Glib::RefPtr<Gtk::TreeStore> directory_model;
 
     //signal handlers
