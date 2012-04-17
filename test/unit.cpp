@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   BOOST_AUTO_TEST_CASE( directoryClassTest ) {
     CoreController* core = CoreController::getInstance("test.cfg");
 
-    Directory* myTestDir = core->getDirectoryTree();
+    Directory* myTestDir = new Directory(""); 
     BOOST_CHECK(myTestDir->getPath()=="/");
     std::vector<Directory*> subdirs = myTestDir->getSubdirectories();
 

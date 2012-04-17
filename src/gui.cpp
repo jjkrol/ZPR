@@ -22,9 +22,6 @@ UserInterface* UserInterface::getInstance(int argc, char *argv[]) {
 /// @param argv Table of parameters (for handling GTK+ command line arguments). 
 UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
   core = CoreController::getInstance();
-  root_dir = core->getDirectoryTree();
-  photos = root_dir->getPhotos();
-  current_photo = photos.begin();
 }
 
 /// @fn void UserInterface::init()
@@ -47,15 +44,13 @@ void UserInterface::destroy() {
 /// @fn void UserInterface::nextImage()
 /// @brief Method (signal handler) responsible for loading next image from folder.
 void UserInterface::nextImage() {
-  if(current_photo == --photos.end()) return;
-  current_photo++;
+  current_photo = core->getNextPhoto();
   main_window->content->updatePixbuf();
 }
 
 /// @fn void UserInterface::prevImage()
 /// @brief Method (signal handler) responsible for loading previous image from folder.
 void UserInterface::prevImage() {
-  if(current_photo == photos.begin()) return;
-  current_photo--;
+  current_photo = core->getPreviousPhoto();
   main_window->content->updatePixbuf();
 }

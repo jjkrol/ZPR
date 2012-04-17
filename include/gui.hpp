@@ -2,6 +2,7 @@
 
 #include <gtkmm.h>
 #include <vector>
+#include "photoData.hpp"
 
 class CoreController;
 class MainWindow;
@@ -34,8 +35,7 @@ class UserInterface {
     //communication with CoreController
     CoreController *core;
     Directory *root_dir, *current_dir;
-    std::vector<Photo*> photos;
-    std::vector<Photo*>::iterator current_photo;
+    PhotoData current_photo;
 
     //main window and kit
     Gtk::Main kit;
