@@ -1,6 +1,5 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
-#include "../include/photo.hpp"
 #include "../include/window.hpp"
 
 /// @fn EditView::EditView(MainWindow *w)
@@ -14,8 +13,8 @@ EditView::EditView(MainWindow *w) : window(w),
   library_button(Gtk::Stock::QUIT), undo_button(Gtk::Stock::UNDO),
   redo_button(Gtk::Stock::REDO) {
 
-  //obtaining UserInterface instance
-  gui = UserInterface::getInstance();
+  //obtaining CoreController instance
+  core = CoreController::getInstance();
 
   //editing widgets
   edit_buttons.set_margin_left(2);
@@ -51,7 +50,7 @@ EditView::EditView(MainWindow *w) : window(w),
       sigc::mem_fun(this, &EditView::onPageSwitch));
 
   //loading image
-  current_photo = gui->core->getCurrentPhoto();
+  current_photo = core->getCurrentPhoto();
 }
 
 /// @fn EditView::~EditView()
@@ -160,13 +159,11 @@ void EditView::onPageSwitch(Gtk::Widget *page, guint number) {
 /// @fn void EditView::nextImage()
 /// @brief Method (signal handler) responsible for loading next image from folder.
 void EditView::nextImage() {
-  current_photo = gui->core->getNextPhoto();
-  //main_window->content->updatePixbuf();
+  current_photo = core->getNextPhoto();
 }
 
 /// @fn void EditView::prevImage()
 /// @brief Method (signal handler) responsible for loading previous image from folder.
 void EditView::prevImage() {
-  current_photo = gui->core->getPreviousPhoto();
-  //main_window->content->updatePixbuf();
+  current_photo = core->getPreviousPhoto();
 }

@@ -1,8 +1,6 @@
 #include "../include/gui.hpp"
-#include "../include/photo.hpp"
-#include "../include/window.hpp"
-#include "../include/directory.hpp"
 #include "../include/core.hpp"
+#include "../include/window.hpp"
 
 
 /// @fn LibraryView::LibraryView(MainWindow *w)
@@ -11,8 +9,8 @@
 LibraryView::LibraryView(MainWindow *w) : window(w),
   tags_label("tags browsing"), db_prompt(NULL) {
 
-  //obtaining UserInterface instance
-  gui = UserInterface::getInstance();
+  //obtaining CoreController instance
+  core = CoreController::getInstance();
 
   //organising widgets
   window->notebook.append_page(directory_tree, "Folders");
@@ -20,7 +18,8 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   window->display.add(images);
 
   //check for database - prompt if unavailable
-  if(gui->core->hasLibraryPathSet())
+  //if(core->hasLibraryPathSet())
+  if(false)
     fillDirectoryTree();
   else
     promptAboutDatabase();
@@ -30,14 +29,17 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
 /// @brief LibraryView descructor - disconnects signals and resets widgets.
 LibraryView::~LibraryView() {
   window->statusbar.set_label("");
+  if(db_prompt) {
+    window->right_box.remove(*db_prompt);
+    delete db_prompt;
+  }
 }
 
 /// @fn void LibraryView::fillDirectoryTree()
 /// @brief Method responsible for loading directory tree from library.
 void LibraryView::fillDirectoryTree() {
-  directory_model = gui->core->getDirectoryTree();
+  directory_model = core->getDirectoryTree();
   directory_tree.set_model(directory_model);
-
   directory_tree.append_column("", columns.name);
   directory_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
 }
@@ -66,10 +68,9 @@ void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColu
     buffer.pop();
   }
 
-
   //loading photos
-  if(gui->core->hasPhotos(dir_path)) {
-    gui->core->setCurrentDirectory(dir_path);
+  if(core->hasPhotos(dir_path)) {
+    core->setCurrentDirectory(dir_path);
     window->showEditView();
   }
 }
@@ -92,12 +93,19 @@ void LibraryView::promptAboutDatabase() {
   //adding label
   Gtk::Label *label = new Gtk::Label("It seems like the photo database is not created. You must create photo database by setting folders in which Imagine should look for your photos.");
   box->pack_start(*label, false, false);
+
+  //adding button
   db_prompt->add_button("Create database", 0);
-  //@TODO connect dialog signal to function
+  db_prompt->signal_response().connect(sigc::mem_fun(*this,
+                       &LibraryView::createDatabase));
 
   //displaying
   window->right_box.remove(window->display);
   window->right_box.pack_start(*db_prompt, false, false);
   window->right_box.pack_start(window->display, true, true);
   window->show_all_children();
+}
+
+void LibraryView::createDatabase(int response) {
+  window->editDatabase();
 }

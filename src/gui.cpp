@@ -1,8 +1,6 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
-#include "../include/photo.hpp"
 #include "../include/window.hpp"
-#include "../include/directory.hpp"
 
 /// @var UserInterface::instance
 /// @brief Pointer to unique UserInterface class instance.

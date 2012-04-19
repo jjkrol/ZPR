@@ -1,5 +1,4 @@
 #include "../include/gui.hpp"
-#include "../include/photo.hpp"
 #include "../include/window.hpp"
 
 /// @fn MainWindow::MainWindow()
@@ -9,9 +8,6 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   zoom_icon(Gtk::Stock::FIND, Gtk::ICON_SIZE_BUTTON),
   save_button(Gtk::Stock::FLOPPY), delete_button(Gtk::Stock::DELETE),
   star_button(Gtk::Stock::ABOUT), tags_button(Gtk::Stock::EDIT) {
-
-  //connecting to UserInterface
-  gui = UserInterface::getInstance();
 
   //customizing window
   set_title("Imagine");
@@ -133,5 +129,6 @@ void MainWindow::editPreferences() {
 
 /// Method responsible for displaying Database Manager dialog.
 void MainWindow::editDatabase() {
-  Glib::RefPtr<Gtk::Dialog> db_manager;
+  Gtk::Dialog *db_manager = new Gtk::Dialog;
+  db_manager->run();
 }

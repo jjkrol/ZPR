@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gtkmm.h>
+#include "./photoData.hpp"
 
 class WindowContent;
 class Directory;
@@ -19,9 +20,6 @@ class MainWindow : public Gtk::Window {
     friend class EditView;
 
   private:
-    //connection with UserInterface class
-    UserInterface *gui;
-
     //defines active type of view
     WindowContent *content;
 
@@ -69,7 +67,6 @@ class WindowContent {
   public:
     WindowContent() {};
     virtual ~WindowContent() {};
-    virtual void updatePixbuf() = 0;
 };
 
 /** @class EditView
@@ -88,7 +85,7 @@ class EditView : public WindowContent {
     EditView(MainWindow *);
 
     //connection with upper classes
-    UserInterface *gui;
+    CoreController *core;
     MainWindow *window;
 
     //widgets
@@ -116,9 +113,6 @@ class EditView : public WindowContent {
 
     //additional function for fitting Pixbuf to widget
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
-
-    //allows UserInterface class to change displayed Photo
-    virtual void updatePixbuf() {};
 };
 
 /** @class LibraryView
@@ -137,7 +131,7 @@ class LibraryView : public WindowContent {
     LibraryView(MainWindow *);
 
     //connection with upper classes
-    UserInterface *gui;
+    CoreController *core;
     MainWindow *window;
 
     //widgets
@@ -160,7 +154,7 @@ class LibraryView : public WindowContent {
     void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 
     //other methods
-    virtual void updatePixbuf() {};
+    void createDatabase(int);
     void fillDirectoryTree();
     void promptAboutDatabase();
     void addSubdirectories(Directory *, Gtk::TreeModel::Row &);
