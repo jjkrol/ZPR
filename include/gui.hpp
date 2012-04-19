@@ -1,13 +1,9 @@
 #pragma once
 
 #include <gtkmm.h>
-#include <vector>
-#include "photoData.hpp"
 
 class CoreController;
 class MainWindow;
-class Directory;
-class Photo;
 
 /** @class UserInterface
  *  @brief Singleton class representing Graphical User Interface.
@@ -34,16 +30,10 @@ class UserInterface {
 
     //communication with CoreController
     CoreController *core;
-    Directory *root_dir, *current_dir;
-    PhotoData current_photo;
 
     //main window and kit
     Gtk::Main kit;
     MainWindow *main_window;
-
-    //handling signals
-    void nextImage();
-    void prevImage();
 
     //hidden constructors and descructors
     UserInterface() {};

@@ -126,3 +126,12 @@ void MainWindow::showAbout() {
   dialog.set_authors(authors);
   dialog.run();
 }
+
+/// Method responsible for displaying Preferences dialog.
+void MainWindow::editPreferences() {
+}
+
+/// Method responsible for displaying Database Manager dialog.
+void MainWindow::editDatabase() {
+  Glib::RefPtr<Gtk::Dialog> db_manager;
+}

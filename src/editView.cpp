@@ -1,4 +1,5 @@
 #include "../include/gui.hpp"
+#include "../include/core.hpp"
 #include "../include/photo.hpp"
 #include "../include/window.hpp"
 
@@ -39,8 +40,8 @@ EditView::EditView(MainWindow *w) : window(w),
   window->display.add(image);
 
   //connecting signals
-  right_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::nextImage));
-  left_button.signal_clicked().connect(sigc::mem_fun(gui, &UserInterface::prevImage));
+  right_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::nextImage));
+  left_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::prevImage));
   library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
   zoom_signal = window->zoom_slider.signal_value_changed().connect(
       sigc::mem_fun(this, &EditView::zoomImage));
@@ -50,7 +51,7 @@ EditView::EditView(MainWindow *w) : window(w),
       sigc::mem_fun(this, &EditView::onPageSwitch));
 
   //loading image
-  updatePixbuf();
+  current_photo = gui->core->getCurrentPhoto();
 }
 
 /// @fn EditView::~EditView()
@@ -69,22 +70,16 @@ EditView::~EditView() {
   page_signal.disconnect();
 }
 
-/// @fn void EditView::updatePixbuf()
-/// @brief Method for changing displayed Photo.
-void EditView::updatePixbuf() {
-  current_pixbuf = gui->current_photo.pixbuf;
-}
-
 /// @fn void EditView::loadImage()
 /// @brief Method (signal handler) for loading image into Gtk::Image widget.
 ///        Called when Next/Previous button is clicked or edit view is created.
 void EditView::loadImage() {
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_photo.pixbuf;
   Gdk::Rectangle rectangle = window->display.get_allocation();
   if(!pixbuf) return;
 
   //displaying filename
-  window->statusbar.set_label(gui->current_photo.path.string());
+  window->statusbar.set_label(current_photo.path.string());
 
   //fitting image if needed
   if(rectangle.get_width() < pixbuf->get_width() ||
@@ -133,9 +128,9 @@ Glib::RefPtr<Gdk::Pixbuf> EditView::resizeImage(Glib::RefPtr<Gdk::Pixbuf> pixbuf
 /// @brief Method (signal handler) for zooming image.
 ///        Called by Gtk::Scale, when its value is changed.
 void EditView::zoomImage() {
-  if(!current_pixbuf) return;
+  if(!current_photo.pixbuf) return;
   double zoom = window->zoom_slider.get_value() / 100;
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_pixbuf;
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_photo.pixbuf;
   pixbuf = pixbuf->scale_simple(pixbuf->get_width() * zoom,
                                 pixbuf->get_height() * zoom, Gdk::INTERP_BILINEAR);
   image.set(pixbuf);
@@ -160,4 +155,18 @@ void EditView::fitImage(Gtk::Allocation &allocation) {
 void EditView::onPageSwitch(Gtk::Widget *page, guint number) {
   edit_buttons.get_parent()->remove(edit_buttons);
   dynamic_cast<Gtk::Box *>(page)->pack_end(edit_buttons, false, false);
+}
+
+/// @fn void EditView::nextImage()
+/// @brief Method (signal handler) responsible for loading next image from folder.
+void EditView::nextImage() {
+  current_photo = gui->core->getNextPhoto();
+  //main_window->content->updatePixbuf();
+}
+
+/// @fn void EditView::prevImage()
+/// @brief Method (signal handler) responsible for loading previous image from folder.
+void EditView::prevImage() {
+  current_photo = gui->core->getPreviousPhoto();
+  //main_window->content->updatePixbuf();
 }

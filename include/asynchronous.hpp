@@ -71,7 +71,7 @@ class Asynchronous{
 
     template<class T>
      T returnByValueQueued(boost::function<void*()> functionObject){
-     T * retPtr = reinterpret_cast<T*>(
+    T * retPtr = reinterpret_cast<T*>(
          invokeQueuedMethod(
            functionObject
            )

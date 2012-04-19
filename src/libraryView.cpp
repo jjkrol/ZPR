@@ -70,8 +70,6 @@ void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColu
   //loading photos
   if(gui->core->hasPhotos(dir_path)) {
     gui->core->setCurrentDirectory(dir_path);
-//    gui->photos = gui->current_dir->getPhotos();
-    gui->current_photo = gui->core->getCurrentPhoto();
     window->showEditView();
   }
 }
@@ -82,7 +80,7 @@ void LibraryView::promptAboutDatabase() {
   //creating dialog
   db_prompt = new Gtk::InfoBar;
   Gtk::Box *box = new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL);
-  Gtk::Container* container = dynamic_cast<Gtk::Container*>(db_prompt->get_content_area());
+  Gtk::Container *container = dynamic_cast<Gtk::Container*>(db_prompt->get_content_area());
   if(container) container->add(*box);
   box->set_spacing(20);
 
@@ -95,6 +93,7 @@ void LibraryView::promptAboutDatabase() {
   Gtk::Label *label = new Gtk::Label("It seems like the photo database is not created. You must create photo database by setting folders in which Imagine should look for your photos.");
   box->pack_start(*label, false, false);
   db_prompt->add_button("Create database", 0);
+  //@TODO connect dialog signal to function
 
   //displaying
   window->right_box.remove(window->display);

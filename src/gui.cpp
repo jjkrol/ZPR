@@ -40,17 +40,3 @@ void UserInterface::destroy() {
   delete instance;
   instance = NULL;
 }
-
-/// @fn void UserInterface::nextImage()
-/// @brief Method (signal handler) responsible for loading next image from folder.
-void UserInterface::nextImage() {
-  current_photo = core->getNextPhoto();
-  main_window->content->updatePixbuf();
-}
-
-/// @fn void UserInterface::prevImage()
-/// @brief Method (signal handler) responsible for loading previous image from folder.
-void UserInterface::prevImage() {
-  current_photo = core->getPreviousPhoto();
-  main_window->content->updatePixbuf();
-}

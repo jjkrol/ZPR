@@ -55,7 +55,8 @@ class MainWindow : public Gtk::Window {
     void showEditView();
 
     //other signal handlers
-    void editPreferences() {};
+    void editPreferences();
+    void editDatabase();
     void showAbout();
 };
 
@@ -99,14 +100,16 @@ class EditView : public WindowContent {
     Gtk::ToolButton library_button;
     Gtk::Button undo_button, redo_button;
 
-    //storing pixbuf of current photo
-    Glib::RefPtr<Gdk::Pixbuf> current_pixbuf;
+    //storing current photo
+    PhotoData current_photo;
 
     //handling signals
     void onPageSwitch(Gtk::Widget *, guint);
     void fitImage(Gtk::Allocation &);
     void loadImage();
     void zoomImage();
+    void nextImage();
+    void prevImage();
 
     //signals storing (for disconnecting)
     sigc::connection zoom_signal, fit_signal, page_signal;
@@ -115,7 +118,7 @@ class EditView : public WindowContent {
     Glib::RefPtr<Gdk::Pixbuf> resizeImage(Glib::RefPtr<Gdk::Pixbuf>, Gdk::Rectangle);
 
     //allows UserInterface class to change displayed Photo
-    virtual void updatePixbuf();
+    virtual void updatePixbuf() {};
 };
 
 /** @class LibraryView
