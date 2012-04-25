@@ -20,7 +20,7 @@ class UserInterface {
     //allows access to unique class instance
     static UserInterface* getInstance(int argc = 0, char *argv[] = NULL);
 
-    //UserInterface external interface
+    //external interface
     void init();
     void destroy();
 

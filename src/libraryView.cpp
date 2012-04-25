@@ -2,7 +2,6 @@
 #include "../include/core.hpp"
 #include "../include/window.hpp"
 
-
 /// @fn LibraryView::LibraryView(MainWindow *w)
 /// @brief LibraryView constructor - connects to UserInterface and builds library view gui.
 /// @param w pointer to parent class MainWindow (needed for communication).
@@ -13,7 +12,7 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   core = CoreController::getInstance();
 
   //organising widgets
-  window->notebook.append_page(directory_tree, "Folders");
+  window->notebook.append_page(database_tree, "Folders");
   window->notebook.append_page(tags_label, "Tags");
   window->display.add(images);
 
@@ -31,17 +30,17 @@ LibraryView::~LibraryView() {
   window->statusbar.set_label("");
   if(db_prompt) {
     window->right_box.remove(*db_prompt);
-    delete db_prompt;
+    delete db_prompt; 
   }
 }
 
 /// @fn void LibraryView::fillDirectoryTree()
 /// @brief Method responsible for loading directory tree from library.
 void LibraryView::fillDirectoryTree() {
-  directory_model = core->getDirectoryTree();
-  directory_tree.set_model(directory_model);
-  directory_tree.append_column("", columns.name);
-  directory_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
+  database_model = core->getDirectoryTree();
+  database_tree.set_model(database_model);
+  database_tree.append_column("", columns.name);
+  database_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
 }
 
 
@@ -51,7 +50,7 @@ void LibraryView::fillDirectoryTree() {
 /// @param path Path to selected row, provided by signal system.
 /// @param column Clicked column, provided by signal system, not used.
 void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
-  Gtk::TreeModel::iterator row = directory_model->get_iter(path);
+  Gtk::TreeModel::iterator row = database_model->get_iter(path);
   std::stack<Glib::ustring> buffer;
   boost::filesystem::path dir_path;
   if(!row) return;

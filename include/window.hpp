@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 #include "./photoData.hpp"
 
+class DBManagerDialog;
 class WindowContent;
 class Directory;
 
@@ -21,7 +22,7 @@ class MainWindow : public Gtk::Window {
 
   private:
     //defines active type of view
-    WindowContent *content;
+    WindowContent *content; 
 
     //containers
     Gtk::Grid grid;
@@ -43,6 +44,10 @@ class MainWindow : public Gtk::Window {
     //toolbar
     Gtk::ToolButton save_button, delete_button;
     Gtk::ToolButton star_button, tags_button;
+    
+    //dialogs
+    DBManagerDialog *db_manager;
+    //PreferencesDialog *preferences_editor;
 
     //constructor and desctructor
     MainWindow();
@@ -141,14 +146,14 @@ class LibraryView : public WindowContent {
     //database prompt
     Gtk::InfoBar *db_prompt;
 
-    Gtk::TreeView directory_tree;
-
+    //images database tree
     class ModelColumns : public Gtk::TreeModel::ColumnRecord {
       public:
         ModelColumns() { add(name); }
         Gtk::TreeModelColumn<Glib::ustring> name;
     } columns;
-    Glib::RefPtr<Gtk::TreeStore> directory_model;
+    Glib::RefPtr<Gtk::TreeStore> database_model;
+    Gtk::TreeView database_tree;
 
     //signal handlers
     void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);

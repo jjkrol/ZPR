@@ -1,4 +1,6 @@
 #include "../include/gui.hpp"
+#include "../include/core.hpp"
+#include "../include/dialogs.hpp"
 #include "../include/window.hpp"
 
 /// @fn MainWindow::MainWindow()
@@ -129,6 +131,7 @@ void MainWindow::editPreferences() {
 
 /// Method responsible for displaying Database Manager dialog.
 void MainWindow::editDatabase() {
-  Gtk::Dialog *db_manager = new Gtk::Dialog;
+  db_manager = new DBManagerDialog(this);
   db_manager->run();
+  delete db_manager;
 }

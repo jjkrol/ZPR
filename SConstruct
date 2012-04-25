@@ -16,6 +16,7 @@ asynchronous = [
 ]
 gui = [
     'src/gui.cpp',
+    'src/dialogs.cpp',
     'src/window.cpp',
     'src/libraryView.cpp',
     'src/editView.cpp'

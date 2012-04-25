@@ -27,11 +27,10 @@ UserInterface::UserInterface(int argc, char *argv[]) : kit(argc, argv) {
 void UserInterface::init() {
   main_window = new MainWindow();
   main_window->showLibraryView();
-  main_window->show_all_children();
   if(main_window) kit.run(*main_window);
 }
 
-/// @fn void UserInterface::destroy()
+/// @fn void UserInterface::destroy(
 /// @brief Method responsible for destroying UserInterface unique object.
 void UserInterface::destroy() {
   delete main_window;
