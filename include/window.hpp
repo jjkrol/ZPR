@@ -22,7 +22,7 @@ class MainWindow : public Gtk::Window {
 
   private:
     //defines active type of view
-    WindowContent *content; 
+    WindowContent *content;
 
     //containers
     Gtk::Grid grid;

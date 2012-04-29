@@ -22,10 +22,10 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   Gtk::Box *content_area = get_content_area();
   content_area->pack_start(box, true, true);
   box.set_spacing(5);
-  box.set_margin_left(5);
-  box.set_margin_right(5);
-  box.set_margin_top(5);
-  box.set_margin_bottom(5);
+  box.set_margin_left(2);
+  box.set_margin_right(2);
+  box.set_margin_top(2);
+  box.set_margin_bottom(2);
   box.pack_start(scroll, true, true);
   box.pack_start(right_box, true, true);
   right_box.pack_start(info, true, true);
@@ -45,14 +45,18 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   directory_model = core->getDirectoryTree();
   directory_tree.set_model(directory_model);
   directory_tree.append_column("Folder List", columns.name);
-  directory_tree.signal_row_activated().connect(sigc::mem_fun(
+  directory_tree.signal_cursor_changed().connect(sigc::mem_fun(
         *this, &DBManagerDialog::selectFolder));
 
   //displaying window
   show_all_children();
 }
 
-void DBManagerDialog::selectFolder(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
+void DBManagerDialog::selectFolder() {
+  Gtk::TreeModel::Path path;
+  Gtk::TreeView::Column *column;
+  directory_tree.get_cursor(path, column);
   Gtk::TreeModel::iterator row = directory_model->get_iter(path);
   frame.set_label((*row)[columns.name]);
+  //load current setting!
 }

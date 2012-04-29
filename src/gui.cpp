@@ -30,7 +30,7 @@ void UserInterface::init() {
   if(main_window) kit.run(*main_window);
 }
 
-/// @fn void UserInterface::destroy(
+/// @fn void UserInterface::destroy()
 /// @brief Method responsible for destroying UserInterface unique object.
 void UserInterface::destroy() {
   delete main_window;

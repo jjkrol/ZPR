@@ -34,7 +34,7 @@ class DBManagerDialog : public Gtk::Dialog {
     Gtk::TreeView included_list;
 
     //signal handlers
-    void selectFolder(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column);
+    void selectFolder();
 
     //hidden methods
     DBManagerDialog() {};

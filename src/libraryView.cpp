@@ -30,7 +30,7 @@ LibraryView::~LibraryView() {
   window->statusbar.set_label("");
   if(db_prompt) {
     window->right_box.remove(*db_prompt);
-    delete db_prompt; 
+    delete db_prompt;
   }
 }
 
