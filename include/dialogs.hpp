@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gtkmm.h>
+#include "./global.hpp"
 
 class CoreController;
 
@@ -21,13 +22,9 @@ class DBManagerDialog : public Gtk::Dialog {
     Gtk::RadioButton ignore_button, scan_button;
 
     //directory tree
-    class ModelColumns : public Gtk::TreeModel::ColumnRecord {
-      public:
-        ModelColumns() { add(name); }
-        Gtk::TreeModelColumn<Glib::ustring> name;
-    } columns;
     Glib::RefPtr<Gtk::TreeStore> directory_model;
     Gtk::TreeView directory_tree;
+    DirTreeColumns dir_columns;
 
     //included folders list
     Glib::RefPtr<Gtk::TreeStore> included_model;

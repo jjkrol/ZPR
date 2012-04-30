@@ -4,10 +4,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/thread.hpp>
+#include "../include/global.hpp"
 #include <set>
 #include <gtkmm.h>
 #include "asynchronous.hpp"
-
 
 class Disk;
 class Photo;
@@ -53,6 +53,10 @@ class CoreController {
      */
     Glib::RefPtr<Gtk::TreeStore> getDirectoryTree();
 
+    /**
+     * @returns an object representing the database directory tree 
+     */
+    Glib::RefPtr<Gtk::TreeStore> getDatabaseTree();
 
     bool hasPhotos(const boost::filesystem::path& directoryPath);
 
@@ -161,11 +165,9 @@ class CoreController {
       Disk* disk;
       boost::thread guiThread;
 
-      class ModelColumns : public Gtk::TreeModel::ColumnRecord {
-        public:
-          ModelColumns() { add(name); }
-          Gtk::TreeModelColumn<Glib::ustring> name;
-      } columns;
-
       Glib::RefPtr<Gtk::TreeStore> directory_model;
+      Glib::RefPtr<Gtk::TreeStore> database_model;
+      DirTreeColumns dir_columns;
+      DbTreeColumns db_columns;
+
     };

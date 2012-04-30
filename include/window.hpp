@@ -1,9 +1,11 @@
 #pragma once
 
 #include <gtkmm.h>
-#include "./photoData.hpp"
+#include "./global.hpp"
 
 class DBManagerDialog;
+//class DbTreeColumns;
+//class DirTreeColumns;
 class WindowContent;
 class Directory;
 
@@ -147,20 +149,16 @@ class LibraryView : public WindowContent {
     Gtk::InfoBar *db_prompt;
 
     //images database tree
-    class ModelColumns : public Gtk::TreeModel::ColumnRecord {
-      public:
-        ModelColumns() { add(name); }
-        Gtk::TreeModelColumn<Glib::ustring> name;
-    } columns;
     Glib::RefPtr<Gtk::TreeStore> database_model;
     Gtk::TreeView database_tree;
+    DbTreeColumns db_columns;
 
     //signal handlers
     void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 
     //other methods
     void createDatabase(int);
-    void fillDirectoryTree();
+    void fillDatabaseTree();
     void promptAboutDatabase();
     void addSubdirectories(Directory *, Gtk::TreeModel::Row &);
 };

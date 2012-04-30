@@ -1,4 +1,5 @@
 #include "../include/core.hpp"
+#include "../include/global.hpp"
 #include "../include/dialogs.hpp"
 
 DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
@@ -35,16 +36,15 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   //editing folder options frame
   frame.set_shadow_type(Gtk::SHADOW_IN);        //WTF?!
   Gtk::RadioButton::Group group = ignore_button.get_group();
-  scan_button.set_group(group);
   button_box.pack_start(ignore_button, false, false);
   button_box.pack_start(scan_button, false, false);
+  scan_button.set_group(group);
   frame.add(button_box);
   
   //loading directory tree
-  //@TODO - create core method for this
   directory_model = core->getDirectoryTree();
   directory_tree.set_model(directory_model);
-  directory_tree.append_column("Folder List", columns.name);
+  directory_tree.append_column("Folder List", dir_columns.name);
   directory_tree.signal_cursor_changed().connect(sigc::mem_fun(
         *this, &DBManagerDialog::selectFolder));
 
@@ -57,6 +57,11 @@ void DBManagerDialog::selectFolder() {
   Gtk::TreeView::Column *column;
   directory_tree.get_cursor(path, column);
   Gtk::TreeModel::iterator row = directory_model->get_iter(path);
-  frame.set_label((*row)[columns.name]);
-  //load current setting!
+
+  //setting frame label
+  frame.set_label((*row)[dir_columns.name]);
+
+  //selecting proper RadioButton
+  if((*row)[dir_columns.included]) scan_button.set_active();
+  else ignore_button.set_active();
 }

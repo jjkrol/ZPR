@@ -19,7 +19,7 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   //check for database - prompt if unavailable
   //if(core->hasLibraryPathSet())
   if(false)
-    fillDirectoryTree();
+    fillDatabaseTree();
   else
     promptAboutDatabase();
 }
@@ -36,10 +36,10 @@ LibraryView::~LibraryView() {
 
 /// @fn void LibraryView::fillDirectoryTree()
 /// @brief Method responsible for loading directory tree from library.
-void LibraryView::fillDirectoryTree() {
-  database_model = core->getDirectoryTree();
+void LibraryView::fillDatabaseTree() {
+  database_model = core->getDatabaseTree();
   database_tree.set_model(database_model);
-  database_tree.append_column("", columns.name);
+  database_tree.append_column("", db_columns.name);
   database_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
 }
 
@@ -57,7 +57,7 @@ void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColu
 
   //storing directory path
   while(row) {
-    buffer.push((*row)[columns.name]);
+    buffer.push((*row)[db_columns.name]);
     row = row->parent();
   }
 

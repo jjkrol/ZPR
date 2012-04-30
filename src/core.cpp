@@ -5,7 +5,6 @@
 #include "../include/gui.hpp"
 #include "../include/directory.hpp"
 #include "../include/dbConnector.hpp"
-#include "../include/photoData.hpp"
 
 using namespace std;
 
@@ -41,8 +40,8 @@ void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
   configManager->writeConfiguration();
 }
 
-Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
-  directory_model = Gtk::TreeStore::create(columns);
+Glib::RefPtr<Gtk::TreeStore> CoreController::getDatabaseTree(){
+  database_model = Gtk::TreeStore::create(dir_columns);
 
   Directory* rootDir = new Directory("");
 
@@ -51,13 +50,17 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
 
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-    row = *(directory_model->append());
-    row[columns.name] = (*it)->getName();                 //adding label
+    row = *(database_model->append());
+    row[dir_columns.name] = (*it)->getName();             //adding label
     addSubdirectories(*it, row);                          //adding subdirectories
   }
-  return directory_model;
+  return database_model;
 }
 
+Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
+  directory_model = Gtk::TreeStore::create(dir_columns);
+  return directory_model;
+}
 
     bool CoreController::hasPhotos(const boost::filesystem::path &directoryPath){
       Directory * dir = new Directory(directoryPath);
@@ -196,7 +199,6 @@ CoreController::CoreController(string forcedConfigPath){
 void CoreController::manageConfig(string forcedConfigPath){
   string configPath = forcedConfigPath=="" ? "config.cfg" : forcedConfigPath;
   configManager = DiskConfigurationManager::getInstance(boost::filesystem::path(configPath));
-
 }
 
 void CoreController::manageDisk(){
@@ -212,19 +214,13 @@ void CoreController::doSomeLongLastingTask(){
 
 void CoreController::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row) {
   if(!dir->hasSubdirectories()) return;
-
   std::vector<Directory*> dirs = dir->getSubdirectories();
-
-
   Gtk::TreeModel::Row childrow;
 
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-
-    childrow = *(directory_model->append(row.children()));
-
-    childrow[columns.name] = (*it)->getName();            //adding label
-
+    childrow = *(database_model->append(row.children()));
+    childrow[dir_columns.name] = (*it)->getName();            //adding label
     addSubdirectories(*it, childrow);                     //adding subdirectories
   }
 }
