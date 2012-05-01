@@ -20,10 +20,12 @@ class DirTreeColumns : public Gtk::TreeModel::ColumnRecord {
   public:
     DirTreeColumns() {
       add(name);
-      add(included);
       add(path);
+      add(stock_id);
+      add(included);
     }
     Gtk::TreeModelColumn<Glib::ustring> name;
     Gtk::TreeModelColumn<std::string> path;
+    Gtk::TreeModelColumn<std::string> stock_id;
     Gtk::TreeModelColumn<bool> included;
 };

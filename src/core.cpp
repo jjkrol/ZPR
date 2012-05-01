@@ -73,13 +73,22 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   return directory_model;
 }
 
-void CoreController::expandDirectory(Gtk::TreeModel::Path path){
-  Gtk::TreeModel::iterator row = directory_model->get_iter(path);
-//  string path = (*row)[dir_columns.path];
-//  Directory* dir = new Directory( path );
-  //dla kazdego dziecka
-//  addAbsoluteSubdirectories(dir, *row, 0);
- // delete dir;
+void CoreController::expandDirectory(const Gtk::TreeModel::iterator &parent,
+                                     const Gtk::TreeModel::Path &tree_path){
+  Gtk::TreeModel::Children children = parent->children();
+  Gtk::TreeModel::Children::iterator child = children.begin();
+  string path;
+
+  //checking if expanding was already done
+  for(; child != children.end(); ++child) if(!child->children().empty()) return;
+
+  //adding subdirectories to row children
+  for(child = children.begin(); child != children.end(); ++child) {
+    path = (*child)[dir_columns.path];
+    Directory *dir = new Directory(path);
+    addAbsoluteSubdirectories(dir, *child, 0);
+    delete dir;
+  }
 }
 
 bool CoreController::hasPhotos(const boost::filesystem::path &directoryPath){
@@ -237,13 +246,13 @@ void CoreController::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row,
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     childrow = *(database_model->append(row.children()));
-    childrow[dir_columns.name] = (*it)->getName();            //adding label
-    if(depth!=0)
+    childrow[db_columns.name] = (*it)->getName();            //adding label
+    if(depth > 0)
       addSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
     }
   }
 
-void CoreController::addAbsoluteSubdirectories(Directory *dir, Gtk::TreeModel::Row &row, int depth) {
+void CoreController::addAbsoluteSubdirectories(Directory *dir, const Gtk::TreeModel::Row &row, int depth) {
   if(!dir->hasAbsoluteSubdirectories()) return;
   std::vector<Directory*> dirs = dir->getAbsoluteSubdirectories();
   Gtk::TreeModel::Row childrow;
@@ -252,7 +261,7 @@ void CoreController::addAbsoluteSubdirectories(Directory *dir, Gtk::TreeModel::R
     childrow = *(directory_model->append(row.children()));
     childrow[dir_columns.name] = (*it)->getName();            //adding label
     childrow[dir_columns.path] = (*it)->getPath().string();
-    if(depth!=0)
+    if(depth > 0)
       addAbsoluteSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
     }
   }

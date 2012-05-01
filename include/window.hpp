@@ -4,8 +4,6 @@
 #include "./global.hpp"
 
 class DBManagerDialog;
-//class DbTreeColumns;
-//class DirTreeColumns;
 class WindowContent;
 class Directory;
 
