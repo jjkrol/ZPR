@@ -58,6 +58,8 @@ class CoreController {
      */
     Glib::RefPtr<Gtk::TreeStore> getDatabaseTree();
 
+void expandDirectory(Gtk::TreeModel::Path path);
+
     bool hasPhotos(const boost::filesystem::path& directoryPath);
 
       /**
@@ -149,8 +151,10 @@ class CoreController {
      * Method responsible for adding subdirectories to directory tree.
      *@param dir Directory in which we look for subdirectories.
      *@param row Tree row to which we append new children.
+     *@param depth How deep should the method go. Set -1 for going deepest
      */
-    void addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row);
+    void addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row, int depth);
+    void addAbsoluteSubdirectories(Directory *dir, Gtk::TreeModel::Row &row, int depth);
 
       static CoreController* instance;
 

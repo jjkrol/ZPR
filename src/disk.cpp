@@ -36,6 +36,22 @@ paths_t Disk::getPhotosPaths(path directoryPath){
       );
 }
 
+paths_t Disk::getAbsoluteSubdirectoriesPaths(path directoryPath){
+  return returnByValueQueued<paths_t>(
+      boost::bind(
+        &Disk::internalGetAbsoluteSubdirectoriesPaths, this, directoryPath
+        )
+      );
+}
+
+paths_t Disk::getAbsolutePhotosPaths(path directoryPath){
+  return returnByValueQueued<paths_t>(
+      boost::bind(
+        &Disk::internalGetAbsolutePhotosPaths, this, directoryPath
+        )
+      );
+}
+
 bool Disk::hasPhotos(path directoryPath){
   return returnByValueQueued<bool>(
       boost::bind(
@@ -48,6 +64,22 @@ bool Disk::hasSubdirectories(path directoryPath){
   return returnByValueQueued<bool>(
       boost::bind(
         &Disk::internalHasSubdirectories, this, directoryPath
+        )
+      );
+}
+
+bool Disk::hasAbsolutePhotos(path directoryPath){
+  return returnByValueQueued<bool>(
+      boost::bind(
+        &Disk::internalAbsoluteHasPhotos, this, directoryPath
+        )
+      );
+}
+
+bool Disk::hasAbsoluteSubdirectories(path directoryPath){
+  return returnByValueQueued<bool>(
+      boost::bind(
+        &Disk::internalAbsoluteHasSubdirectories, this, directoryPath
         )
       );
 }
@@ -96,8 +128,37 @@ void * Disk::internalGetPhotosPaths(boost::filesystem::path directoryPath){
 
 void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPath){
   paths_t * subdirectories = new paths_t();
-
   path absolutePath = makeAbsolutePath(directoryPath);
+  paths_t  directoryContents;
+  directoryContents = getDirectoryContents(absolutePath);
+  for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+    if(is_directory(*it))
+      subdirectories->push_back((*it).filename());
+  } 
+
+  return subdirectories;
+}
+
+void * Disk::internalGetAbsolutePhotosPaths(boost::filesystem::path directoryPath){
+  paths_t * photos = new paths_t();
+
+  path absolutePath = makeSystemAbsolutePath(directoryPath);
+  paths_t directoryContents = getDirectoryContents(absolutePath);
+
+  for(vector<path>::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
+    if(!is_directory(*it))
+      if( isAcceptableExtension((*it).extension().string())) // right now we only use jpg
+        photos->push_back((*it).filename());
+
+  } 
+
+  return photos;
+}
+
+void * Disk::internalGetAbsoluteSubdirectoriesPaths(boost::filesystem::path directoryPath){
+  paths_t * subdirectories = new paths_t();
+
+  path absolutePath = makeSystemAbsolutePath(directoryPath);
   paths_t  directoryContents = getDirectoryContents(absolutePath);
 
   for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
@@ -130,6 +191,36 @@ void * Disk::internalHasSubdirectories(boost::filesystem::path directoryPath){
   return retVal;
 }
 
+void * Disk::internalAbsoluteHasPhotos(boost::filesystem::path directoryPath){
+paths_t * paths = reinterpret_cast<paths_t*>(internalGetAbsolutePhotosPaths(directoryPath));
+bool * retVal;
+  if(paths->size() == 0)
+    retVal = new bool(false);
+  else
+    retVal =  new bool(true);
+delete paths;
+return retVal;
+}
+
+void * Disk::internalAbsoluteHasSubdirectories(boost::filesystem::path directoryPath){
+paths_t *  paths; 
+  try{
+  paths = reinterpret_cast<paths_t*>(internalGetAbsoluteSubdirectoriesPaths(directoryPath));
+  }
+  catch (boost::filesystem::filesystem_error &e) 
+  { 
+    std::cerr << e.what() << std::endl; 
+    return new bool(false);
+  } 
+  bool * retVal;
+  if(paths->size() == 0)
+    retVal =  new bool(false);
+  else
+    retVal =  new bool(true);
+  delete paths;
+  return retVal;
+}
+
 void * Disk::internalGetPhotoFile(path photoPath){
   path absolutePath = makeAbsolutePath(photoPath);
   Glib::RefPtr<Gdk::Pixbuf> * retPtr = new Glib::RefPtr<Gdk::Pixbuf>(Gdk::Pixbuf::create_from_file(absolutePath.string()));
@@ -150,13 +241,25 @@ void * Disk::internalDeletePhoto(path photoPath){
 // returns content of given directory (all files)
 paths_t Disk::getDirectoryContents(path directoryPath){
   vector<path> directoryContents;
+  try{
   copy(directory_iterator(directoryPath), directory_iterator(), back_inserter(directoryContents));
   sort(directoryContents.begin(), directoryContents.end());
+  }
+  catch (boost::filesystem::filesystem_error &e) 
+  { 
+    std::cerr << e.what() << std::endl; 
+  } 
   return directoryContents;
 }
 
 path Disk::makeAbsolutePath(path relativePath){\
   path absolutePath = libraryDirectoryPath;
+  absolutePath /= relativePath.relative_path();
+  return absolutePath;
+}
+
+path Disk::makeSystemAbsolutePath(path relativePath){\
+  path absolutePath("/");
   absolutePath /= relativePath.relative_path();
   return absolutePath;
 }

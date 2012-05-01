@@ -27,8 +27,14 @@ class Disk : public Asynchronous {
     paths_t getPhotosPaths(boost::filesystem::path directoryPath);
     paths_t getSubdirectoriesPaths(boost::filesystem::path directoryPath);
 
+    paths_t getAbsolutePhotosPaths(boost::filesystem::path directoryPath);
+    paths_t getAbsoluteSubdirectoriesPaths(boost::filesystem::path directoryPath);
+
     bool hasPhotos(boost::filesystem::path directoryPath);
     bool hasSubdirectories(boost::filesystem::path directoryPath);
+
+    bool hasAbsolutePhotos(boost::filesystem::path directoryPath);
+    bool hasAbsoluteSubdirectories(boost::filesystem::path directoryPath);
 
     Glib::RefPtr<Gdk::Pixbuf> getPhotoFile(boost::filesystem::path photoPath);
 
@@ -50,8 +56,14 @@ class Disk : public Asynchronous {
     void * internalGetPhotosPaths(boost::filesystem::path directoryPath);
     void * internalGetSubdirectoriesPaths(boost::filesystem::path directoryPath);
 
+    void * internalGetAbsolutePhotosPaths(boost::filesystem::path directoryPath);
+    void * internalGetAbsoluteSubdirectoriesPaths(boost::filesystem::path directoryPath);
+
     void * internalHasPhotos(boost::filesystem::path);
     void * internalHasSubdirectories(boost::filesystem::path directoryPath);
+
+    void * internalAbsoluteHasPhotos(boost::filesystem::path);
+    void * internalAbsoluteHasSubdirectories(boost::filesystem::path directoryPath);
 
     void * internalGetPhotoFile(boost::filesystem::path photoPath);
 
@@ -64,6 +76,7 @@ class Disk : public Asynchronous {
       static Disk* instance;
       paths_t getDirectoryContents(boost::filesystem::path);
       boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
+      boost::filesystem::path makeSystemAbsolutePath(boost::filesystem::path);
       boost::filesystem::path libraryDirectoryPath;
     };
 

@@ -52,20 +52,40 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDatabaseTree(){
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     row = *(database_model->append());
     row[dir_columns.name] = (*it)->getName();             //adding label
-    addSubdirectories(*it, row);                          //adding subdirectories
+    addSubdirectories(*it, row, -1);                          //adding subdirectories
   }
   return database_model;
 }
 
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   directory_model = Gtk::TreeStore::create(dir_columns);
+
+  Directory* rootDir = new Directory("");
+  std::vector<Directory*> dirs = rootDir->getAbsoluteSubdirectories();
+  Gtk::TreeModel::Row row;
+  //filling tree
+  for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
+    row = *(directory_model->append());
+    row[dir_columns.name] = (*it)->getName();             //adding label
+    row[dir_columns.path] = (*it)->getPath().string();
+    addAbsoluteSubdirectories(*it, row, 0);                          //adding subdirectories
+  }
   return directory_model;
 }
 
-    bool CoreController::hasPhotos(const boost::filesystem::path &directoryPath){
-      Directory * dir = new Directory(directoryPath);
-      return dir->hasPhotos();
-    }
+void CoreController::expandDirectory(Gtk::TreeModel::Path path){
+  Gtk::TreeModel::iterator row = directory_model->get_iter(path);
+//  string path = (*row)[dir_columns.path];
+//  Directory* dir = new Directory( path );
+  //dla kazdego dziecka
+//  addAbsoluteSubdirectories(dir, *row, 0);
+ // delete dir;
+}
+
+bool CoreController::hasPhotos(const boost::filesystem::path &directoryPath){
+  Directory * dir = new Directory(directoryPath);
+  return dir->hasPhotos();
+}
 
 vector<PhotoData> CoreController::getPhotos(boost::filesystem::path directoryPath){
   vector<PhotoData> retPhotos;
@@ -209,18 +229,30 @@ void CoreController::manageDatabase(){
   db = DBConnectorFactory::getInstance("kotek");
   db->open("DB.sqlite");
 }
-void CoreController::doSomeLongLastingTask(){
-}
 
-void CoreController::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row) {
+void CoreController::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row, int depth) {
   if(!dir->hasSubdirectories()) return;
   std::vector<Directory*> dirs = dir->getSubdirectories();
   Gtk::TreeModel::Row childrow;
-
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     childrow = *(database_model->append(row.children()));
     childrow[dir_columns.name] = (*it)->getName();            //adding label
-    addSubdirectories(*it, childrow);                     //adding subdirectories
+    if(depth!=0)
+      addSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
+    }
   }
-}
+
+void CoreController::addAbsoluteSubdirectories(Directory *dir, Gtk::TreeModel::Row &row, int depth) {
+  if(!dir->hasAbsoluteSubdirectories()) return;
+  std::vector<Directory*> dirs = dir->getAbsoluteSubdirectories();
+  Gtk::TreeModel::Row childrow;
+  //filling tree
+  for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
+    childrow = *(directory_model->append(row.children()));
+    childrow[dir_columns.name] = (*it)->getName();            //adding label
+    childrow[dir_columns.path] = (*it)->getPath().string();
+    if(depth!=0)
+      addAbsoluteSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
+    }
+  }
