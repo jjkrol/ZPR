@@ -41,10 +41,10 @@ void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
 }
 
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDatabaseTree(){
+  if(database_model) return database_model;
   database_model = Gtk::TreeStore::create(dir_columns);
 
   Directory* rootDir = new Directory("");
-
   std::vector<Directory*> dirs = rootDir->getSubdirectories();
   Gtk::TreeModel::Row row;
 
@@ -52,23 +52,25 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDatabaseTree(){
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     row = *(database_model->append());
     row[dir_columns.name] = (*it)->getName();             //adding label
-    addSubdirectories(*it, row, -1);                          //adding subdirectories
+    addSubdirectories(*it, row, -1);                      //adding subdirectories
   }
   return database_model;
 }
 
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
+  if(directory_model) return directory_model;
   directory_model = Gtk::TreeStore::create(dir_columns);
 
   Directory* rootDir = new Directory("");
   std::vector<Directory*> dirs = rootDir->getAbsoluteSubdirectories();
   Gtk::TreeModel::Row row;
+
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     row = *(directory_model->append());
     row[dir_columns.name] = (*it)->getName();             //adding label
     row[dir_columns.path] = (*it)->getPath().string();
-    addAbsoluteSubdirectories(*it, row, 0);                          //adding subdirectories
+    addAbsoluteSubdirectories(*it, row, 0);               //adding subdirectories
   }
   return directory_model;
 }
@@ -240,29 +242,45 @@ void CoreController::manageDatabase(){
   db->open("DB.sqlite");
 }
 
-void CoreController::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row, int depth) {
+void CoreController::addSubdirectories(Directory *dir,
+    const Gtk::TreeModel::Row &row, int depth) {
   if(!dir->hasSubdirectories()) return;
   std::vector<Directory*> dirs = dir->getSubdirectories();
   Gtk::TreeModel::Row childrow;
+
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     childrow = *(database_model->append(row.children()));
-    childrow[db_columns.name] = (*it)->getName();            //adding label
+    childrow[db_columns.name] = (*it)->getName();              //adding label
     if(depth != 0)
-      addSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
+      addSubdirectories(*it, childrow, depth-1);               //adding subdirectories
     }
   }
 
-void CoreController::addAbsoluteSubdirectories(Directory *dir, const Gtk::TreeModel::Row &row, int depth) {
+void CoreController::addAbsoluteSubdirectories(Directory *dir,
+    const Gtk::TreeModel::Row &row, int depth) {
   if(!dir->hasAbsoluteSubdirectories()) return;
   std::vector<Directory*> dirs = dir->getAbsoluteSubdirectories();
   Gtk::TreeModel::Row childrow;
+
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     childrow = *(directory_model->append(row.children()));
-    childrow[dir_columns.name] = (*it)->getName();            //adding label
-    childrow[dir_columns.path] = (*it)->getPath().string();
+    childrow[dir_columns.name] = (*it)->getName();              //adding label
+    childrow[dir_columns.path] = (*it)->getPath().string();     //adding path
     if(depth != 0)
-      addAbsoluteSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
-    }
+      addAbsoluteSubdirectories(*it, childrow, depth-1);        //adding subdirectories
   }
+}
+
+void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
+  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+  (*folder)[dir_columns.stock_id] = Gtk::StockID(Gtk::Stock::FIND).get_string();
+  (*folder)[dir_columns.included] = true;
+}
+
+void CoreController::removeFolderFromDB(const Gtk::TreeModel::iterator &folder) {
+  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+  (*folder)[dir_columns.stock_id] = "";
+  (*folder)[dir_columns.included] = false;
+}

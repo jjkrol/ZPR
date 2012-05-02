@@ -137,6 +137,9 @@ class CoreController {
        */
       photos_t getPhotosWithTags(std::vector<std::string>);
 
+      void addFolderToDB(const Gtk::TreeModel::iterator &);
+      void removeFolderFromDB(const Gtk::TreeModel::iterator &);
+
       private:
       CoreController (std::string forcedConfigPath="");
       CoreController& operator= (const CoreController&);
@@ -154,7 +157,7 @@ class CoreController {
        *@param row Tree row to which we append new children.
        *@param depth How deep should the method go. Set -1 for going deepest
        */
-      void addSubdirectories(Directory *, Gtk::TreeModel::Row &, int);
+      void addSubdirectories(Directory *, const Gtk::TreeModel::Row &, int);
       void addAbsoluteSubdirectories(Directory *, const Gtk::TreeModel::Row &, int);
 
       static CoreController* instance;

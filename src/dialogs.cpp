@@ -44,12 +44,15 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
 
   //appending columns
   directory_tree.append_column("Folder List", dir_columns.name);
+  Gtk::TreeViewColumn *column = directory_tree.get_column(0);
+  if(column) column->set_expand(true);
   Gtk::CellRendererPixbuf *cell = Gtk::manage(new Gtk::CellRendererPixbuf);
-  int columns = directory_tree.append_column("", *cell);
-  Gtk::TreeViewColumn *column = directory_tree.get_column(columns - 1);
-  if(column)
+  directory_tree.append_column("", *cell);
+  column = directory_tree.get_column(1);
+  if(column) {
     column->add_attribute(cell->property_stock_id(), dir_columns.stock_id);
-  //@TODO make icon appear on the right
+    //column->set_expand(false);
+  }
 
   //editing folder options frame
   ignore_button.signal_clicked().connect(sigc::mem_fun(
@@ -83,25 +86,25 @@ void DBManagerDialog::selectFolder() {
 }
 
 void DBManagerDialog::addFolderToDB() {
+  //checking if anything in tree is selected
   if(frame.get_label() == "Folder options") return;
+
+  //sending message to core
   Gtk::TreeModel::Path path;
   Gtk::TreeView::Column *column;
   directory_tree.get_cursor(path, column);
   Gtk::TreeModel::iterator folder = directory_model->get_iter(path);
-
-  //@TODO this should be moved to core
-  (*folder)[dir_columns.stock_id] = Gtk::StockID(Gtk::Stock::FIND).get_string();
-  (*folder)[dir_columns.included] = true;
+  core->addFolderToDB(folder);
 }
 
 void DBManagerDialog::removeFolderFromDB() {
+  //checking if anything in tree is selected
   if(frame.get_label() == "Folder options") return;
+
+  //sending message to core
   Gtk::TreeModel::Path path;
   Gtk::TreeView::Column *column;
   directory_tree.get_cursor(path, column);
   Gtk::TreeModel::iterator folder = directory_model->get_iter(path);
-
-  //@TODO this should be moved to core
-  (*folder)[dir_columns.stock_id] = "";
-  (*folder)[dir_columns.included] = false;
+  core->removeFolderFromDB(folder);
 }
