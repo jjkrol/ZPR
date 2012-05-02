@@ -28,19 +28,12 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   box.set_margin_top(2);
   box.set_margin_bottom(2);
   box.pack_start(scroll, true, true);
-  box.pack_start(right_box, true, true);
+  box.pack_start(right_box, false, false);
+  right_box.set_size_request(250);
   right_box.pack_start(info, true, true);
   right_box.pack_start(frame, false, false);
   scroll.add(directory_tree);
 
-  //editing folder options frame
-  frame.set_shadow_type(Gtk::SHADOW_IN);
-  Gtk::RadioButton::Group group = ignore_button.get_group();
-  button_box.pack_start(ignore_button, false, false);
-  button_box.pack_start(scan_button, false, false);
-  scan_button.set_group(group);
-  frame.add(button_box);
-  
   //loading directory tree
   directory_model = core->getDirectoryTree();
   directory_tree.set_model(directory_model);
@@ -56,7 +49,19 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   Gtk::TreeViewColumn *column = directory_tree.get_column(columns - 1);
   if(column)
     column->add_attribute(cell->property_stock_id(), dir_columns.stock_id);
+  //@TODO make icon appear on the right
 
+  //editing folder options frame
+  ignore_button.signal_clicked().connect(sigc::mem_fun(
+        *this, &DBManagerDialog::removeFolderFromDB));
+  scan_button.signal_clicked().connect(sigc::mem_fun(
+        *this, &DBManagerDialog::addFolderToDB));
+  Gtk::RadioButton::Group group = ignore_button.get_group();
+  button_box.pack_start(ignore_button, false, false);
+  button_box.pack_start(scan_button, false, false);
+  scan_button.set_group(group);
+  frame.add(button_box);
+  
   //displaying window
   show_all_children();
 }
@@ -69,9 +74,34 @@ void DBManagerDialog::selectFolder() {
   Gtk::TreeModel::iterator row = directory_model->get_iter(path);
 
   //setting frame label
-  frame.set_label((*row)[dir_columns.name]);
+  std::string label = (*row)[dir_columns.path];
+  frame.set_label(label);
 
   //selecting proper RadioButton
   if((*row)[dir_columns.included]) scan_button.set_active();
   else ignore_button.set_active();
+}
+
+void DBManagerDialog::addFolderToDB() {
+  if(frame.get_label() == "Folder options") return;
+  Gtk::TreeModel::Path path;
+  Gtk::TreeView::Column *column;
+  directory_tree.get_cursor(path, column);
+  Gtk::TreeModel::iterator folder = directory_model->get_iter(path);
+
+  //@TODO this should be moved to core
+  (*folder)[dir_columns.stock_id] = Gtk::StockID(Gtk::Stock::FIND).get_string();
+  (*folder)[dir_columns.included] = true;
+}
+
+void DBManagerDialog::removeFolderFromDB() {
+  if(frame.get_label() == "Folder options") return;
+  Gtk::TreeModel::Path path;
+  Gtk::TreeView::Column *column;
+  directory_tree.get_cursor(path, column);
+  Gtk::TreeModel::iterator folder = directory_model->get_iter(path);
+
+  //@TODO this should be moved to core
+  (*folder)[dir_columns.stock_id] = "";
+  (*folder)[dir_columns.included] = false;
 }

@@ -80,7 +80,8 @@ void CoreController::expandDirectory(const Gtk::TreeModel::iterator &parent,
   string path;
 
   //checking if expanding was already done
-  for(; child != children.end(); ++child) if(!child->children().empty()) return;
+  for(; child != children.end(); ++child)
+    if(!child->children().empty()) return;
 
   //adding subdirectories to row children
   for(child = children.begin(); child != children.end(); ++child) {
@@ -247,7 +248,7 @@ void CoreController::addSubdirectories(Directory *dir, Gtk::TreeModel::Row &row,
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
     childrow = *(database_model->append(row.children()));
     childrow[db_columns.name] = (*it)->getName();            //adding label
-    if(depth > 0)
+    if(depth != 0)
       addSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
     }
   }
@@ -261,7 +262,7 @@ void CoreController::addAbsoluteSubdirectories(Directory *dir, const Gtk::TreeMo
     childrow = *(directory_model->append(row.children()));
     childrow[dir_columns.name] = (*it)->getName();            //adding label
     childrow[dir_columns.path] = (*it)->getPath().string();
-    if(depth > 0)
+    if(depth != 0)
       addAbsoluteSubdirectories(*it, childrow, depth-1);                     //adding subdirectories
     }
   }

@@ -32,6 +32,8 @@ class DBManagerDialog : public Gtk::Dialog {
 
     //signal handlers
     void selectFolder();
+    void addFolderToDB();
+    void removeFolderFromDB();
 
     //hidden methods
     DBManagerDialog() {};
