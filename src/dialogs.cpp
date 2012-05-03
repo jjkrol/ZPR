@@ -49,10 +49,8 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   Gtk::CellRendererPixbuf *cell = Gtk::manage(new Gtk::CellRendererPixbuf);
   directory_tree.append_column("", *cell);
   column = directory_tree.get_column(1);
-  if(column) {
+  if(column)
     column->add_attribute(cell->property_stock_id(), dir_columns.stock_id);
-    //column->set_expand(false);
-  }
 
   //editing folder options frame
   ignore_button.signal_clicked().connect(sigc::mem_fun(
@@ -65,7 +63,7 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   scan_button.set_group(group);
   frame.add(button_box);
   
-  //displaying window
+  //displaying dialog
   show_all_children();
 }
 

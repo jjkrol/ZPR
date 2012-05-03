@@ -274,13 +274,35 @@ void CoreController::addAbsoluteSubdirectories(Directory *dir,
 }
 
 void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
-  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+  //selecting folder
   (*folder)[dir_columns.stock_id] = Gtk::StockID(Gtk::Stock::FIND).get_string();
   (*folder)[dir_columns.included] = true;
+
+  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+
+  //checking for subdirectories
+  Gtk::TreeModel::Children children = folder->children();
+  if(children.empty()) return;
+
+  //adding subfolders to db recursively
+  Gtk::TreeModel::Children::iterator child = children.begin();
+  for(; child != children.end(); ++child)
+    addFolderToDB(child);
 }
 
 void CoreController::removeFolderFromDB(const Gtk::TreeModel::iterator &folder) {
-  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+  //unselecing folder
   (*folder)[dir_columns.stock_id] = "";
   (*folder)[dir_columns.included] = false;
+ 
+  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+
+  //checking for subdirectories
+  Gtk::TreeModel::Children children = folder->children();
+  if(children.empty()) return;
+
+  //removing subfolders from db recursively
+  Gtk::TreeModel::Children::iterator child = children.begin();
+  for(; child != children.end(); ++child)
+    removeFolderFromDB(child);
 }
