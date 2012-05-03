@@ -278,7 +278,9 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
   (*folder)[dir_columns.stock_id] = Gtk::StockID(Gtk::Stock::FIND).get_string();
   (*folder)[dir_columns.included] = true;
 
-  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+  //storing changes in container (to handle OK/Cancel/Apply buttons)
+  std::string path =(*folder)[dir_columns.path];
+  scannedFolders.insert(path);
 
   //checking for subdirectories
   Gtk::TreeModel::Children children = folder->children();
@@ -295,7 +297,9 @@ void CoreController::removeFolderFromDB(const Gtk::TreeModel::iterator &folder) 
   (*folder)[dir_columns.stock_id] = "";
   (*folder)[dir_columns.included] = false;
  
-  //@TODO store changes in some container (to handle OK/Cancel/Apply buttons)
+  //storing changes in container (to handle OK/Cancel/Apply buttons)
+  std::string path =(*folder)[dir_columns.path];
+  scannedFolders.erase(path);
 
   //checking for subdirectories
   Gtk::TreeModel::Children children = folder->children();

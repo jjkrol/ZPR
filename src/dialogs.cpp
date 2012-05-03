@@ -5,7 +5,7 @@
 DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   Gtk::Dialog("Database Manager", *parent), box(Gtk::ORIENTATION_HORIZONTAL),
   right_box(Gtk::ORIENTATION_VERTICAL), button_box(Gtk::ORIENTATION_VERTICAL),
-  frame("Folder options"), info("Select dirs, lol."),
+  frame("Folder options"), info("Please select folders in which Imagine should look for your photos. Selected folders will be scanned for new photos automatically every time you launch Imagine."),
   ignore_button("Exclude from database"), scan_button("Scan for photos automatically") {
 
   //obtaining CoreController instance
@@ -19,7 +19,8 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   add_button(Gtk::Stock::APPLY, 1);
   add_button(Gtk::Stock::CANCEL, 2);
 
-  //adding contents
+  //adding and setting widgets
+  info.set_line_wrap(true);
   Gtk::Box *content_area = get_content_area();
   content_area->pack_start(box, true, true);
   box.set_spacing(5);
@@ -29,9 +30,10 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   box.set_margin_bottom(2);
   box.pack_start(scroll, true, true);
   box.pack_start(right_box, false, false);
-  right_box.set_size_request(250);
   right_box.pack_start(info, true, true);
   right_box.pack_start(frame, false, false);
+  //right_box.set_size_request(250);
+  scroll.set_min_content_width(350);
   scroll.add(directory_tree);
 
   //loading directory tree

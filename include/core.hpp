@@ -140,7 +140,7 @@ class CoreController {
       void addFolderToDB(const Gtk::TreeModel::iterator &);
       void removeFolderFromDB(const Gtk::TreeModel::iterator &);
 
-      private:
+  private:
       CoreController (std::string forcedConfigPath="");
       CoreController& operator= (const CoreController&);
       CoreController (const CoreController&);
@@ -151,8 +151,8 @@ class CoreController {
       void manageDatabase();
       void doSomeLongLastingTask();
 
-        /**
-         * Method responsible for adding subdirectories to directory tree.
+      /**
+       * Method responsible for adding subdirectories to directory tree.
        *@param dir Directory in which we look for subdirectories.
        *@param row Tree row to which we append new children.
        *@param depth How deep should the method go. Set -1 for going deepest
@@ -177,5 +177,6 @@ class CoreController {
       Glib::RefPtr<Gtk::TreeStore> database_model;
       DirTreeColumns dir_columns;
       DbTreeColumns db_columns;
-
-    };
+      
+      std::set<std::string> scannedFolders;
+};
