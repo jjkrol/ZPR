@@ -43,7 +43,6 @@ void LibraryView::fillDatabaseTree() {
   database_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
 }
 
-
 /// @fn void LibraryView::loadImages()
 /// @brief Method (signal handler) responsible for updating thumbnails in right panel.
 ///        Called when directory from directory view is clicked.

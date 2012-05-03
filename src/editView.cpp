@@ -160,10 +160,12 @@ void EditView::onPageSwitch(Gtk::Widget *page, guint number) {
 /// @brief Method (signal handler) responsible for loading next image from folder.
 void EditView::nextImage() {
   current_photo = core->getNextPhoto();
+  loadImage();
 }
 
 /// @fn void EditView::prevImage()
 /// @brief Method (signal handler) responsible for loading previous image from folder.
 void EditView::prevImage() {
   current_photo = core->getPreviousPhoto();
+  loadImage();
 }
