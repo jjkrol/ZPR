@@ -1,10 +1,10 @@
 /**
  * @file dbConnector.hpp
  * @brief File containing definition of an DB connectors
- * @author Jack Witkowski
- * @version 0.01
+ * @author Jacek Witkowski
+ * @version 0.03
  * Basicly there are 3 types of classes defined in this file:
- * - DBConnector which is an interface for all singletons used
+ * - DBConnector which is an interface for all connectors used
  *   to communicate with diffrent types of databases (eg.SQLite DB)
  * - DBConnectorFactory which is used to create DBConnectors
  *   (it ensures that there is no more than one object of each type
@@ -16,13 +16,10 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <ostream> //for testing purposes only
 #include <boost/filesystem.hpp>
 #include <sqlite3.h>
 
-/**
- * @todo Adding photos to database
- * @todo Removing photos from database
-*/
 class Disk;
 
 class DBConnector;
@@ -30,9 +27,9 @@ class SQLiteConnector;
 
 /*! @typedef typedef std::vector< std::vector <std::string> > ResultTable;
   * ResultTable is a type of objects storing results of queries.
-  * Each line of a result is represented by a vector of strings.
-  * Results may be composed of more than a line, that's why
-  * a ResultTable is of type vector<vector<string> >
+  * Each line of the result is represented by a vector of strings.
+  * Results may be composed of more than one line, so a ResultTable
+  * is of type vector<vector<string> >
   *
   * @typedef typedef DBConnector* (*Creator)();
   * Creator is a static function called by the DBConnectorFactory
@@ -71,31 +68,44 @@ public:
  *  @brief Tells if database was changed since last usage of imgview
  *  @returns true if database has changed 
  *  
+ *  @fn virtual bool checkCompatibility() const = 0;
+ *  @brief checks if photos stored in the database exist
+ *  @returns true if all photos exist and false otherwise
+ *  
  *  @fn virtual bool addPhotosFromDirectories(
  *        const std::vector<DirectoriesPath> &dirs
  *      ) = 0;
  *  @brief adds photos from the directories included in the vector
- *  (recursively).
- *  @returns true value when run successfully and false value otherwise
+ *  @returns true value when ends successfully and false value otherwise
  *
  *  @fn virtual bool addPhoto(const PhotoPath &photo) = 0;
- *  @brief adds a single photo to database
+ *  @brief adds a single photo to the database
  *  @returns a true value when run successfully and false otherwise
  *
  *  @fn virtual bool movePhoto(
  *        const PhotoPath &old_path,
  *        const PhotoPath &new_path) = 0;
- *  @brief moves photo from old path to new path
+ *  @brief moves photo from one directory to another
  *  @returns true if photo has been moved successfully and false otherwise
  *
  *  @fn virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
- *  @brief removes photo from database
+ *  @brief removes photo from the database
  *  @returns true if photo has been removed successfully and false otherwise
  *
- *  @fn virtual bool addTags(
+ *  @fn  virtual bool deleteDirectories(
+ *         const std::vector<DirectoriesPath> &dirs) = 0;
+ *  @brief deletes directory and all its contents (photos and subdirectories)
+ *  @returns true if executed successfully and false otherwise
+ *
+ *  @fn virtual bool addTagsToPhoto(
  *        const PhotoPath &photo, const std::set<std::string> &tags) = 0;
  *  @brief add tags to photo specified in the first argument.
  *  @returns true value if run successfully and false value otherwise
+ *
+ *  @fn virtual bool deleteTagsFromPhoto(
+ *        const PhotoPath &photo, const std::set<std::string> &tags) = 0;
+ *  @brief deletes tags from a photo
+ *  @returns true if executed successfully and false otherwise
  *
  *  @fn virtual bool getPhotosWithTags(
  *        const std::set<std::string> &tags,
@@ -106,7 +116,7 @@ public:
  *
  *  @fn virtual bool getPhotosTags(
  *        const PhotoPath &photo, std::set<std::string> &tags_output) = 0;
- *  @brief takes a path of photo and puts all corresponding tags in a vector
+ *  @brief takes a path of a photo and puts all corresponding tags in a vector
  *  specified in a second argument (tags_output)
  *  @returns a true value when run successfully and a false value otherwise
 */
@@ -120,23 +130,35 @@ public:
   virtual int open(const std::string filename) = 0;
   virtual int close() = 0;
   virtual inline bool hasChanged() const = 0;
+  virtual bool checkCompatibility() const = 0;
   virtual bool isEmpty() = 0;
 
   virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs) = 0;
   virtual bool addPhoto(const PhotoPath &photo) = 0;
+  //don't know if the following method is needed
   virtual bool movePhoto(
     const PhotoPath &old_path, const PhotoPath &new_path) = 0;
   virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
   virtual bool deleteDirectories(const std::vector<DirectoriesPath> &dirs) = 0;
 
-  virtual bool addTags(
+  virtual bool addTagsToPhoto(
+    const PhotoPath &photo, const std::set<std::string> &tags) = 0;
+  virtual bool deleteTagsFromPhoto(
     const PhotoPath &photo, const std::set<std::string> &tags) = 0;
   virtual bool getPhotosWithTags(
     const std::set<std::string> &tags,
     std::vector<PhotoPath> &photos_output) = 0;
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output) = 0;
+
+
+  //Methods used for testing purposes only
+  virtual void showTags(std::ostream &) = 0;
+  virtual void showPhotos(std::ostream &) = 0;
+  virtual void showDirectories(std::ostream &) = 0;
+  virtual void showPhotosTags(std::ostream &) = 0;
+
 
 protected:
   virtual ~DBConnector(){};
@@ -150,7 +172,7 @@ protected:
   * @brief Concrete version of DBConnector. Uses SQLite Database.
   *
   * Must declare DBConnectorFactory as a friend. Must provide
-  * getInstance function which gives access to the database
+  * getInstance function which gives an access to the database
   * (every concrete connector is implemented as a Singleton)
 */
 class SQLiteConnector : public DBConnector {
@@ -170,7 +192,8 @@ public:
 */
   int open(const std::string filename);
   int close();
-  inline bool hasChanged() const;
+  bool hasChanged() const;
+  bool checkCompatibility() const;
   bool isEmpty();
 
   //bool addPhotosFromDirectories(
@@ -184,12 +207,21 @@ public:
     const PhotoPath &old_path,
     const PhotoPath &new_path);
   bool deletePhoto(const PhotoPath &photos_path);
-  bool addTags(const PhotoPath &photo, const std::set<std::string> &tags);
+  bool addTagsToPhoto(const PhotoPath &photo,
+    const std::set<std::string> &tags);
+  bool deleteTagsFromPhoto(
+    const PhotoPath &photo, const std::set<std::string> &tags);
   bool getPhotosWithTags(
     const std::set<std::string> &tags,
     std::vector<PhotoPath> &photos_output);
   bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output);
+
+  //Methods used for testing purposes only
+  void showTags(std::ostream &);
+  void showPhotos(std::ostream &);
+  void showDirectories(std::ostream &);
+  void showPhotosTags(std::ostream &);
 
 private:
   SQLiteConnector(){
@@ -200,13 +232,13 @@ private:
    *  @brief holds a pointer to opened database
    *
    *  @var std::string filename;
-   *  @brief holds a name of database
+   *  @brief holds a name of a database file
    *
    *  @var static DBConnector *instance;
    *  @brief holds a pointer to the only existing SQLiteConnector
    *
    *  @fn static DBConnector * getInstance();
-   *  @brief Gives access or creates the SQLiteConnector. Is private because
+   *  @brief Gives an access or creates the SQLiteConnector. Is private because
    *  only the DBFactory should be able to run this method
    *  @returns a pointer to the instance of SQLiteConnector
    *
@@ -219,7 +251,6 @@ private:
    *  setting hold in a database is a checksum, so nothing more is saved.
    *
    *  @fn bool getDirectoriesFromDB(
-   *        boost::filesystem::path &main_directory,
    *        std::vector<boost::filesystem::path> &dirs) const;
    *  @brief Gets a main directory from the database and the vector
    *  of directories that should be excluded form the database.
@@ -254,9 +285,14 @@ private:
   bool saveSettings();
 
   bool getDirectoriesFromDB(std::vector<DirectoriesPath> &dirs) const;
+  bool getSubdirectoriesFromDB(
+    const DirectoriesPath &dir,
+    std::vector<DirectoriesPath> &subdirs) const;
   bool getChecksumFromDB(int &checksum) const;
-  bool addTag(const PhotoPath &photo, const std::string &tag);
+  bool addTagToPhoto(const PhotoPath &photo, const std::string &tag);
+  bool deleteTagFromPhoto(const PhotoPath &, const std::string &);
 
   int calculateChecksum() const;
+  bool getPhotosFromDB(std::vector<boost::filesystem::path> &photos) const;
   inline bool reportErrors(const char *query) const;
 };

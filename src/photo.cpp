@@ -81,7 +81,7 @@ void Photo::deleteFromLibraryAndDisk(){
 void      Photo::addTag(std::string tag ){
   std::set<std::string> argVector;
   argVector.insert(tag);
-  db->addTags(photoPath, argVector);
+  db->addTagsToPhoto(photoPath, argVector);
   tags.insert(tag);
 }
 

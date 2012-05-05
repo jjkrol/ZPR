@@ -6,6 +6,8 @@
 #include "../include/core.hpp"
 #include "../include/photo.hpp"
 #include "../include/directory.hpp"
+#include "../include/dbConnector.hpp"
+#include "../include/disk.hpp"
 
 using namespace boost::filesystem;
 
@@ -69,47 +71,59 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_CHECK(delta->hasPhotos() == false);
   }
 
- /** BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
-   * Functions to test:
-   *  (private) bool createDB();
-   *  :: TESTED :: int open(const string filename);
-   *
-   *  (private) bool reportErrors(const char *query) const;
-   *  (private) bool saveSettings();
-   *  :: TESTED :: void close();
-   *
-   *  :: TESTED :: bool addPhoto(const PhotoPath &photo);
-   *  (private) bool addDirectoryToDB(const DirectoryPath &dir);
-   *  (private) bool addPhotosFromDirectory(const DirectoryPath &dir);
-   *  bool addPhotosFromDirectories(vector<DirectoryPath> &dirs);
-   *  bool addPhotosFromDirectories(
-   *    const path &main_dir, vector<DirectoryPath> &excluded_dirs);
-   *  
-   *  (private) bool getDirectoriesFromDB(vector<DirectoryPath> &dirs) const;
-   *  (private) int calulateChecksum() const;
-   *  (private) bool getChecksumFromDB(int &checksum) const;
-   *  bool hasChanged() const;
-   *
-   *  bool movePhoto(
-   *    const PhotoPath &old_path, const PhotoPath &new_path);
-   *  
-   *  bool deletePhoto(const PhotoPath &photos_path);
-   *
-    DBConnector *sqlconnector = DBConnectorFactory::getInstance(" ");
+  BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
+    using std::vector;
+    using boost::filesystem::path;
+    //making an instance of a connector which should be tested
+    DBConnector *sqlconnector = DBConnectorFactory::getInstance("sqlite");
 
+  /******************************************/
+  /*    OPENING AND CLOSING DATABASE        */
+  /******************************************/
+
+    //closing database which is not opened
     BOOST_CHECK(sqlconnector->close() == DBConnector::FAILURE);
+
+    //opening non-existing database (should be created)
     BOOST_REQUIRE(sqlconnector->open("DB.sqlite")
                   == (DBConnector::OPENED | DBConnector::CREATED));
+
+    //closing opened database connection
     BOOST_REQUIRE(sqlconnector->close() == DBConnector::CLOSED);
 
+    //opening existing database
     BOOST_REQUIRE(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
+
+    //opening database which has been already opened (multi-connections
+    //are not allowed, so the function should exit with a FAILURE flag)
     BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::FAILURE);
 
-    BOOST_CHECK((sqlconnector->addPhoto("test_tree/1.jpg")));
 
-    //BOOST_CHECK(addPhotosFromDirectories());
-    sqlconnector->close();
-  }*/
+  /******************************************/
+  /*    ADDING AND DELETING PHOTOS          */
+  /******************************************/
+    Disk *disk = Disk::getInstance();
+    vector<boost::filesystem::path> dirs = disk->getSubdirectoriesPaths(
+                                           boost::filesystem::path("/"));
+
+    //adding photos from directory non-recursively
+    //dirs.push_back(DirectoriesPath ("/alpha/", false));
+
+
+    //sqlconnector->addPhotosFromDirectories(dirs);
+    //sqlconnector->showPhotos(std::cout);
+
+    //deleting directories;
+    //deleting photos;
+    //checking if a structure of files on a disk has changed
+    //checking if a database is empty (contains no directories)
+    //adding tags to photo
+    //adding removing tags from photo;
+    //removing tag
+
+    //closing connection to database finalizes the test suite
+    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
+  }
 
 BOOST_AUTO_TEST_SUITE_END()
 
