@@ -25,9 +25,7 @@ Directory::~Directory(){
 
 vector <Directory*> Directory::getSubdirectories(){
   vector<path> subdirFilenames = disk->getSubdirectoriesPaths(directoryPath);
-
   subdirectories.clear();
-
   //create a vector of pointers to Directory Objects
   for(vector<path>::iterator it = subdirFilenames.begin(); it!=subdirFilenames.end(); it++){
     path subdirPath = directoryPath;

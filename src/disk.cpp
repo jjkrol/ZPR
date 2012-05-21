@@ -16,7 +16,7 @@ Disk* Disk::getInstance(path libraryDirectoryPath){
   return instance;
 }
 
-Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath){
+Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath),Asynchronous(){
 
 }
 
@@ -135,7 +135,6 @@ void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPat
     if(is_directory(*it))
       subdirectories->push_back((*it).filename());
   } 
-
   return subdirectories;
 }
 

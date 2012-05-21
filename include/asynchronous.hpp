@@ -102,6 +102,10 @@ class Asynchronous{
     }
 
     bool stopLoops;
+    boost::condition_variable condMainLoop; //is this necessary?
+    boost::mutex mutMainLoop;
+    boost::condition_variable condConcLoop; 
+    boost::mutex mutConcLoop;
 
     MessageQueue normalMessageQueue;
     boost::thread mainLoopThread;

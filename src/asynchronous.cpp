@@ -11,9 +11,14 @@
 
 
 Asynchronous::Asynchronous(){
+  boost::unique_lock<boost::mutex> lockMainLoop(mutMainLoop);
+  boost::unique_lock<boost::mutex> lockConcLoop(mutConcLoop);
+
   stopLoops = nietego;
   mainLoopThread = boost::thread(&Asynchronous::mainLoop, this) ;
+  condMainLoop.wait(lockMainLoop);
   concurrentLoopThread = boost::thread(&Asynchronous::concurrentLoop, this);
+  condConcLoop.wait(lockConcLoop);
 }
 
  Asynchronous::~Asynchronous(){
@@ -24,25 +29,27 @@ Asynchronous::Asynchronous(){
 
  void Asynchronous::mainLoop(){
   boost::unique_lock<boost::mutex> lock(normalMessageQueue.mut);
+  condMainLoop.notify_all();
   while(!stopLoops){
-    while(normalMessageQueue.isEmpty()){
+    //while(!normalMessageQueue.isEmpty()){
       normalMessageQueue.cond.wait(lock);
       Message msg = normalMessageQueue.pop();
       runTask(msg); 
-    }
+    //}
   }
 }
 
  void Asynchronous::concurrentLoop(){ 
   boost::thread threadFromQueue;
   boost::unique_lock<boost::mutex> lock(concurrentMessageQueue.mut);
+  condConcLoop.notify_all();
   while(!stopLoops){
-    while(concurrentMessageQueue.isEmpty()){
+    //while(!concurrentMessageQueue.isEmpty()){
       concurrentMessageQueue.cond.wait(lock);
       Message msg = concurrentMessageQueue.pop();
       threadFromQueue = boost::thread(&Asynchronous::runTask, this, msg);
       //TODO what happens with those threads?
-    }
+    //}
   }
 }
 
