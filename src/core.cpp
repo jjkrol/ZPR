@@ -30,9 +30,9 @@ void CoreController::startApplication(int argc, char** argv){
   gui = UserInterface::getInstance(argc, argv);
   guiThread = boost::thread(&UserInterface::init, gui);
 }
+
 bool CoreController::hasLibraryPathSet(){
-  //@TODO db function for getting library paths from db 
-  return true;
+  return !(db->isEmpty()); 
 }
 
 void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
@@ -279,10 +279,11 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
   (*folder)[dir_columns.included] = true;
 
   //storing changes in container (to handle OK/Cancel/Apply buttons)
-  std::string path =(*folder)[dir_columns.path];
-  scannedFolders.insert(path);
+  added_folders.push_back(folder);
 
-  //checking for subdirectories
+  //expanding and checking for subdirectories
+  Gtk::TreeModel::Path path;
+  expandDirectory(folder, path);
   Gtk::TreeModel::Children children = folder->children();
   if(children.empty()) return;
 
@@ -293,13 +294,21 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
 }
 
 void CoreController::removeFolderFromDB(const Gtk::TreeModel::iterator &folder) {
-  //unselecing folder
+  if(!(bool)(*folder)[dir_columns.included]) return;
+
+  //unselecting folder
   (*folder)[dir_columns.stock_id] = "";
   (*folder)[dir_columns.included] = false;
  
   //storing changes in container (to handle OK/Cancel/Apply buttons)
-  std::string path =(*folder)[dir_columns.path];
-  scannedFolders.erase(path);
+  std::vector<Gtk::TreeModel::iterator>::iterator it;
+  it = std::find(added_folders.begin(), added_folders.end(), folder);
+
+  //checking whether user already added that folder to DB
+  if(it != added_folders.end())
+    added_folders.erase(it);
+  else
+    deleted_folders.push_back(folder);
 
   //checking for subdirectories
   Gtk::TreeModel::Children children = folder->children();
@@ -309,4 +318,42 @@ void CoreController::removeFolderFromDB(const Gtk::TreeModel::iterator &folder) 
   Gtk::TreeModel::Children::iterator child = children.begin();
   for(; child != children.end(); ++child)
     removeFolderFromDB(child);
+}
+
+void CoreController::sendChangesToDB() {
+  std::vector<Gtk::TreeModel::iterator>::iterator folder;
+  std::vector<boost::filesystem::path> db_vector;
+
+  //copying vector and sending it to DB
+  for(folder = added_folders.begin(); folder != added_folders.end(); ++folder) {
+    db_vector.push_back((std::string)(**folder)[dir_columns.path]);
+  }
+  //db->addPhotosFromDirectories(db_vector);
+  added_folders.clear();
+  db_vector.clear();
+ 
+  //copying vector and sending it to DB
+  for(folder = deleted_folders.begin(); folder != deleted_folders.end(); ++folder) {
+    db_vector.push_back((std::string)(**folder)[dir_columns.path]);
+  }
+  //db->deleteDirectories(db_vector);
+  deleted_folders.clear();
+}
+
+void CoreController::cancelDBChanges() {
+  std::vector<Gtk::TreeModel::iterator>::iterator folder;
+
+  //cancel adding folders
+  for(folder = added_folders.begin(); folder != added_folders.end(); ++folder) {
+    (**folder)[dir_columns.stock_id] = "";
+    (**folder)[dir_columns.included] = false;
+  }
+  added_folders.clear();
+
+  //cancel removing folders
+  for(folder = deleted_folders.begin(); folder != deleted_folders.end(); ++folder) {
+    (**folder)[dir_columns.stock_id] = Gtk::StockID(Gtk::Stock::FIND).get_string();
+    (**folder)[dir_columns.included] = true;
+  }
+  deleted_folders.clear();
 }

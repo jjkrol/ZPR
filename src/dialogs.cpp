@@ -15,9 +15,9 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   set_size_request(600, 400);
 
   //adding buttons
-  add_button(Gtk::Stock::OK, 0);
-  add_button(Gtk::Stock::APPLY, 1);
-  add_button(Gtk::Stock::CANCEL, 2);
+  add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+  add_button(Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+  add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
   //adding and setting widgets
   info.set_line_wrap(true);
@@ -32,7 +32,6 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   box.pack_start(right_box, false, false);
   right_box.pack_start(info, true, true);
   right_box.pack_start(frame, false, false);
-  //right_box.set_size_request(250);
   scroll.set_min_content_width(350);
   scroll.add(directory_tree);
 
@@ -64,6 +63,10 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   button_box.pack_start(scan_button, false, false);
   scan_button.set_group(group);
   frame.add(button_box);
+
+  //handling OK/Cancel/Apply buttons
+  this->signal_response().connect(sigc::mem_fun(
+        *this, &DBManagerDialog::handleButtonPush));
   
   //displaying dialog
   show_all_children();
@@ -107,4 +110,19 @@ void DBManagerDialog::removeFolderFromDB() {
   directory_tree.get_cursor(path, column);
   Gtk::TreeModel::iterator folder = directory_model->get_iter(path);
   core->removeFolderFromDB(folder);
+}
+
+void DBManagerDialog::handleButtonPush(int button_id) {
+  switch(button_id) {
+    case Gtk::RESPONSE_OK:
+      core->sendChangesToDB();
+      break;
+    case Gtk::RESPONSE_APPLY:
+      /// @todo make dialog stay on screen
+      core->sendChangesToDB();
+      break;
+    case Gtk::RESPONSE_CANCEL:
+      core->cancelDBChanges();
+      break;
+  }
 }

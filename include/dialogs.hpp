@@ -34,6 +34,7 @@ class DBManagerDialog : public Gtk::Dialog {
     void selectFolder();
     void addFolderToDB();
     void removeFolderFromDB();
+    void handleButtonPush(int);
 
     //hidden methods
     DBManagerDialog() {};

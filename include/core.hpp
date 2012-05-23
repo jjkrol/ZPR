@@ -140,6 +140,9 @@ class CoreController {
       void addFolderToDB(const Gtk::TreeModel::iterator &);
       void removeFolderFromDB(const Gtk::TreeModel::iterator &);
 
+      void sendChangesToDB();
+      void cancelDBChanges();
+
   private:
       CoreController (std::string forcedConfigPath="");
       CoreController& operator= (const CoreController&);
@@ -173,10 +176,13 @@ class CoreController {
       Disk* disk;
       boost::thread guiThread;
 
+      //GTK folder trees
       Glib::RefPtr<Gtk::TreeStore> directory_model;
       Glib::RefPtr<Gtk::TreeStore> database_model;
       DirTreeColumns dir_columns;
       DbTreeColumns db_columns;
       
-      std::set<std::string> scannedFolders;
+      //containers for comminucating with DBManager
+      std::vector<Gtk::TreeModel::iterator> added_folders;
+      std::vector<Gtk::TreeModel::iterator> deleted_folders;
 };
