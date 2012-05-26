@@ -33,6 +33,9 @@ DBConnector* DBConnectorFactory::getInstance(const string type) {
   /** @todo Factory should check the register of creators andn return the
    * desired one.
    */
+  if(type != "SQLiteConnector")
+    cout << "Proszę sobie nie żartować"<<endl;
+
   return SQLiteConnector::getInstance();
 }
 
@@ -134,7 +137,7 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
 }
 
 bool SQLiteConnector::isEmpty() {
-  //@fixme Getting all directories from the database is not necessary.
+  //TODO Getting all directories from the database is not necessary.
   //Only one directory existing in the database is enough
   vector<DirectoriesPath> dirs;
   getDirectoriesFromDB(dirs);
@@ -187,7 +190,7 @@ bool SQLiteConnector::saveSettings() {
     return !reportErrors(query.c_str());
  
   query = "INSERT INTO settings VALUES (0);"; //quick fix
-  //@fixme how to make a string from an integer
+  //@todo how to make a string from an integer
   //query = "INSERT INTO settings VALUES (" + calculateChecksum()
   //        + string(");") ;
 
@@ -228,8 +231,8 @@ int SQLiteConnector::calculateChecksum() const{
   for(vector<DirectoriesPath>::iterator i = directories.begin();
       i != directories.end(); ++i) {
   
-    //add a hash from every photo from directory to checksum
-    vector<path> photo_paths = disk->getPhotosPaths(i->path);
+    //add make a hash from every photo from directory to checksum
+    vector<path> photo_paths = disk->getPhotosPaths(*i);
     for(vector<path>::iterator j = photo_paths.begin();
         j != photo_paths.end() ; j++) {
       checksum_tmp += hash(j->string().c_str());
@@ -281,7 +284,7 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &(dir.path), sizeof(path), SQLITE_STATIC);
+  sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -304,7 +307,7 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &(dir.path), sizeof(path), SQLITE_STATIC);
+  sqlite3_bind_blob(stmt, 1, &(dir), sizeof(path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -321,27 +324,13 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
   //add photos which are located directly in this directory
   {
     //get photos which are located in this directory
-    vector<PhotoPath> photos = disk->getPhotosPaths(dir.path);
+    vector<PhotoPath> photos = disk->getPhotosPaths(dir);
 
     //add each photo to database
     for(vector<PhotoPath>::const_iterator i = photos.begin();
         i != photos.end() ; ++i) {
       if(! addPhoto(*i))
         return false;
-    }
-  }
-
-  //add photos from all subdirectories, if a directory should be added
-  //recursively
-  if(dir.recursively) {
-    //get subdirectories of this directory
-    vector<path> subdirectories = disk->getSubdirectoriesPaths(dir.path);
-
-    //add photos from each of subdirectories to a database
-    for(vector<path>::iterator i = subdirectories.begin();
-        i != subdirectories.end() ; ++i) {
-      if(! addPhotosFromDirectory(DirectoriesPath(*i,true)))
-        return false;  
     }
   }
 
@@ -365,8 +354,8 @@ bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
   if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &dir.path, sizeof(path), SQLITE_STATIC);
-  path parent = dir.path.parent_path();
+  sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC);
+  path parent = dir.parent_path();
   sqlite3_bind_blob(stmt, 2, &parent, sizeof(path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
@@ -374,7 +363,7 @@ bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
   return !(reportErrors(query));
 }
 
-//don't know if needed
+//TODO
 bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
   return false;
 }
@@ -443,14 +432,13 @@ const DirectoriesPath &dir, vector<DirectoriesPath> &directories) const {
   if(( sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK)
     return !reportErrors(query);
 
-  sqlite3_bind_blob(stmt, 1, &dir.path, sizeof(path), SQLITE_STATIC );
+  sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC );
 
   while(sqlite3_step(stmt) == SQLITE_ROW) {
     const void *blob = sqlite3_column_blob(stmt,0);
-    directories.push_back(
-      DirectoriesPath( *(static_cast<const path *>(blob)), false)
-    );
+    directories.push_back( *static_cast<const path *>(blob) );
   }
+
   sqlite3_finalize(stmt);
 
   return !reportErrors(query);
@@ -468,9 +456,7 @@ vector<DirectoriesPath> &directories) const {
 
   while(sqlite3_step(stmt) == SQLITE_ROW) {
     const void *blob = sqlite3_column_blob(stmt,0);
-    directories.push_back(
-      DirectoriesPath( *(static_cast<const path *>(blob)) , false)
-    );
+    directories.push_back( *static_cast<const path *>(blob) );
   }
   
   sqlite3_finalize(stmt);
@@ -689,6 +675,7 @@ void SQLiteConnector::showPhotos(std::ostream &out) {
   sqlite3_finalize(stmt);
 }
 
+//funkcja testowa
 void SQLiteConnector::showDirectories(std::ostream &out) {
   sqlite3_stmt *stmt;
   const char* query = "SELECT * FROM directories;";

@@ -39,11 +39,11 @@ class SQLiteConnector;
   * Class used to provide instances of adequate concrete versions
   * of database connectors (eg. SQLiteConnector)
 */
-struct DirectoriesPath;
 
 typedef std::vector< std::vector <std::string> > ResultTable;
 typedef DBConnector*(*Creator)(void);
 typedef boost::filesystem::path PhotoPath;
+typedef boost::filesystem::path DirectoriesPath;
 
 class DBConnectorFactory {
 public:

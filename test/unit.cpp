@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
                                            boost::filesystem::path("/"));
 
     //adding photos from directory non-recursively
-    //dirs.push_back(DirectoriesPath ("/alpha/", false));
+    //dirs.push_back(boost::filesystem::path("/alpha/"));
 
 
     //sqlconnector->addPhotosFromDirectories(dirs);
