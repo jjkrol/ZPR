@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 #include "./global.hpp"
 
+class PreferencesDialog;
 class DBManagerDialog;
 class WindowContent;
 class Directory;
@@ -21,6 +22,9 @@ class MainWindow : public Gtk::Window {
     friend class EditView;
 
   private:
+    //connection with CoreController
+    CoreController *core;
+
     //defines active type of view
     WindowContent *content;
 
@@ -43,11 +47,11 @@ class MainWindow : public Gtk::Window {
 
     //toolbar
     Gtk::ToolButton save_button, delete_button;
-    Gtk::ToolButton star_button, tags_button;
+    Gtk::ToolButton edit_button, tags_button;
     
     //dialogs
     DBManagerDialog *db_manager;
-    //PreferencesDialog *preferences_editor;
+    PreferencesDialog *preferences_editor;
 
     //constructor and desctructor
     MainWindow();
@@ -106,6 +110,7 @@ class EditView : public WindowContent {
     PhotoData current_photo;
 
     //handling signals
+    void editWithExternalEditor();
     void onPageSwitch(Gtk::Widget *, guint);
     void fitImage(Gtk::Allocation &);
     void loadImage();

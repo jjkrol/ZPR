@@ -23,6 +23,13 @@ EditView::EditView(MainWindow *w) : window(w),
   edit_buttons.set_margin_bottom(1);
   edit_buttons.set_spacing(2);
 
+  //adding tooltips to buttons
+  left_button.set_tooltip_text("Load previous photo");
+  right_button.set_tooltip_text("Load next photo");
+  undo_button.set_tooltip_text("Undo last operation");
+  redo_button.set_tooltip_text("Redo previously cancelled operation");
+  library_button.set_tooltip_text("Go back to library view");
+
   //organising widgets
   edit_buttons.pack_start(undo_button, true, true);
   edit_buttons.pack_start(redo_button, true, true);

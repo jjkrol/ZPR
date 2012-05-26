@@ -126,3 +126,32 @@ void DBManagerDialog::handleButtonPush(int button_id) {
       break;
   }
 }
+
+PreferencesDialog::PreferencesDialog(Gtk::Window *parent) : 
+  Gtk::Dialog("Preferences", *parent) {
+  //obtaining CoreController instance
+  core = CoreController::getInstance();
+
+  //setting size
+  set_size_request(600, 400);
+
+  //adding buttons
+  add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+  add_button(Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+  add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+}
+
+void PreferencesDialog::handleButtonPush(int button_id) {
+  switch(button_id) {
+    case Gtk::RESPONSE_OK:
+      //send changes to core
+      //quit
+      break;
+    case Gtk::RESPONSE_APPLY:
+      //send changes to core
+      break;
+    case Gtk::RESPONSE_CANCEL:
+      //quit
+      break;
+  }
+}

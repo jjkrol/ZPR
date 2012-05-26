@@ -357,3 +357,20 @@ void CoreController::cancelDBChanges() {
   }
   deleted_folders.clear();
 }
+
+void CoreController::setExternalEditor(std::string name) {
+  configManager->setStringValue("externalEditor", name);
+  configManager->writeConfiguration();
+}
+
+void CoreController::editInExternalEditor() {
+  //check if any photo is loaded/selected
+  if(currentPhoto == currentPhotoSet.end()) return;
+
+  Glib::RefPtr<Gio::AppInfo> editor = Gio::AppInfo::create_from_commandline(
+      "gimp", "GIMP", Gio::APP_INFO_CREATE_SUPPORTS_URIS);
+  Glib::RefPtr<Gio::File> photo = Gio::File::create_for_path(
+      (*currentPhoto)->getPath().string());
+
+  editor->launch(photo);
+}

@@ -143,6 +143,9 @@ class CoreController {
       void sendChangesToDB();
       void cancelDBChanges();
 
+      void setExternalEditor(std::string name);
+      void editInExternalEditor();
+
   private:
       CoreController (std::string forcedConfigPath="");
       CoreController& operator= (const CoreController&);

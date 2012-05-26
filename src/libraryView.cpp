@@ -18,7 +18,7 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
 
   //check for database - prompt if unavailable
   //if(core->hasLibraryPathSet())
-  if(false)
+  if(true)
     fillDatabaseTree();
   else
     promptAboutDatabase();
@@ -104,6 +104,8 @@ void LibraryView::promptAboutDatabase() {
   window->show_all_children();
 }
 
+/// @fn void LibraryView::createDatabase(int response)
+/// @brief Method responsible for displaying the DB Manager Dialog.
 void LibraryView::createDatabase(int response) {
   window->editDatabase();
 }

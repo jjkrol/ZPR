@@ -39,3 +39,21 @@ class DBManagerDialog : public Gtk::Dialog {
     //hidden methods
     DBManagerDialog() {};
 };
+
+class PreferencesDialog : public Gtk::Dialog {
+  public:
+    PreferencesDialog(Gtk::Window *);
+    ~PreferencesDialog() {};
+
+  private:
+    //connection with CoreController class
+    CoreController *core;
+
+    //widgets
+
+    //signal handlers
+    void handleButtonPush(int);
+
+    //hidden methods
+    PreferencesDialog() {};
+};

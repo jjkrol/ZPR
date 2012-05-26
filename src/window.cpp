@@ -9,16 +9,29 @@
 MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   zoom_icon(Gtk::Stock::FIND, Gtk::ICON_SIZE_BUTTON),
   save_button(Gtk::Stock::FLOPPY), delete_button(Gtk::Stock::DELETE),
-  star_button(Gtk::Stock::ABOUT), tags_button(Gtk::Stock::EDIT) {
+  edit_button(Gtk::Stock::EDIT), tags_button(Gtk::Stock::INDEX) {
+
+  //obtaining CoreController instance
+  core = CoreController::getInstance();
 
   //customizing window
   set_title("Imagine");
   maximize();
 
-  //editing widgets
+  //editing zoom slider
   zoom_slider.set_draw_value(false);
   zoom_slider.set_show_fill_level(true);
   zoom_slider.set_size_request(200, -1);
+
+  //adding tooltips to buttons
+  save_button.set_tooltip_text("Save image to disk");
+  delete_button.set_tooltip_text("Delete image from disk");
+  edit_button.set_tooltip_text("Edit image in external editor");
+  tags_button.set_tooltip_text("Add/delete image tags");
+
+  //connecting signals to buttons
+  edit_button.signal_clicked().connect(sigc::mem_fun(core,
+        &CoreController::editInExternalEditor));
 
   //menubar creating
   Gtk::RadioAction::Group view_type;
@@ -71,7 +84,7 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   //organising widgets into containers
   toolbar.pack_start(save_button, true, true);
   toolbar.pack_start(delete_button, true, true);
-  toolbar.pack_start(star_button, true, true);
+  toolbar.pack_start(edit_button, true, true);
   toolbar.pack_start(tags_button, true, true);
   bottom_box.pack_end(zoom_icon, false, false);
   bottom_box.pack_end(zoom_slider, false, false);
@@ -125,11 +138,16 @@ void MainWindow::showAbout() {
   dialog.run();
 }
 
-/// Method responsible for displaying Preferences dialog.
+/// @fn void MainWindow::editPreferences()
+/// @brief Method responsible for displaying Preferences dialog.
 void MainWindow::editPreferences() {
+  preferences_editor = new PreferencesDialog(this);
+  preferences_editor ->run();
+  delete preferences_editor;
 }
 
-/// Method responsible for displaying Database Manager dialog.
+/// @fn void MainWindow::editDatabase()
+/// @brief Method responsible for displaying Database Manager dialog.
 void MainWindow::editDatabase() {
   db_manager = new DBManagerDialog(this);
   db_manager->run();
