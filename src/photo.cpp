@@ -51,6 +51,10 @@ boost::filesystem::path Photo::getPath(){
   return photoPath;
 }
 
+boost::filesystem::path Photo::getAbsolutePath(){
+  return disk->makeAbsolutePath(photoPath);
+}
+
 boost::filesystem::path Photo::getFilename(){
   return photoPath.filename();
 }

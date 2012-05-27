@@ -51,6 +51,11 @@ class Photo {
     boost::filesystem::path getFilename();
 
     /**
+     * @returns absolute path of a photo
+     * @warning use with caution!
+     */
+    boost::filesystem::path getAbsolutePath();
+    /**
      * @brief moves photo to a new destination in the filesystem 
      * and updates the database
      */

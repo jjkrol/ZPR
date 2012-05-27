@@ -370,7 +370,7 @@ void CoreController::editInExternalEditor() {
   Glib::RefPtr<Gio::AppInfo> editor = Gio::AppInfo::create_from_commandline(
       "gimp", "GIMP", Gio::APP_INFO_CREATE_SUPPORTS_URIS);
   Glib::RefPtr<Gio::File> photo = Gio::File::create_for_path(
-      (*currentPhoto)->getPath().string());
+      (*currentPhoto)->getAbsolutePath().string());
 
   editor->launch(photo);
 }

@@ -46,6 +46,8 @@ class Disk : public Asynchronous {
       return boost::filesystem::exists(file);
     } 
 
+    boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
+
   private:
     Disk (boost::filesystem::path);
     Disk& operator= (const Disk&);
@@ -73,10 +75,9 @@ class Disk : public Asynchronous {
 
     bool isAcceptableExtension(std::string);
 
-      static Disk* instance;
-      paths_t getDirectoryContents(boost::filesystem::path);
-      boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
-      boost::filesystem::path makeSystemAbsolutePath(boost::filesystem::path);
-      boost::filesystem::path libraryDirectoryPath;
-    };
+    static Disk* instance;
+    paths_t getDirectoryContents(boost::filesystem::path);
+    boost::filesystem::path makeSystemAbsolutePath(boost::filesystem::path);
+    boost::filesystem::path libraryDirectoryPath;
+};
 
