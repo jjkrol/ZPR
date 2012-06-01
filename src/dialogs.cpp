@@ -10,6 +10,7 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
 
   //obtaining CoreController instance
   core = CoreController::getInstance();
+  main_window = static_cast<MainWindow*>(parent);
 
   //setting size
   set_size_request(600, 400);
@@ -116,10 +117,12 @@ void DBManagerDialog::handleButtonPush(int button_id) {
   switch(button_id) {
     case Gtk::RESPONSE_OK:
       core->sendChangesToDB();
+      main_window->refreshActiveView();
       break;
     case Gtk::RESPONSE_APPLY:
       /// @todo make dialog stay on screen
       core->sendChangesToDB();
+      main_window->refreshActiveView();
       break;
     case Gtk::RESPONSE_CANCEL:
       core->cancelDBChanges();

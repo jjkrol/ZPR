@@ -21,6 +21,8 @@ class MainWindow : public Gtk::Window {
     friend class LibraryView;
     friend class EditView;
 
+    void refreshActiveView();
+
   private:
     //connection with CoreController
     CoreController *core;
@@ -74,6 +76,7 @@ class MainWindow : public Gtk::Window {
 
 class WindowContent {
   public:
+    virtual void refreshView() = 0;
     WindowContent() {};
     virtual ~WindowContent() {};
 };
@@ -87,6 +90,8 @@ class EditView : public WindowContent {
   public:
     friend class MainWindow;
     friend class UserInterface;
+
+    virtual void refreshView();
 
   private:
     EditView() {};
@@ -134,6 +139,8 @@ class LibraryView : public WindowContent {
   public:
     friend class MainWindow;
     friend class UserInterface;
+
+    virtual void refreshView();
 
   private:
     LibraryView() {};

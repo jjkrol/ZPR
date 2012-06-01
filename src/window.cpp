@@ -104,6 +104,12 @@ MainWindow::~MainWindow() {
   if(content) delete content;
 }
 
+/// @fn MainWindow::refreshActiveView() {
+/// @brief MainWindow method for refreshing the active view.
+void MainWindow::refreshActiveView() {
+  if(content) content->refreshView();
+}
+
 /// @fn MainWindow::showLibraryView()
 /// @brief Method responsible for switching to library view.
 void MainWindow::showLibraryView() {

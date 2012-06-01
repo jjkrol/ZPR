@@ -76,6 +76,12 @@ EditView::~EditView() {
   page_signal.disconnect();
 }
 
+/// @fn EditView::refreshView()
+/// @brief EditView method for refreshing the view.
+void EditView::refreshView() {
+  //TODO
+}
+
 /// @fn void EditView::loadImage()
 /// @brief Method (signal handler) for loading image into Gtk::Image widget.
 ///        Called when Next/Previous button is clicked or edit view is created.

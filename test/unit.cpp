@@ -103,8 +103,8 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /*    ADDING AND DELETING PHOTOS          */
   /******************************************/
     Disk *disk = Disk::getInstance();
-    vector<boost::filesystem::path> dirs = disk->getSubdirectoriesPaths(
-                                           boost::filesystem::path("/"));
+    //vector<boost::filesystem::path> dirs = disk->getSubdirectoriesPaths(
+                                           //boost::filesystem::path("/"));
 
     //adding photos from directory non-recursively
     //dirs.push_back(boost::filesystem::path("/alpha/"));

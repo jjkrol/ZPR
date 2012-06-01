@@ -16,12 +16,8 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   window->notebook.append_page(tags_label, "Tags");
   window->display.add(images);
 
-  //check for database - prompt if unavailable
-  //if(core->hasLibraryPathSet())
-  if(false)
-    fillDatabaseTree();
-  else
-    promptAboutDatabase();
+  //refreshing the view
+  refreshView();
 }
 
 /// @fn LibraryView::~LibraryView()
@@ -32,6 +28,20 @@ LibraryView::~LibraryView() {
     window->right_box.remove(*db_prompt);
     delete db_prompt;
   }
+}
+
+/// @fn LibraryView::refreshView()
+/// @brief LibraryView method for refreshing the view.
+void LibraryView::refreshView() {
+  if(db_prompt) {
+    window->right_box.remove(*db_prompt);
+    delete db_prompt;
+  }
+
+  if(core->hasLibraryPathSet())
+    fillDatabaseTree();
+  else
+    promptAboutDatabase();
 }
 
 /// @fn void LibraryView::fillDirectoryTree()

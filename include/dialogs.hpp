@@ -2,6 +2,7 @@
 
 #include <gtkmm.h>
 #include "./global.hpp"
+#include "./window.hpp"
 
 class CoreController;
 
@@ -13,6 +14,7 @@ class DBManagerDialog : public Gtk::Dialog {
   private:
     //connection with CoreController class
     CoreController *core;
+    MainWindow *main_window;
 
     //widgets
     Gtk::Box box, right_box, button_box;
