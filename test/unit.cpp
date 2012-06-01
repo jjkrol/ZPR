@@ -13,7 +13,7 @@ using namespace boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( testSuite )
 
-  BOOST_AUTO_TEST_CASE( coreClassTest ){
+/*  BOOST_AUTO_TEST_CASE( coreClassTest ){
     CoreController* core = CoreController::getInstance("test.cfg");
 
     BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
@@ -69,11 +69,16 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_CHECK(delta->hasPhotos() == true);
     myPhoto->deleteFromLibraryAndDisk();
     BOOST_CHECK(delta->hasPhotos() == false);
-  }
+  }*/
 
   BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
     using std::vector;
     using boost::filesystem::path;
+    std::cout << "Kotek1" <<std::endl;
+
+    CoreController* core = CoreController::getInstance("test.cfg");
+    
+    Disk::getInstance(core->getLibraryDirectoryPath());
     //making an instance of a connector which should be tested
     DBConnector *sqlconnector = DBConnectorFactory::getInstance("sqlite");
 
@@ -102,27 +107,18 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /******************************************/
   /*    ADDING AND DELETING PHOTOS          */
   /******************************************/
-    Disk *disk = Disk::getInstance();
-    //vector<boost::filesystem::path> dirs = disk->getSubdirectoriesPaths(
-                                           //boost::filesystem::path("/"));
+  //  vector<boost::filesystem::path> dirs = disk->getSubdirectoriesPaths(
+   //                                        boost::filesystem::path("/"));
+  //Disk::getInstance(path("./test/test_tree"));
+  Directory dir("/");
+  vector<Directory*> dirs = dir.getSubdirectories();
 
-    //adding photos from directory non-recursively
-    //dirs.push_back(boost::filesystem::path("/alpha/"));
+  //for(vector<Directory*>::iterator i= dirs.begin() ; i != dirs.end(); ++i) {
+  //  std::cout << (*i)->getPath() << std::endl;
+  //}
 
-
-    //sqlconnector->addPhotosFromDirectories(dirs);
-    //sqlconnector->showPhotos(std::cout);
-
-    //deleting directories;
-    //deleting photos;
-    //checking if a structure of files on a disk has changed
-    //checking if a database is empty (contains no directories)
-    //adding tags to photo
-    //adding removing tags from photo;
-    //removing tag
-
-    //closing connection to database finalizes the test suite
-    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
+  //adding photos from directories
+  
   }
 
 BOOST_AUTO_TEST_SUITE_END()

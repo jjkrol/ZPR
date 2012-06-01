@@ -17,7 +17,7 @@ Disk* Disk::getInstance(path libraryDirectoryPath){
 }
 
 Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath),Asynchronous(){
-
+  std::cout<<"Initializing disk with path: "<<libraryDirectoryPath<<std::endl;
 }
 
 paths_t Disk::getSubdirectoriesPaths(path directoryPath){
@@ -137,6 +137,7 @@ void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPat
   paths_t * subdirectories = new paths_t();
   path absolutePath = makeAbsolutePath(directoryPath);
   paths_t  directoryContents;
+  std::cout<<"abs: "<<absolutePath.string()<<std::endl;
   directoryContents = getDirectoryContents(absolutePath);
   for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
     if(is_directory(*it))

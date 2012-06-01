@@ -65,7 +65,7 @@ int SQLiteConnector::open(const string filename) {
     return FAILURE;
 
   //open a database, if it exists
-  if(disk->exists(filename)) {
+  if(disk->absoluteExists(filename)) {
     if(sqlite3_open(filename.c_str(), &database) == SQLITE_OK) {
       return OPENED;
     }
@@ -245,9 +245,9 @@ int SQLiteConnector::calculateChecksum() const{
 ////////////////////////////////////////////////////////////////////////////////
 
 bool SQLiteConnector::addPhotosFromDirectories(
-const vector<DirectoriesPath> &dirs) {
+const vector<path> &dirs) {
   //add photos from each directory from database
-  for(vector<DirectoriesPath>::const_iterator i = dirs.begin();
+  for(vector<path>::const_iterator i = dirs.begin();
       i != dirs.end() ; ++i) {
     //in case of failure in adding photos from directory, stop adding photos
     if(! addPhotosFromDirectory(*i) )
