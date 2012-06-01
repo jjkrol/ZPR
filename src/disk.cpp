@@ -108,6 +108,13 @@ void Disk::deletePhoto(path photoPath){
       );
 }
 
+    bool Disk::exists(boost::filesystem::path file) {
+      return boost::filesystem::exists(makeSystemAbsolutePath(file));
+    } 
+
+    bool Disk::absoluteExists(boost::filesystem::path file) {
+      return boost::filesystem::exists(file);
+    } 
 //private methods
 
 void * Disk::internalGetPhotosPaths(boost::filesystem::path directoryPath){

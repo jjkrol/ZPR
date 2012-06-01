@@ -19,6 +19,7 @@
 #include <ostream> //for testing purposes only
 #include <boost/filesystem.hpp>
 #include <sqlite3.h>
+#include "disk.hpp"
 
 class Disk;
 
@@ -226,7 +227,10 @@ public:
 private:
   SQLiteConnector(){
     database = 0;
+    disk = Disk::getInstance();
   };
+
+  Disk * disk;
 
   /*! @var sqlite3 *database;
    *  @brief holds a pointer to opened database

@@ -42,9 +42,9 @@ class Disk : public Asynchronous {
 
     boost::filesystem::path movePhoto(boost::filesystem::path sourcePath, boost::filesystem::path destinationPath);
 
-    inline static bool exists(boost::filesystem::path file) {
-      return boost::filesystem::exists(file);
-    } 
+    bool exists(boost::filesystem::path file);
+
+    bool absoluteExists(boost::filesystem::path file);
 
     boost::filesystem::path makeAbsolutePath(boost::filesystem::path);
 

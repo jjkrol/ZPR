@@ -65,7 +65,7 @@ int SQLiteConnector::open(const string filename) {
     return FAILURE;
 
   //open a database, if it exists
-  if(Disk::exists(filename)) {
+  if(disk->exists(filename)) {
     if(sqlite3_open(filename.c_str(), &database) == SQLITE_OK) {
       return OPENED;
     }
@@ -113,7 +113,7 @@ bool SQLiteConnector::checkCompatibility() const{
 
   for(vector<path>::const_iterator i = photos.begin() ;
       i != photos.end() ; ++i) {
-    if(!Disk::exists(*i))
+    if(!disk->exists(*i))
       return false;
   }
 
@@ -219,7 +219,6 @@ bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
 }
 
 int SQLiteConnector::calculateChecksum() const{
-  Disk * disk = Disk::getInstance();
   int checksum_tmp = 0;
 
   //vector with all directories stored in the database (even nested ones)
@@ -315,7 +314,6 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
 }
 
 bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
-  static Disk *disk = Disk::getInstance();
 
   //add directory's path to database
   if(!addDirectoryToDB(dir))
