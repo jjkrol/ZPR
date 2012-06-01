@@ -6,6 +6,7 @@
 */
 
 #include <iostream> //for testing end error reporting
+#include <boost/lexical_cast.hpp>
 
 #include "../include/dbConnector.hpp"
 #include "../include/disk.hpp"
@@ -34,7 +35,7 @@ DBConnector* DBConnectorFactory::getInstance(const string type) {
    * desired one.
    */
   if(type != "sqlite")
-    cout << "Proszę sobie nie żartować"<<endl;
+    cout << "Prosze sobie nie zartowac"<<endl;
 
   return SQLiteConnector::getInstance();
 }
@@ -84,7 +85,7 @@ int SQLiteConnector::open(const string filename) {
 
 int SQLiteConnector::close() {
   //return a FAILURE flag if a connection is closed or you can't save settings
-  if(! (database /*&& saveSettings()*/) ) //FIXME
+  if( !database ||  !saveSettings() )
     return FAILURE;
 
   sqlite3_close(database);
@@ -129,7 +130,10 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
   }
 
   while(sqlite3_step(stmt) == SQLITE_ROW) {
-    photos.push_back(*static_cast<const path *>(sqlite3_column_blob(stmt,1)));
+    //photos.push_back(*static_cast<const path *>(sqlite3_column_blob(stmt,1)));
+    string path_string = reinterpret_cast<const char*>
+                        (sqlite3_column_text(stmt,1));
+    photos.push_back(path(path_string));
   }
 
   sqlite3_finalize(stmt);
@@ -149,13 +153,13 @@ bool SQLiteConnector::createDB() {
   const char *query = 
       "CREATE TABLE photos ("
         "id INTEGER PRIMARY KEY,"
-        "path BLOB UNIQUE,"
+        "path TEXT UNIQUE,"
         "parents_id INTEGER"
       ");"
 
       "CREATE TABLE directories ("
         "id INTEGER PRIMARY KEY,"
-        "path BLOB UNIQUE,"
+        "path TEXT UNIQUE,"
         "parents_id INT"
       ");"
 
@@ -184,20 +188,20 @@ bool SQLiteConnector::createDB() {
 }
 
 bool SQLiteConnector::saveSettings() {
-  //@todo is it ok to delete from an empty table?
   string query = "DELETE FROM settings;";
-  if(sqlite3_exec(database, query.c_str(), NULL, NULL, NULL) != SQLITE_OK)
-    return !reportErrors(query.c_str());
- 
-  query = "INSERT INTO settings VALUES (0);"; //quick fix
-  //@todo how to make a string from an integer
-  //query = "INSERT INTO settings VALUES (" + calculateChecksum()
-  //        + string(");") ;
+  if(! executeQuery(query)) {
+    cout <<"Nie udalo sie usunac poprzednich ustawien" << endl;
+    return false;
+  }
+  query = "INSERT INTO settings VALUES ("
+          + boost::lexical_cast<string>(calculateChecksum()) + ");";
 
-  if(sqlite3_exec(database, query.c_str(), NULL, NULL, NULL) == SQLITE_OK)
-    return true;
-    
-  return !reportErrors(query.c_str());
+  if(! executeQuery(query)) {
+    cout << "Nie udalo sie zapisac nowych ustawien" << endl;
+    return false;
+  }
+
+  return true;
 }
 
 bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
@@ -210,8 +214,9 @@ bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
   if(sqlite3_step(stmt) != SQLITE_ROW)
     return false;
   
-  const void *blob = sqlite3_column_blob(stmt,0);
-  checksum = *(static_cast<const int *>(blob));
+  //const void *blob = sqlite3_column_blob(stmt,0);
+  //checksum = *(static_cast<const int *>(blob));
+  checksum = sqlite3_column_int(stmt,0);
 
   sqlite3_finalize(stmt);
 
@@ -222,12 +227,12 @@ int SQLiteConnector::calculateChecksum() const{
   int checksum_tmp = 0;
 
   //vector with all directories stored in the database (even nested ones)
-  vector<DirectoriesPath> directories;
+  vector<path> directories;
   if(!getDirectoriesFromDB(directories))
     return -1;
   
   //take every directory form database
-  for(vector<DirectoriesPath>::iterator i = directories.begin();
+  for(vector<path>::iterator i = directories.begin();
       i != directories.end(); ++i) {
   
     //add make a hash from every photo from directory to checksum
@@ -280,13 +285,14 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
 
   //deleting photos from this folder
   sqlite3_stmt *stmt;
-  const char *query = "DELETE FROM photos WHERE parent_dir"
-                      "IN (SELECT id FROM directories WHERE path=?);";
+  string query = "DELETE FROM photos WHERE parent_dir"
+                  "IN (SELECT id FROM directories WHERE path="
+                  + dir.string() + ");";
   
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
+      != SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -303,13 +309,12 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   }
 
   //deleting directory
-  query = "DELETE FROM directories WHERE path=? ;";
+  query = "DELETE FROM directories WHERE path=" + dir.string() +" ;";
   stmt=0;
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))!= SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &(dir), sizeof(path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -331,7 +336,7 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
     //add each photo to database
     for(vector<PhotoPath>::const_iterator i = photos.begin();
         i != photos.end() ; ++i) {
-      if(! addPhoto(*i)) {
+      if(! addPhoto(dir / (*i))) {
         cout << "Blad przy dodawaniu zdjecia do bazy danych" << endl;
         return false;
       }
@@ -344,23 +349,27 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
 bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
   //add subidirectory with values: autonum, dir.path, id_of_parental_directory 
   sqlite3_stmt *stmt;
-  const char *query =
-    "IF EXISTS"
-      "(SELECT NULL, dir.path, directories.id FROM directories "
-      " WHERE path = dir.path.parent_path()) "
-    "THEN "
-      "INSERT INTO directories "
-      "SELECT NULL, dir.path, directories.id FROM directories "
-      "WHERE path = dir.path.parent_path() "
-    "ELSE "
-      "INSERT INTO directories VALUES(NULL, dir.path, NULL); ";
+  string parents_path, parents_id, query;
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
+  parents_path = dir.parent_path().string();
+  parents_id = "NULL";
+
+  if( !parents_path.empty() )
+    parents_id = "\n  (SELECT id FROM directories WHERE path=\'"
+                 +parents_path+ "\')";
+
+  query =
+    "INSERT INTO directories VALUES(NULL, \'" + dir.string() + "\', "
+    + parents_id + ");";
+
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL)) != SQLITE_OK) {
+    reportErrors(query);
     return false;
+  }
 
-  sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC);
-  path parent = dir.parent_path();
-  sqlite3_bind_blob(stmt, 2, &parent, sizeof(path), SQLITE_STATIC);
+  //sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC);
+  //path parent = dir.parent_path();
+  //sqlite3_bind_blob(stmt, 2, &parent, sizeof(path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -377,13 +386,14 @@ bool SQLiteConnector::deletePhoto(const path &photos_path) {
 
   //Firstly, connection between the photo and corresponding tags is deleted
   string query = "DELETE FROM photos_tags WHERE photos_id IN ("
-                 "SELECT id FROM photos WHERE path=? )";
+                 "SELECT id FROM photos WHERE path=" + photos_path.string()
+                 + " )";
 
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
       != SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &photos_path, sizeof(photos_path), SQLITE_STATIC);
+  //sqlite3_bind_blob(stmt, 1, &photos_path, sizeof(photos_path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -391,14 +401,14 @@ bool SQLiteConnector::deletePhoto(const path &photos_path) {
     return false;
 
   //Secondly, photo should be deleted from the table of photos
-  query = "DELETE FROM photos WHERE path=? ;";
+  query = "DELETE FROM photos WHERE path=" + photos_path.string() + " ;";
   stmt = 0;
 
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
       != SQLITE_OK)
     return false;
 
-  sqlite3_bind_blob(stmt, 1, &photos_path, sizeof(photos_path), SQLITE_STATIC);
+  //sqlite3_bind_blob(stmt, 1, &photos_path, sizeof(photos_path), SQLITE_STATIC);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
@@ -408,17 +418,27 @@ bool SQLiteConnector::deletePhoto(const path &photos_path) {
 bool SQLiteConnector::addPhoto(const path &photo) {
   //inserting NULL as an id value is used for autoincrementing id numbers
   //add a photo with an appropriate parent's id
-  const char *query = "INSERT INTO photos"
-                      "SELECT NULL, ?, directories.id FROM directories"
-                      "WHERE path=?;";
-  path parent = photo.parent_path();
+  string parents_id, parents_path;
+
+  parents_path = photo.parent_path().string();
+  parents_id = "NULL";
+
+  if( !parents_path.empty() ) {
+    parents_id = "\n  (SELECT id FROM directories\n"
+                 "i\n  WHERE path=\'" + parents_path + "\')";
+  }
+
+
+  string query = "INSERT INTO photos VALUES("
+                  "NULL, \'" + photo.string() +"\', " + parents_id + ");";
+  //path parent = photo.parent_path();
   sqlite3_stmt *stmt;
 
-  if(( sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK)
+  if(( sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK)
     return !reportErrors(query);
 
-  sqlite3_bind_blob(stmt, 1, &photo, sizeof(photo), SQLITE_STATIC );
-  sqlite3_bind_blob(stmt, 2, &parent, sizeof(parent), SQLITE_STATIC );
+  //sqlite3_bind_blob(stmt, 1, &photo, sizeof(photo), SQLITE_STATIC );
+  //sqlite3_bind_blob(stmt, 2, &parent, sizeof(parent), SQLITE_STATIC );
   sqlite3_step(stmt);
 
   sqlite3_finalize(stmt);
@@ -459,8 +479,9 @@ vector<DirectoriesPath> &directories) const {
     return !reportErrors(query);
 
   while(sqlite3_step(stmt) == SQLITE_ROW) {
-    const void *blob = sqlite3_column_blob(stmt,0);
-    directories.push_back( *static_cast<const path *>(blob) );
+    string path_string = reinterpret_cast<const char*>
+                        (sqlite3_column_text(stmt,0));
+    directories.push_back( path(path_string) );
   }
   
   sqlite3_finalize(stmt);
@@ -472,7 +493,7 @@ vector<DirectoriesPath> &directories) const {
 //Other methods: reporting errors
 ////////////////////////////////////////////////////////////////////////////////
 
-bool SQLiteConnector::reportErrors(const char * query) const {
+bool SQLiteConnector::reportErrors(string query) const {
   string error = sqlite3_errmsg(database);
 
   if(error != "not an error"){
@@ -696,4 +717,17 @@ void SQLiteConnector::showDirectories(std::ostream &out) {
         << static_cast<const int>(sqlite3_column_int(stmt,2)) << std::endl;
   }
   sqlite3_finalize(stmt);
+}
+
+bool SQLiteConnector::executeQuery(string query) {
+  sqlite3_stmt *stmt;
+  if(sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0) != SQLITE_OK){
+    reportErrors(query);
+    return false;
+  }
+
+  sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  return !reportErrors(query);
 }

@@ -301,5 +301,6 @@ private:
 
   int calculateChecksum() const;
   bool getPhotosFromDB(std::vector<boost::filesystem::path> &photos) const;
-  inline bool reportErrors(const char *query) const;
+  bool executeQuery(std::string query);
+  inline bool reportErrors(std::string query) const;
 };

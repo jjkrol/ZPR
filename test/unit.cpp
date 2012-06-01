@@ -74,11 +74,9 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
     using std::vector;
     using boost::filesystem::path;
-    std::cout << "Kotek1" <<std::endl;
 
     CoreController* core = CoreController::getInstance("test.cfg");
-    
-    Disk::getInstance(core->getLibraryDirectoryPath());
+    Disk *disk = Disk::getInstance();
     //making an instance of a connector which should be tested
     DBConnector *sqlconnector = DBConnectorFactory::getInstance("sqlite");
 
@@ -87,16 +85,11 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /******************************************/
 
     //closing database which is not opened
+    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
+    //closing opened database connection
     BOOST_CHECK(sqlconnector->close() == DBConnector::FAILURE);
 
-    //opening non-existing database (should be created)
-    BOOST_REQUIRE(sqlconnector->open("DB.sqlite")
-                  == (DBConnector::OPENED | DBConnector::CREATED));
-
-    //closing opened database connection
-    BOOST_REQUIRE(sqlconnector->close() == DBConnector::CLOSED);
-
-    //opening existing database
+    //reopening an existing database
     BOOST_REQUIRE(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
 
     //opening database which has been already opened (multi-connections
@@ -107,17 +100,13 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /******************************************/
   /*    ADDING AND DELETING PHOTOS          */
   /******************************************/
-  //  vector<boost::filesystem::path> dirs = disk->getSubdirectoriesPaths(
-   //                                        boost::filesystem::path("/"));
-  //Disk::getInstance(path("./test/test_tree"));
-  Directory dir("/");
-  vector<Directory*> dirs = dir.getSubdirectories();
+    vector<path> dirs = disk->getSubdirectoriesPaths(path("/"));
+    BOOST_CHECK(sqlconnector->addPhotosFromDirectories(dirs) == true);
+    sqlconnector->close();
 
-  //for(vector<Directory*>::iterator i= dirs.begin() ; i != dirs.end(); ++i) {
-  //  std::cout << (*i)->getPath() << std::endl;
-  //}
 
   //adding photos from directories
+  //addPhotosFromDirectories(di)
   
   }
 
