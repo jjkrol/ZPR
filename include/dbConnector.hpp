@@ -132,7 +132,7 @@ public:
   virtual int close() = 0;
   virtual inline bool hasChanged() const = 0;
   virtual bool checkCompatibility() const = 0;
-  virtual bool isEmpty() = 0;
+  virtual bool isEmpty() const = 0;
 
   virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs) = 0;
@@ -153,13 +153,15 @@ public:
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output) = 0;
 
+  virtual bool getDirectoriesFromDB(
+    std::vector<boost::filesystem::path> &dirs) const = 0;
 
   //Methods used for testing purposes only
   virtual void showTags(std::ostream &) = 0;
   virtual void showPhotos(std::ostream &) = 0;
   virtual void showDirectories(std::ostream &) = 0;
   virtual void showPhotosTags(std::ostream &) = 0;
-
+  
 
 protected:
   virtual ~DBConnector(){};
@@ -191,38 +193,40 @@ public:
   * @returns falgs defined in DBConnector::Flags
   *
 */
-  int open(const std::string filename);
-  int close();
-  bool hasChanged() const;
-  bool checkCompatibility() const;
-  bool isEmpty();
+  virtual int open(const std::string filename);
+  virtual int close();
+  virtual bool hasChanged() const;
+  virtual bool checkCompatibility() const;
+  virtual bool isEmpty() const;
 
   //bool addPhotosFromDirectories(
   //  const boost::filesystem::path &main_dir,
   //  const std::vector<boost::filesystem::path> &excluded_dirs);
-  bool addPhotosFromDirectories(
+  virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs);
-  bool deleteDirectories(const std::vector<DirectoriesPath> &dirs);
-  bool addPhoto(const PhotoPath &photo);
-  bool movePhoto(
+  virtual bool deleteDirectories(const std::vector<DirectoriesPath> &dirs);
+  virtual bool addPhoto(const PhotoPath &photo);
+  virtual bool movePhoto(
     const PhotoPath &old_path,
     const PhotoPath &new_path);
-  bool deletePhoto(const PhotoPath &photos_path);
-  bool addTagsToPhoto(const PhotoPath &photo,
+  virtual bool deletePhoto(const PhotoPath &photos_path);
+  virtual bool addTagsToPhoto(const PhotoPath &photo,
     const std::set<std::string> &tags);
-  bool deleteTagsFromPhoto(
+  virtual bool deleteTagsFromPhoto(
     const PhotoPath &photo, const std::set<std::string> &tags);
-  bool getPhotosWithTags(
+  virtual bool getPhotosWithTags(
     const std::set<std::string> &tags,
     std::vector<PhotoPath> &photos_output);
-  bool getPhotosTags(
+  virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output);
 
+  virtual bool getDirectoriesFromDB(
+    std::vector<boost::filesystem::path> &dirs) const;
   //Methods used for testing purposes only
-  void showTags(std::ostream &);
-  void showPhotos(std::ostream &);
-  void showDirectories(std::ostream &);
-  void showPhotosTags(std::ostream &);
+  virtual void showTags(std::ostream &);
+  virtual void showPhotos(std::ostream &);
+  virtual void showDirectories(std::ostream &);
+  virtual void showPhotosTags(std::ostream &);
 
 private:
   SQLiteConnector(){
@@ -288,7 +292,6 @@ private:
   bool createDB();
   bool saveSettings();
 
-  bool getDirectoriesFromDB(std::vector<DirectoriesPath> &dirs) const;
   bool getSubdirectoriesFromDB(
     const DirectoriesPath &dir,
     std::vector<DirectoriesPath> &subdirs) const;

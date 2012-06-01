@@ -84,7 +84,7 @@ int SQLiteConnector::open(const string filename) {
 
 int SQLiteConnector::close() {
   //return a FAILURE flag if a connection is closed or you can't save settings
-  if(! (database && saveSettings()) )
+  if(! (database /*&& saveSettings()*/) )
     return FAILURE;
 
   sqlite3_close(database);
@@ -136,7 +136,7 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
   return !reportErrors(query);
 }
 
-bool SQLiteConnector::isEmpty() {
+bool SQLiteConnector::isEmpty() const{
   //TODO Getting all directories from the database is not necessary.
   //Only one directory existing in the database is enough
   vector<DirectoriesPath> dirs;
