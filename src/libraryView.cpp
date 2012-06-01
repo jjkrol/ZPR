@@ -18,7 +18,7 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
 
   //check for database - prompt if unavailable
   //if(core->hasLibraryPathSet())
-  if(true)
+  if(false)
     fillDatabaseTree();
   else
     promptAboutDatabase();

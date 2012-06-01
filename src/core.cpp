@@ -7,6 +7,7 @@
 #include "../include/dbConnector.hpp"
 
 using namespace std;
+using namespace boost::filesystem;
 
 CoreController* CoreController::instance = NULL;
 
@@ -43,6 +44,13 @@ void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDatabaseTree(){
   if(database_model) return database_model;
   database_model = Gtk::TreeStore::create(dir_columns);
+  vector<path> paths;
+  db->getDirectoriesFromDB(paths);
+  vector<path>::iterator it;
+  for(it = paths.begin(); it != paths.end(); ++it){
+    std::cout<<(*it).string()<<std::endl;
+  }
+
 
   Directory* rootDir = new Directory("");
   std::vector<Directory*> dirs = rootDir->getSubdirectories();
@@ -224,8 +232,8 @@ photos_t CoreController::getPhotosWithTags(vector<string>){
 
 CoreController::CoreController(string forcedConfigPath){
   manageConfig(forcedConfigPath);
-  manageDatabase();
   manageDisk();
+  manageDatabase();
 }
 
 void CoreController::manageConfig(string forcedConfigPath){
@@ -328,7 +336,7 @@ void CoreController::sendChangesToDB() {
   for(folder = added_folders.begin(); folder != added_folders.end(); ++folder) {
     db_vector.push_back((std::string)(**folder)[dir_columns.path]);
   }
-  //db->addPhotosFromDirectories(db_vector);
+  db->addPhotosFromDirectories(db_vector);
   added_folders.clear();
   db_vector.clear();
  
@@ -336,7 +344,7 @@ void CoreController::sendChangesToDB() {
   for(folder = deleted_folders.begin(); folder != deleted_folders.end(); ++folder) {
     db_vector.push_back((std::string)(**folder)[dir_columns.path]);
   }
-  //db->deleteDirectories(db_vector);
+  db->deleteDirectories(db_vector);
   deleted_folders.clear();
 }
 
