@@ -246,7 +246,7 @@ void CoreController::manageDisk(){
 }
 
 void CoreController::manageDatabase(){
-  db = DBConnectorFactory::getInstance("kotek");
+  db = DBConnectorFactory::getInstance("sqlite");
   db->open("DB.sqlite");
 }
 

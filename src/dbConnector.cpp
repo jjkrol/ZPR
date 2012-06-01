@@ -33,7 +33,7 @@ DBConnector* DBConnectorFactory::getInstance(const string type) {
   /** @todo Factory should check the register of creators andn return the
    * desired one.
    */
-  if(type != "SQLiteConnector")
+  if(type != "sqlite")
     cout << "Proszę sobie nie żartować"<<endl;
 
   return SQLiteConnector::getInstance();
@@ -65,7 +65,7 @@ int SQLiteConnector::open(const string filename) {
     return FAILURE;
 
   //open a database, if it exists
-  if(disk->absoluteExists(filename)) {
+  if(disk->absoluteExists(path(string("./")+filename))) {
     if(sqlite3_open(filename.c_str(), &database) == SQLITE_OK) {
       return OPENED;
     }
@@ -84,7 +84,7 @@ int SQLiteConnector::open(const string filename) {
 
 int SQLiteConnector::close() {
   //return a FAILURE flag if a connection is closed or you can't save settings
-  if(! (database /*&& saveSettings()*/) )
+  if(! (database /*&& saveSettings()*/) ) //FIXME
     return FAILURE;
 
   sqlite3_close(database);
@@ -250,8 +250,11 @@ const vector<path> &dirs) {
   for(vector<path>::const_iterator i = dirs.begin();
       i != dirs.end() ; ++i) {
     //in case of failure in adding photos from directory, stop adding photos
-    if(! addPhotosFromDirectory(*i) )
+    if(! addPhotosFromDirectory(*i) ) {
+      cout << "addPhotosFromDirectories: "
+           <<"Blad przy dodawaniu zdjec do bazy danych" << endl;
       return false;
+    }
   }
 
   return true;
@@ -316,9 +319,10 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
 bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
 
   //add directory's path to database
-  if(!addDirectoryToDB(dir))
+  if(!addDirectoryToDB(dir)) {
+    cout << "Blad przy dodawaniu katalogu do bazy danych" << endl;
     return false;
-
+  }
   //add photos which are located directly in this directory
   {
     //get photos which are located in this directory
@@ -327,8 +331,10 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
     //add each photo to database
     for(vector<PhotoPath>::const_iterator i = photos.begin();
         i != photos.end() ; ++i) {
-      if(! addPhoto(*i))
+      if(! addPhoto(*i)) {
+        cout << "Blad przy dodawaniu zdjecia do bazy danych" << endl;
         return false;
+      }
     }
   }
 
