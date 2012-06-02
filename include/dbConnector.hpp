@@ -128,20 +128,23 @@ public:
     CLOSED  = 0x4
   };
 
-  virtual int open(const std::string filename) = 0;
-  virtual int close() = 0;
+  virtual int open(const std::string filename) = 0; //tested
+  virtual int close() = 0; //tested
   virtual inline bool hasChanged() const = 0;
   virtual bool checkCompatibility() const = 0;
   virtual bool isEmpty() const = 0;
 
   virtual bool addPhotosFromDirectories(
-    const std::vector<DirectoriesPath> &dirs) = 0;
-  virtual bool addPhoto(const PhotoPath &photo) = 0;
+    const std::vector<DirectoriesPath> &dirs) = 0; //tested
+  virtual bool addPhoto(const PhotoPath &photo) = 0; //tested
+
   //don't know if the following method is needed
   virtual bool movePhoto(
     const PhotoPath &old_path, const PhotoPath &new_path) = 0;
-  virtual bool deletePhoto(const PhotoPath &photos_path) = 0;
-  virtual bool deleteDirectories(const std::vector<DirectoriesPath> &dirs) = 0;
+  virtual bool deletePhoto(const PhotoPath &photos_path) = 0; //tested
+  virtual bool deleteDirectory(const boost::filesystem::path &dir) = 0;
+  virtual bool deleteDirectories(
+    const std::vector<boost::filesystem::path> &dirs) = 0;
 
   virtual bool addTagsToPhoto(
     const PhotoPath &photo, const std::set<std::string> &tags) = 0;
@@ -202,6 +205,7 @@ public:
   virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs);
   virtual bool deleteDirectories(const std::vector<DirectoriesPath> &dirs);
+  virtual bool deleteDirectory(const boost::filesystem::path &dir);
   virtual bool addPhoto(const PhotoPath &photo);
   virtual bool movePhoto(
     const PhotoPath &old_path,
@@ -282,7 +286,6 @@ private:
   static DBConnector * getInstance();
 
   bool addPhotosFromDirectory(const DirectoriesPath &dir);
-  bool deleteDirectory(const DirectoriesPath &dir);
   bool addDirectoryToDB(const DirectoriesPath &dir);
 
   bool createDB();

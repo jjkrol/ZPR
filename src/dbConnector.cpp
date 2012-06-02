@@ -148,12 +148,26 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
 }
 
 bool SQLiteConnector::isEmpty() const{
-  //TODO Getting all directories from the database is not necessary.
-  //Only one directory existing in the database is enough
-  vector<DirectoriesPath> dirs;
-  getDirectoriesFromDB(dirs);
+  sqlite3_stmt *stmt;
+  bool result;
+  string query = "SELECT EXISTS (\n"
+                 "  SELECT * FROM directories"
+                 ");";
+  
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
+      != SQLITE_OK) {
+    reportErrors(query);
+    return false;
+  }
 
-  return (dirs.empty());
+  if(sqlite3_step(stmt) != SQLITE_ROW)
+    return false;
+  
+  result = static_cast<bool>(sqlite3_column_int(stmt,0));
+
+  sqlite3_finalize(stmt);
+
+  return result;
 }
 
 bool SQLiteConnector::createDB() {
@@ -291,20 +305,21 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   //4. Delete directory from directories table.
 
   //deleting photos from this folder
-  cout<<"Usuwam foleder: " << dir.string() <<endl;;
-  sqlite3_stmt *stmt;
-  string query = "DELETE FROM photos WHERE parent_dir"
-                  "IN (SELECT id FROM directories WHERE path="
-                  + dir.string() + ");";
+  string query = "DELETE FROM photos WHERE parents_id\n"
+                  " = (SELECT id FROM directories WHERE path=\'"
+                  + dir.string() + "\');";
   
-  if(! executeQuery(query))
+  if(! executeQuery(query)) {
+    cout << "Nie udalo sie usunac zdjec bedacych w katalogu:"
+         <<dir.string() <<endl;
     return false;
-
+  }
   //getting subdirectories of directory which is being deleted
   vector<DirectoriesPath> subdirs;
-  if( !getSubdirectoriesFromDB(dir, subdirs))
+  if( !getSubdirectoriesFromDB(dir, subdirs)) {
+    cout<<"Nie udalo sie pobrac podkatalogow katalogu: " <<dir.string() << endl;
     return false;
-
+  }
   //deleting each of subdirectories
   for(vector<DirectoriesPath>::iterator i = subdirs.begin();
       i != subdirs.end() ; ++i) {
@@ -313,15 +328,12 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   }
 
   //deleting directory
-  query = "DELETE FROM directories WHERE path=" + dir.string() +" ;";
-  stmt=0;
+  query = "DELETE FROM directories WHERE path=\'" + dir.string() +"\';";
 
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))!= SQLITE_OK)
+  if(! executeQuery(query)) {
+    cout << "Nie udalo sie usunac katalogu:"<< dir.string() << endl;
     return false;
-
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
+  }
   return true;
 }
 
@@ -386,7 +398,6 @@ bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
 }
 
 bool SQLiteConnector::deletePhoto(const path &photos_path) {
-  cout << "Usuwam zdjecie o sciezce:" << photos_path.string() <<endl;
   //Firstly, connection between the photo and corresponding tags is deleted
   string query = "DELETE FROM photos_tags WHERE photos_id IN (\n"
                  "  SELECT id FROM photos WHERE path=\'" + photos_path.string()+
@@ -440,19 +451,19 @@ bool SQLiteConnector::addPhoto(const path &photo) {
 
 bool SQLiteConnector::getSubdirectoriesFromDB(
 const DirectoriesPath &dir, vector<DirectoriesPath> &directories) const {
-
-  const char *query = "SELECT path FROM directories WHERE parents_id"
-                      "IN (SELECT id FROM directories WHERE path = ?);";
   sqlite3_stmt *stmt;
+  directories.clear();
+  string query = "SELECT path FROM directories WHERE parents_id\n"
+                      "IN (SELECT id FROM directories WHERE path =\'"
+                      + dir.string() + "\');";
 
-  if(( sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK)
+  if(( sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK)
     return !reportErrors(query);
 
-  sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC );
-
   while(sqlite3_step(stmt) == SQLITE_ROW) {
-    const void *blob = sqlite3_column_blob(stmt,0);
-    directories.push_back( *static_cast<const path *>(blob) );
+    string path_string = reinterpret_cast<const char *>
+                         (sqlite3_column_text(stmt,0));
+    directories.push_back( path(path_string));
   }
 
   sqlite3_finalize(stmt);
@@ -483,12 +494,32 @@ vector<DirectoriesPath> &directories) const {
 
 bool SQLiteConnector::getPhotosFromDirectory(
   const path &directory, vector<path> &out) const{
+  //FIXME this query should work if specified directory doesn't exist
+  //however it will propably work for non-exisiting paths (result will be the
+  //same as for "/" path). Not 100% about that one
+  sqlite3_stmt *stmt;
   string query = "SELECT path FROM photos\n"
                  "WHERE parents_id = (\n"
                  "  SELECT id FROM directories\n"
                  "  WHERE path=\'" + directory.string() + "\'"
                  ");";
-  return(executeQuery(query));
+  out.clear();
+
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
+      != SQLITE_OK) {
+    cout << "Blad przy odczycie sciezki zdjecia z bazy danych" <<endl;
+    return !reportErrors(query);
+  }
+
+  while(sqlite3_step(stmt) == SQLITE_ROW) {
+    string path_string = reinterpret_cast<const char*>
+                        (sqlite3_column_text(stmt,0));
+    out.push_back(path(path_string));
+  }
+  sqlite3_finalize(stmt);
+
+  return !reportErrors(query);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -621,12 +652,10 @@ const set<string> &tags, std::vector<PhotoPath> &photos) {
   //constructing a query
   set<string>::const_iterator i = tags.begin();
 
-  string query = "SELECT path FROM photos "
-                   "INNER JOIN photos_tags "
-                     "ON photos.id = photos_tags.photos_id "
-                   "INNER JOIN tags "
-                     "ON photos_tags.tags_id = tags.id "
-                 "WHERE (tags.name = " + *(i++);
+  string query = "SELECT path FROM photos p, photos_tags pt, tags t\n"
+                 "WHERE p.id = pt.photos_id\n"
+                 "AND pt.tags_id = t.id\n"
+                 "AND tags.name = " + *(i++); //FIXME
 
   for(; i != tags.end() ; ++i) {
     query += " AND tags.name = " + (*i);

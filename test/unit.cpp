@@ -1,6 +1,7 @@
 #define BOOST_TEST_MAIN
 
 #include <fstream>
+#include <string>
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
@@ -11,6 +12,7 @@
 #include "../include/disk.hpp"
 
 using namespace boost::filesystem;
+using namespace std;
 
 BOOST_AUTO_TEST_SUITE( testSuite )
 
@@ -73,11 +75,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   }*/
 
   BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
-    using std::vector;
-    using boost::filesystem::path;
-    using std::cout;
-    using std::endl;
-
     CoreController* core = CoreController::getInstance("test.cfg");
     Disk *disk = Disk::getInstance();
     //making an instance of a connector which should be tested
@@ -99,34 +96,16 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //are not allowed, so the function should exit with a FAILURE flag)
     BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::FAILURE);
 
-
-  /******************************************/
-  /*    ADDING AND DELETING PHOTOS          */
-  /******************************************/
-    //adding photos from directories
-    vector<path> dirs = disk->getSubdirectoriesPaths(path("/"));
-    BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(dirs) == true);
-    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
-    BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
-
-    //getting directories from database
-    vector<path> dirs2;
-    BOOST_REQUIRE(sqlconnector->getDirectoriesFromDB(dirs2) == true );
-    {
-      vector<path>::const_iterator i, j;
-      i = dirs.begin();
-      j = dirs2.begin();
- 
-      while( i != dirs.end())
-        BOOST_CHECK (*(i++) == *(j++));
-    }
-
+  /*********************************************************************/
+  /* CHECKING COMPATIBILITY AND CHECKING IF DISK STRUCTURE HAS CHANGED */
+  /******************************************************************t pu***/
     //checking compatibility
+    //BOOST_CHECK(sqlconnector->checkCompatibility() == true);
+    //sqlconnector->hasChanged();
     //std::fstream f;
     //f.open("./test/test_tree/empty_test_file.txt", std::ios::out);
     //f << std::flush;
     //f.close();
-    sqlconnector->checkCompatibility();
     //if(sqlconnector->checkCompatibility())
     //  cout << "kompatybilne" << endl;
 
@@ -134,7 +113,60 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //isEmpty
 
 
-  
+  /******************************************/
+  /*    ADDING AND DELETING PHOTOS          */
+  /******************************************/
+    //adding photos from directories
+    vector<path> paths = disk->getSubdirectoriesPaths(path("/"));
+
+    BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(paths) == true);
+    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
+    BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
+
+    //getting directories from database
+    vector<path> paths2;
+    BOOST_REQUIRE(sqlconnector->getDirectoriesFromDB(paths2) == true );
+    {
+      vector<path>::const_iterator i, j;
+      i = paths.begin();
+      j = paths2.begin();
+ 
+      while( i != paths.end())
+        BOOST_CHECK (*(i++) == *(j++));
+    }
+
+    //deleting single photo
+    string output;
+
+    sqlconnector->getPhotosFromDirectory("alpha", paths);
+    for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i)
+      output += i->string() + "\n";
+
+    BOOST_CHECK(output == "alpha/3.jpg\nalpha/4.jpg\n");
+
+    sqlconnector->deletePhoto(path("alpha/3.jpg"));
+
+    sqlconnector->getPhotosFromDirectory("alpha", paths);
+    output.clear();
+    for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i)
+      output += i->string() + "\n";
+
+    BOOST_CHECK(output == "alpha/4.jpg\n");
+
+    //deleting directory
+    sqlconnector->getDirectoriesFromDB(paths);
+    paths.erase(find(paths.begin(), paths.end(), path("alpha")));
+    sqlconnector->deleteDirectory("alpha");
+    sqlconnector->getDirectoriesFromDB(paths2);
+    BOOST_REQUIRE(paths.size() == paths2.size());
+    {
+      vector<path>::const_iterator i, j;
+      i = paths.begin();
+      j = paths2.begin();
+ 
+      while( i != paths.end())
+        BOOST_CHECK (*(i++) == *(j++));
+    }
   }
 
 BOOST_AUTO_TEST_SUITE_END()
