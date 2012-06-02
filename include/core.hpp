@@ -4,7 +4,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/thread.hpp>
-#include "../include/global.hpp"
+#include "global.hpp"
 #include <set>
 #include <gtkmm.h>
 #include "asynchronous.hpp"
@@ -175,8 +175,8 @@ class CoreController {
       boost::thread guiThread;
 
       //GTK folder trees
-      Glib::RefPtr<Gtk::TreeStore> directory_tree;
       Glib::RefPtr<Gtk::TreeStore> database_tree;
+      Glib::RefPtr<Gtk::TreeStore> filesystem_tree;
       Glib::RefPtr<Gtk::ListStore> tags_list;
       DirectoryTreeColumns dir_columns;
       FilesystemTreeColumns fs_columns;

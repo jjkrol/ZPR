@@ -43,6 +43,9 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   action_group->add(Gtk::Action::create("EditPreferences",
                     Gtk::Stock::PREFERENCES, "_Preferences", "Preferences"),
                     sigc::mem_fun(*this, &MainWindow::editPreferences));
+  action_group->add(Gtk::Action::create("EditDatabase",
+                    Gtk::Stock::DIRECTORY, "_Database", "Database Manager"),
+                    sigc::mem_fun(*this, &MainWindow::editDatabase));
   action_group->add(Gtk::Action::create("ViewMenu", "View")); 
   library_view = Gtk::RadioAction::create(view_type, "LibraryView", "Library View");
   action_group->add(library_view, sigc::mem_fun(*this, &MainWindow::showLibraryView));

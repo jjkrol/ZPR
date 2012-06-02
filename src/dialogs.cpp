@@ -1,6 +1,7 @@
 #include "../include/core.hpp"
 #include "../include/global.hpp"
 #include "../include/dialogs.hpp"
+#include <iostream>
 
 DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   Gtk::Dialog("Database Manager", *parent), box(Gtk::ORIENTATION_HORIZONTAL),
@@ -37,7 +38,7 @@ DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   scroll.add(directory_tree);
 
   //loading directory tree
-  directory_model = core->getDirectoryTree();
+  directory_model = core->getFilesystemTree();
   directory_tree.set_model(directory_model);
   directory_tree.signal_cursor_changed().connect(sigc::mem_fun(
         *this, &DBManagerDialog::selectFolder));

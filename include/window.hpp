@@ -151,7 +151,6 @@ class LibraryView : public WindowContent {
 
     //widgets
     Gtk::DrawingArea images;
-    Gtk::Label tags_label;
 
     //database prompt
     Gtk::InfoBar *db_prompt;

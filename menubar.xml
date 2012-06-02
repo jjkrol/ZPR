@@ -5,6 +5,7 @@
     </menu>
     <menu action='EditMenu'>
       <menuitem action='EditPreferences'/>
+      <menuitem action='EditDatabase'/>
     </menu>
     <menu action='ViewMenu'>
       <menuitem action='LibraryView'/>

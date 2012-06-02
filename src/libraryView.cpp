@@ -5,9 +5,7 @@
 /// @fn LibraryView::LibraryView(MainWindow *w)
 /// @brief LibraryView constructor - connects to UserInterface and builds library view gui.
 /// @param w pointer to parent class MainWindow (needed for communication).
-LibraryView::LibraryView(MainWindow *w) : window(w),
-  tags_label("tags browsing"), db_prompt(NULL) {
-
+LibraryView::LibraryView(MainWindow *w) : window(w), db_prompt(NULL) {
   //obtaining CoreController instance
   core = CoreController::getInstance();
 

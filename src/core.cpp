@@ -42,7 +42,7 @@ void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
 
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   if(database_tree) return database_tree;
-  database_tree = Gtk::TreeStore::create(fs_columns);
+  database_tree = Gtk::TreeStore::create(dir_columns);
 
   //getting folders from database
   vector<path> paths;
@@ -68,8 +68,8 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
 }
 
 Glib::RefPtr<Gtk::TreeStore> CoreController::getFilesystemTree(){
-  if(directory_tree) return directory_tree;
-  directory_tree = Gtk::TreeStore::create(fs_columns);
+  if(filesystem_tree) return filesystem_tree;
+  filesystem_tree = Gtk::TreeStore::create(fs_columns);
 
   Directory* rootDir = new Directory("");
   std::vector<Directory*> dirs = rootDir->getAbsoluteSubdirectories();
@@ -77,13 +77,16 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getFilesystemTree(){
 
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-    row = *(directory_tree->append());
-    row[fs_columns.name] = (*it)->getName();             //adding label
+    row = *(filesystem_tree->append());
+    row[fs_columns.name] = (*it)->getName();              //adding label
     row[fs_columns.path] = (*it)->getPath().string();
+    row[fs_columns.included] = false;
     addAbsoluteSubdirectories(*it, row, 0);               //adding subdirectories
   }
 
-  return directory_tree;
+  //@TODO check watched folders
+
+  return filesystem_tree;
 }
 
 void CoreController::expandDirectory(const Gtk::TreeModel::iterator &parent,
@@ -264,7 +267,7 @@ void CoreController::addAbsoluteSubdirectories(Directory *dir,
 
   //filling tree
   for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-    childrow = *(directory_tree->append(row.children()));
+    childrow = *(filesystem_tree->append(row.children()));
     childrow[fs_columns.name] = (*it)->getName();              //adding label
     childrow[fs_columns.path] = (*it)->getPath().string();     //adding path
     if(depth != 0)
@@ -279,6 +282,10 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
 
   //storing changes in container (to handle OK/Cancel/Apply buttons)
   added_folders.push_back(folder);
+
+  //checking if library path has not changed
+  path library_path = getLibraryDirectoryPath();
+  std::cout << library_path.string() << std::endl;
 
   //expanding and checking for subdirectories
   Gtk::TreeModel::Path path;
