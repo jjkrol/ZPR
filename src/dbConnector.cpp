@@ -553,34 +553,20 @@ const PhotoPath &photo, const set<string> &tags) {
 }
 
 bool SQLiteConnector::addTagToPhoto(const PhotoPath &photo, const string &tag) {
-  sqlite3_stmt *stmt;
-
   //inserting a tag into a tags table if a tag has not existed before
-  string query = "IF NOT EXISTS (SELECT * FROM tags WHERE name='" + tag + "') "
-                  "THEN INSERT INTO tags VALUES(NULL,'" + tag + "') ;";
+  string query = "INSERT OR IGNORE INTO tags VALUES (NULL, \'" + tag + "\');\n";
 
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK)
-    return false;
-
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
-  if(reportErrors(query.c_str()))
+  if(! executeQuery(query))
     return false;
 
   //making a connection between the tag and a corresponding photo
-  query = "INSERT INTO photos_tags "
-          "SELECT photos.id, tags.id FROM photos, tags "
-          "WHERE photos.path = ? AND tags.name = '" + tag  + "';";
+  query = "INSERT OR IGNORE INTO photos_tags\n"
+          "  SELECT p.id, t.id\n"
+          "  FROM photos p, tags t\n"
+          "  WHERE p.path = \'" + photo.string() + "\'\n" +
+          "    AND t.name = \'" + tag  + "\'\n;";
 
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK)
-    return false;
-    
-  sqlite3_bind_blob(stmt, 1, &photo, sizeof(path), SQLITE_STATIC);
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
-  return !reportErrors(query.c_str());
+  return executeQuery(query);
 }
 
 bool SQLiteConnector::getPhotosTags(
@@ -588,19 +574,21 @@ const PhotoPath &photo, set<string> &tags) {
   //Get id of a given photo. Then get ids of tags connected with it.
   //Finally, get names of those tags.
   sqlite3_stmt *stmt;
-  const char *query = "SELECT name FROM tags WHERE tags.id IN ("
-                        "SELECT tags_id FROM photos_tags WHERE photos_id IN ("
-                          "SELECT id FROM photos WHERE path = ?"
-                        ")"
-                      ");";
+  string query = "SELECT t.name\n"
+                 "FROM tags t, photos_tags pt, photos p\n"
+                 "WHERE t.id = pt.tags_id\n"
+                 "  AND pt.photos_id = p.id\n"
+                 "  AND p.path =\'" + photo.string() + "\';";
+                        
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK)
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK) {
+    reportErrors(query);
     return false;
+  }
     
-  sqlite3_bind_blob(stmt, 1, &photo, sizeof(path), SQLITE_STATIC);
   while(sqlite3_step(stmt) == SQLITE_ROW) {
-    const void *blob = sqlite3_column_text(stmt,0);
-    tags.insert(* static_cast<const string *>(blob));
+    string tag = reinterpret_cast<const char*>(sqlite3_column_text(stmt,0));
+    tags.insert(tag);
   }
   sqlite3_finalize(stmt);
 

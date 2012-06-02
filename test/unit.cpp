@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //isEmpty
 
 
-  /******************************************/
-  /*    ADDING AND DELETING PHOTOS          */
-  /******************************************/
+  /***********************************************/
+  /* ADDING AND DELETING PHOTOS AND DIRECTORIES  */
+  /***********************************************/
     //adding photos from directories
     vector<path> paths = disk->getSubdirectoriesPaths(path("/"));
 
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
         BOOST_CHECK (*(i++) == *(j++));
     }
 
-    //deleting single photo
+    //deleting photos
     string output;
 
     sqlconnector->getPhotosFromDirectory("alpha", paths);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //deleting directory
     sqlconnector->getDirectoriesFromDB(paths);
     paths.erase(find(paths.begin(), paths.end(), path("alpha")));
-    sqlconnector->deleteDirectory("alpha");
+    sqlconnector->deleteDirectory(path("alpha"));
     sqlconnector->getDirectoriesFromDB(paths2);
     BOOST_REQUIRE(paths.size() == paths2.size());
     {
@@ -167,6 +167,17 @@ BOOST_AUTO_TEST_SUITE( testSuite )
       while( i != paths.end())
         BOOST_CHECK (*(i++) == *(j++));
     }
+
+  /*****************************/
+  /*    TAGS MANIPULATION      */
+  /*****************************/
+    //adding tags
+    set<string> tags;
+
+    sqlconnector->addTagToPhoto(path("beta/1.jpg"),"architecture");
+    sqlconnector->getPhotosTags(path("beta/1.jpg"),tags);
+    BOOST_CHECK(tags.find("architecture") != tags.end());
+
   }
 
 BOOST_AUTO_TEST_SUITE_END()
