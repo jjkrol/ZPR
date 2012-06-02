@@ -628,12 +628,6 @@ const PhotoPath &photo, const string &tag) {
 }
 bool SQLiteConnector::getPhotosWithTags(
 const set<string> &tags, std::vector<PhotoPath> &photos) {
-//  SELECT path FROM photos
-//    INNER JOIN photos_tags
-//      ON photos.id = photos_tags.photos_id
-//    INNER JOIN tags
-//      ON photos_tags.tags_id = tags.id
-//  WHERE (tags.name = 'tag1' AND tags.name = 'tag2' AND ...);
   if(tags.empty())
     return false;
 
@@ -678,6 +672,20 @@ bool SQLiteConnector::executeQuery(string query) const{
   return !reportErrors(query);
 }
 
-bool SQLiteConnector::getAllTags(vector<path> &out) {
-  return false;
+bool SQLiteConnector::getAllTags(set<string> &tags) {
+  sqlite3_stmt *stmt;
+  string query = "SELECT name FROM tags;";
+
+  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK) {
+    reportErrors(query);
+    return false;
+  }
+    
+  while(sqlite3_step(stmt) == SQLITE_ROW) {
+    string tag = reinterpret_cast<const char*>(sqlite3_column_text(stmt,0));
+    tags.insert(tag);
+  }
+  sqlite3_finalize(stmt);
+
+  return !reportErrors(query);
 }
