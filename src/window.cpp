@@ -32,6 +32,8 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   //connecting signals to buttons
   edit_button.signal_clicked().connect(sigc::mem_fun(core,
         &CoreController::editInExternalEditor));
+  tags_button.signal_clicked().connect(sigc::mem_fun(*this,
+        &MainWindow::editPhotoTags));
 
   //menubar creating
   Gtk::RadioAction::Group view_type;
@@ -150,7 +152,7 @@ void MainWindow::showAbout() {
 /// @fn void MainWindow::editPreferences()
 /// @brief Method responsible for displaying Preferences dialog.
 void MainWindow::editPreferences() {
-  preferences_editor = new PreferencesDialog(this);
+  PreferencesDialog *preferences_editor = new PreferencesDialog(this);
   preferences_editor ->run();
   delete preferences_editor;
 }
@@ -158,7 +160,15 @@ void MainWindow::editPreferences() {
 /// @fn void MainWindow::editDatabase()
 /// @brief Method responsible for displaying Database Manager dialog.
 void MainWindow::editDatabase() {
-  db_manager = new DBManagerDialog(this);
+  DBManagerDialog *db_manager = new DBManagerDialog(this);
   db_manager->run();
   delete db_manager;
+}
+
+/// @fn void MainWindow::editPhotoTags()
+/// @brief Method responsible for displaying Edit Photo Tags dialog.
+void MainWindow::editPhotoTags() {
+  TagsDialog *tags_dialog = new TagsDialog(this);
+  tags_dialog->run();
+  delete tags_dialog;
 }

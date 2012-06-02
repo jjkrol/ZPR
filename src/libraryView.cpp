@@ -36,8 +36,11 @@ void LibraryView::refreshView() {
     delete db_prompt;
   }
 
-  if(core->hasLibraryPathSet())
+  //if(core->hasLibraryPathSet()) {
+  if(true) {
     fillDatabaseTree();
+    fillTagsList();
+  }
   else
     promptAboutDatabase();
 }
@@ -47,16 +50,29 @@ void LibraryView::refreshView() {
 void LibraryView::fillDatabaseTree() {
   directory_tree = core->getDirectoryTree();
   directory_view.set_model(directory_tree);
-  directory_view.append_column("", dir_columns.name);
-  directory_view.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
+  directory_view.append_column("Directory Tree", dir_columns.name);
+  directory_view.signal_row_activated().connect(sigc::mem_fun(*this,
+        &LibraryView::loadImagesByDirectory));
 }
 
-/// @fn void LibraryView::loadImages()
+/// @fn void LibraryView::fillTagsList()
+/// @brief Method responsible for loading tags list from library.
+void LibraryView::fillTagsList() {
+  tags_list = core->getTagsList();
+  tags_view.set_model(tags_list);
+  tags_view.append_column("Tags List", tags_columns.name);
+  tags_view.append_column_editable("", tags_columns.selected);
+  tags_view.signal_row_activated().connect(sigc::mem_fun(*this,
+        &LibraryView::loadImagesByTags));
+}
+
+/// @fn void LibraryView::loadImagesByDirectory()
 /// @brief Method (signal handler) responsible for updating thumbnails in right panel.
 ///        Called when directory from directory view is clicked.
 /// @param path Path to selected row, provided by signal system.
 /// @param column Clicked column, provided by signal system, not used.
-void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
+void LibraryView::loadImagesByDirectory(const Gtk::TreeModel::Path &path,
+    Gtk::TreeViewColumn *column) {
   Gtk::TreeModel::iterator row = directory_tree->get_iter(path);
   std::stack<Glib::ustring> buffer;
   boost::filesystem::path dir_path;
@@ -81,6 +97,17 @@ void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColu
   }
 }
 
+/// @fn void LibraryView::loadImagesByTags()
+/// @brief Method (signal handler) responsible for updating thumbnails in right panel.
+///        Called when directory from directory view is clicked.
+/// @param path Path to selected row, provided by signal system.
+/// @param column Clicked column, provided by signal system, not used.
+void LibraryView::loadImagesByTags(const Gtk::TreeModel::Path &path,
+    Gtk::TreeViewColumn *column) {
+  //TODO
+}
+ 
+
 /// @fn void LibraryView::promptAboutDatabase()
 /// @brief Method responsible for prompting the user if db is not created.
 void LibraryView::promptAboutDatabase() {
@@ -98,6 +125,7 @@ void LibraryView::promptAboutDatabase() {
 
   //adding label
   Gtk::Label *label = new Gtk::Label("It seems like the photo database is not created. You must create photo database by setting folders in which Imagine should look for your photos.");
+  label->set_line_wrap(true);
   box->pack_start(*label, false, false);
 
   //adding button

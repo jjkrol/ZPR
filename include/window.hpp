@@ -50,10 +50,6 @@ class MainWindow : public Gtk::Window {
     Gtk::ToolButton save_button, delete_button;
     Gtk::ToolButton edit_button, tags_button;
     
-    //dialogs
-    DBManagerDialog *db_manager;
-    PreferencesDialog *preferences_editor;
-
     //constructor and desctructor
     MainWindow();
     ~MainWindow();
@@ -65,6 +61,7 @@ class MainWindow : public Gtk::Window {
     //other signal handlers
     void editPreferences();
     void editDatabase();
+    void editPhotoTags();
     void showAbout();
 };
 
@@ -166,11 +163,13 @@ class LibraryView : public WindowContent {
     TagsListColumns tags_columns;
 
     //signal handlers
-    void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
+    void loadImagesByDirectory(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
+    void loadImagesByTags(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 
     //other methods
-    void createDatabase(int);
+    void fillTagsList();
     void fillDatabaseTree();
+    void createDatabase(int);
     void promptAboutDatabase();
     void addSubdirectories(Directory *, Gtk::TreeModel::Row &);
 };

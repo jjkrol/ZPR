@@ -55,3 +55,33 @@ class PreferencesDialog : public Gtk::Dialog {
     //hidden methods
     PreferencesDialog() {};
 };
+
+class TagsDialog : public Gtk::Dialog {
+  public:
+    TagsDialog(Gtk::Window *);
+    ~TagsDialog() {};
+
+  private:
+    //connection with CoreController class
+    CoreController *core;
+
+    //widgets
+    Gtk::ToolButton add_tag_button;
+    Gtk::Box box, top_box;
+    Gtk::Entry tag_entry;
+    Gtk::ScrolledWindow scroll;
+    
+    //tags list
+    Glib::RefPtr<Gtk::ListStore> tags_list;
+    Gtk::TreeView tags_view;
+    TagsListColumns tags_columns;
+
+    //additional functions
+    void loadTagsList();
+
+    //signal handlers
+    void addTag();
+
+    //hidden methods
+    TagsDialog() {};
+};

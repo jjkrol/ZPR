@@ -1,7 +1,6 @@
 #include "../include/core.hpp"
 #include "../include/global.hpp"
 #include "../include/dialogs.hpp"
-#include <iostream>
 
 DBManagerDialog::DBManagerDialog(Gtk::Window *parent) :
   Gtk::Dialog("Database Manager", *parent), box(Gtk::ORIENTATION_HORIZONTAL),
@@ -133,6 +132,7 @@ void DBManagerDialog::handleButtonPush(int button_id) {
 
 PreferencesDialog::PreferencesDialog(Gtk::Window *parent) : 
   Gtk::Dialog("Preferences", *parent) {
+
   //obtaining CoreController instance
   core = CoreController::getInstance();
 
@@ -158,4 +158,53 @@ void PreferencesDialog::handleButtonPush(int button_id) {
       //quit
       break;
   }
+}
+
+TagsDialog::TagsDialog(Gtk::Window *parent) : 
+  Gtk::Dialog("Edit Photo Tags", *parent), add_tag_button(Gtk::Stock::ADD),
+  box(Gtk::ORIENTATION_VERTICAL), top_box(Gtk::ORIENTATION_HORIZONTAL) {
+
+  //obtaining CoreController instance
+  core = CoreController::getInstance();
+
+  //setting size
+  set_size_request(300, 300);
+
+  //adding buttons
+  add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+  //adding and setting widgets
+  Gtk::Box *content_area = get_content_area();
+  content_area->pack_start(box, true, true);
+  box.set_spacing(5);
+  box.set_margin_left(2);
+  box.set_margin_right(2);
+  box.set_margin_top(2);
+  box.set_margin_bottom(2);
+  box.pack_start(top_box, false, false);
+  box.pack_start(scroll, true, true);
+  top_box.pack_start(tag_entry, true, true);
+  top_box.pack_start(add_tag_button, false, false);
+  scroll.add(tags_view);
+
+  loadTagsList();
+
+  //connecting signals
+  add_tag_button.signal_clicked().connect(sigc::mem_fun(
+        *this, &TagsDialog::addTag));
+  
+  //displaying dialog
+  show_all_children();
+}
+
+void TagsDialog::loadTagsList() {
+  std::vector<std::string> tags = core->getTagsOfActivePhoto();
+  tags_list = core->getTagsList();
+  tags_view.set_model(tags_list);
+  //TODO check some tags
+}
+
+void TagsDialog::addTag() {
+  Glib::RefPtr<Gtk::EntryBuffer> buffer = tag_entry.get_buffer();
+  core->addTagToActivePhoto(buffer->get_text());
 }

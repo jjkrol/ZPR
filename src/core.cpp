@@ -53,8 +53,7 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   //std::cout<<library_path.string()<<std::endl;
 
   //filling tree
-  //@TODO - fix if condition in loop; add folders lower in hierarchy
-  //uncomment couts and if to see the problem
+  //@TODO - add folders lower in hierarchy
   Gtk::TreeModel::Row row;
   for(vector<path>::iterator it = paths.begin(); it != paths.end(); ++it) {
     //if(it->parent_path() == library_path) {
@@ -207,12 +206,12 @@ void CoreController::putConfiguration(boost::property_tree::ptree config){
 Glib::RefPtr<Gtk::ListStore> CoreController::getTagsList(){
   if(tags_list) return tags_list;
   tags_list = Gtk::ListStore::create(tags_columns);
-  //TODO ask db for all tags
+  //TODO ask DB
   return tags_list;
 }
 
 photos_t CoreController::getPhotosWithTags(vector<string>){
-  //TODO ask db for paths
+  //TODO ask DB
   vector<boost::filesystem::path> paths;
   vector<boost::filesystem::path>::iterator it;
   photos_t photosWithTags;
@@ -220,6 +219,20 @@ photos_t CoreController::getPhotosWithTags(vector<string>){
     photosWithTags.push_back(Photo::getInstance((*it)));
   }
   return photosWithTags;
+}
+
+void CoreController::addTagToActivePhoto(std::string tag) {
+  //TODO ask DB
+}
+
+void CoreController::RemoveTagFromActivePhoto(std::string tag) {
+  //TODO ask DB
+}
+
+std::vector<std::string> CoreController::getTagsOfActivePhoto() {
+  std::vector<std::string> tags;
+  //TODO ask DB
+  return tags;
 }
 
 //private 

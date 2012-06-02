@@ -12,8 +12,10 @@ class TagsListColumns : public Gtk::TreeModel::ColumnRecord {
   public:
     TagsListColumns() {
       add(name);
+      add(selected);
     }
     Gtk::TreeModelColumn<Glib::ustring> name;
+    Gtk::TreeModelColumn<bool> selected;
 };
 
 class DirectoryTreeColumns : public Gtk::TreeModel::ColumnRecord {
