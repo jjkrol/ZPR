@@ -177,6 +177,8 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     sqlconnector->addTagToPhoto(path("beta/1.jpg"),"architecture");
     sqlconnector->getPhotosTags(path("beta/1.jpg"),tags);
     BOOST_CHECK(tags.find("architecture") != tags.end());
+    sqlconnector->getAllTags(tags);
+    BOOST_CHECK(tags.find("architecture") != tags.end());
 
   }
 

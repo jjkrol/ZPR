@@ -157,7 +157,7 @@ public:
     std::vector<PhotoPath> &photos_output) = 0;
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output) = 0; //tested
-  virtual bool getAllTags( std::vector<boost::filesystem::path> &out) = 0;
+  virtual bool getAllTags( std::set<std::string> &tags_output) = 0;
 
   virtual bool getDirectoriesFromDB(
     std::vector<boost::filesystem::path> &dirs) const = 0; //tested
@@ -223,7 +223,7 @@ public:
     std::vector<PhotoPath> &photos_output);
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output);
-  virtual bool getAllTags( std::vector<boost::filesystem::path> &out);
+  virtual bool getAllTags( std::set<std::string> &tags_output);
 
   virtual bool getDirectoriesFromDB(
     std::vector<boost::filesystem::path> &dirs) const;
