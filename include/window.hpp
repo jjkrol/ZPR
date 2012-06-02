@@ -1,6 +1,9 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <vector>
+#include <string>
+#include <map>
 #include "./global.hpp"
 
 class PreferencesDialog;
@@ -107,6 +110,10 @@ class EditView : public WindowContent {
     Gtk::ToolButton library_button;
     Gtk::Button undo_button, redo_button;
 
+    //plugin widgets
+    Gtk::ToolButton sample_button, put_effect_button;
+    std::map<std::string, Gtk::ToolButton*> pluginButtons;
+
     //storing current photo
     PhotoData current_photo;
 
@@ -118,6 +125,8 @@ class EditView : public WindowContent {
     void zoomImage();
     void nextImage();
     void prevImage();
+    void applyEffect();
+    void showPluginBox(std::string name);
 
     //signals storing (for disconnecting)
     sigc::connection zoom_signal, fit_signal, page_signal;

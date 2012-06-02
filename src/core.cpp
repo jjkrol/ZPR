@@ -5,6 +5,10 @@
 #include "../include/gui.hpp"
 #include "../include/directory.hpp"
 #include "../include/dbConnector.hpp"
+#include "../include/pluginManager.hpp"
+#include "../include/plugin.hpp"
+#include "../include/effect.hpp"
+#include "../include/params.hpp"
 
 using namespace std;
 using namespace boost::filesystem;
@@ -241,6 +245,7 @@ CoreController::CoreController(string forcedConfigPath){
   manageConfig(forcedConfigPath);
   manageDisk();
   manageDatabase();
+  pm = new PluginManager();
 }
 
 void CoreController::manageConfig(string forcedConfigPath){
@@ -392,4 +397,26 @@ void CoreController::editInExternalEditor() {
       (*currentPhoto)->getAbsolutePath().string());
 
   editor->launch(photo);
+}
+
+vector<string> CoreController::getPluginNames(){
+  vector<Plugin*> plugins = pm->getPluginList();
+  vector<Plugin*>::iterator it;
+  vector<string> retVector;
+  for(it = plugins.begin(); it != plugins.end(); ++it){
+    retVector.push_back((*it)->getName());
+  }
+  return retVector;
+}
+
+void CoreController::applyEffectOfSelectedPlugin(){
+Effect * effect =  selectedPlugin->getEffect(new Params());
+
+(*currentPhoto)->putEffect(effect);
+}
+
+Gtk::Widget * CoreController::getPluginBox(string name){
+Plugin * plugin = pm->getPluginByName(name);
+selectedPlugin = plugin;
+  return selectedPlugin->getWidget();
 }

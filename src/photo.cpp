@@ -1,6 +1,7 @@
 #include "../include/photo.hpp"
 #include "../include/disk.hpp"
 #include "../include/dbConnector.hpp"
+#include "../include/effect.hpp"
 
 using namespace boost::gil;
 using namespace std;
@@ -44,7 +45,15 @@ Glib::RefPtr<Gdk::Pixbuf> Photo::getThumbnail(){
 }
 
 Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
-  return disk->getPhotoFile(photoPath);
+  if(pixbuf == NULL){
+    pixbuf = disk->getPhotoFile(photoPath);\
+  }
+
+  return pixbuf;
+}
+
+void Photo::setPixbuf(Glib::RefPtr<Gdk::Pixbuf> buf){
+  pixbuf = buf;
 }
 
 boost::filesystem::path Photo::getPath(){
@@ -100,4 +109,8 @@ taglist_t Photo::getTags(){
 
 bool      Photo::hasTag(std::string tag){
   return !(tags.find(tag) == tags.end());
+}
+
+void Photo::putEffect(Effect * effect){
+  effect->execute(this);
 }

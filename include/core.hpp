@@ -11,9 +11,11 @@
 
 class Disk;
 class Photo;
+class Plugin;
 class PhotoData;
 class Directory;
 class DBConnector;
+class PluginManager;
 class UserInterface;
 class ConfigurationManager;
 
@@ -142,7 +144,28 @@ class CoreController {
       void cancelDBChanges();
 
       void setExternalEditor(std::string name);
+
+      /**
+       * Invoke gimp to edit photo
+       */
       void editInExternalEditor();
+
+      /**
+       * Apply selected effect
+       */
+
+      void applyEffectOfSelectedPlugin();
+
+      /**
+       * @returns a widget for setting plugin parameters
+       */
+      Gtk::Widget * getPluginBox(std::string name);
+
+      /**
+       * @returns names of all available plugins
+       */
+      std::vector<std::string> getPluginNames();
+
 
   private:
       CoreController (std::string forcedConfigPath="");
@@ -150,6 +173,7 @@ class CoreController {
       CoreController (const CoreController&);
       ~CoreController (){};
 
+      Plugin * selectedPlugin;
       void manageConfig(std::string);
       void manageDisk();
       void manageDatabase();
@@ -175,6 +199,7 @@ class CoreController {
       UserInterface *gui;
       ConfigurationManager* configManager;
       Disk* disk;
+      PluginManager* pm;
       boost::thread guiThread;
 
       //GTK folder trees

@@ -26,6 +26,7 @@
 
 class Disk;
 class DBConnector;
+class Effect;
 
 typedef std::set<std::string> taglist_t;
 
@@ -43,6 +44,8 @@ class Photo {
      * @TODO optimisation, implement various image types
      */
     Glib::RefPtr<Gdk::Pixbuf> getPixbuf();
+
+    void setPixbuf(Glib::RefPtr<Gdk::Pixbuf> pixbuf);
 
     /**
      * @returns A relative path to the photo.
@@ -91,6 +94,11 @@ class Photo {
      */
     bool      hasTag(std::string tag);
 
+    /**
+     * puts specified effect on the photo
+     */
+void putEffect(Effect * effect);
+
   private:
     Photo (boost::filesystem::path argumentPath);
     Photo& operator=(const Photo&);
@@ -101,6 +109,8 @@ class Photo {
     DBConnector* db;
     boost::filesystem::path photoPath;
     std::set<std::string> tags;
+
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
 
 };

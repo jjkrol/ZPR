@@ -1,4 +1,5 @@
 *.o
+config.cfg
 .scons*
 *.zarg*
 DB.sqlite

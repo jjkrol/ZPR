@@ -11,7 +11,8 @@ EditView::EditView(MainWindow *w) : window(w),
   effects_box(Gtk::ORIENTATION_VERTICAL), basic_label("Basic editing"),
   colors_label("Colors modification"), effects_label("Other effects"),
   library_button(Gtk::Stock::QUIT), undo_button(Gtk::Stock::UNDO),
-  redo_button(Gtk::Stock::REDO) {
+  redo_button(Gtk::Stock::REDO), sample_button(Gtk::Stock::GO_FORWARD),
+put_effect_button("put effect"){
 
   //obtaining CoreController instance
   core = CoreController::getInstance();
@@ -33,7 +34,14 @@ EditView::EditView(MainWindow *w) : window(w),
   //organising widgets
   edit_buttons.pack_start(undo_button, true, true);
   edit_buttons.pack_start(redo_button, true, true);
-  basic_box.pack_start(basic_label, true, true);
+  std::vector<std::string> plugin_names = core->getPluginNames();
+  std::vector<std::string>::iterator it;
+  for(it = plugin_names.begin(); it != plugin_names.end(); ++it){
+    Gtk::ToolButton * but = new Gtk::ToolButton((*it));
+    but->signal_clicked().connect(sigc::bind(sigc::mem_fun(this, &EditView::showPluginBox),(*it)));
+    pluginButtons[*it] = but;
+    basic_box.pack_start(*but, false, false);
+  }
   colors_box.pack_start(colors_label, true, true);
   effects_box.pack_start(effects_label, true, true);
   window->toolbar.pack_end(library_button, false, false);
@@ -49,6 +57,7 @@ EditView::EditView(MainWindow *w) : window(w),
   right_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::nextImage));
   left_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::prevImage));
   library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
+  put_effect_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::applyEffect));
   zoom_signal = window->zoom_slider.signal_value_changed().connect(
       sigc::mem_fun(this, &EditView::zoomImage));
   fit_signal = window->signal_size_allocate().connect_notify(
@@ -74,6 +83,26 @@ EditView::~EditView() {
   zoom_signal.disconnect();
   fit_signal.disconnect();
   page_signal.disconnect();
+  //@TODO remove plugin buttons
+}
+
+///
+void EditView::showPluginBox(std::string name){
+  Gtk::Widget * pluginBox = core->getPluginBox("Sample plugin");
+  //remove plugin buttons
+  Gtk::ToolButton * but = pluginButtons[name];
+  basic_box.remove(*but);
+  basic_box.pack_end(*pluginBox, true, true);
+  basic_box.pack_end(put_effect_button, true, true);
+  basic_box.show_all_children();
+}
+
+
+/// @fn void EditView::applyEffect()
+/// @brief applies effect to the current photo
+void EditView::applyEffect(){
+core->applyEffectOfSelectedPlugin();
+refreshView();
 }
 
 /// @fn EditView::refreshView()
@@ -86,6 +115,7 @@ void EditView::refreshView() {
 /// @brief Method (signal handler) for loading image into Gtk::Image widget.
 ///        Called when Next/Previous button is clicked or edit view is created.
 void EditView::loadImage() {
+  current_photo = core->getCurrentPhoto();
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = current_photo.pixbuf;
   Gdk::Rectangle rectangle = window->display.get_allocation();
   if(!pixbuf) return;

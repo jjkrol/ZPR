@@ -31,7 +31,12 @@ tests = [
 demo = [
   'test/async_test.cpp'
 ]
-app = core + gui + database + asynchronous
+plugins = [
+  'src/pluginManager.cpp',
+  'src/samplePlugin.cpp',
+  'src/sampleEffect.cpp',
+]
+app = core + gui + database + asynchronous + plugins
 
 env = Environment(CCFLAGS = CCFLAGS, LINKFLAGS = LINKFLAGS)
 env.Append(LIBS=File('/usr/lib/libboost_unit_test_framework.a'))
