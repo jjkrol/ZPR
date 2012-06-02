@@ -422,6 +422,7 @@ bool SQLiteConnector::addPhoto(const path &photo) {
   //inserting NULL as an id value is used for autoincrementing id numbers
   //add a photo with an appropriate parent's id
   string parents_id, parents_path;
+
   parents_path = photo.parent_path().string();
   parents_id = "NULL";
 
@@ -578,7 +579,7 @@ const PhotoPath &photo, set<string> &tags) {
                  "WHERE t.id = pt.tags_id\n"
                  "  AND pt.photos_id = p.id\n"
                  "  AND p.path =\'" + photo.string() + "\';";
-                        
+  tags.clear();
 
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK) {
     reportErrors(query);
@@ -607,23 +608,23 @@ const PhotoPath &photo, const std::set<std::string> &tags) {
 
 bool SQLiteConnector::deleteTagFromPhoto(
 const PhotoPath &photo, const string &tag) {
-  string query = "DELETE FROM photos_tags WHERE tags_id IN ("
-                    "SELECT id FROM tags WHERE name=" + tag +
-                  ");"
+  string query = "DELETE FROM photos_tags WHERE tags_id = (\n"
+                    "SELECT id FROM tags WHERE name=\'" + tag +
+                  "\'\n);";
 
-                 "IF NOT EXISTS ("
-                   "SELECT * FROM photos_tags WHERE tags_id IN ("
-                     "SELECT id FROM tags WHERE name=?"
-                   ")"
-                 ")"
-                 "THEN "
-                   "DELETE FROM tags WHERE name=" + tag + " ;";
+  if( !executeQuery(query) )
+    return false;
+ 
+  query = "DELETE FROM tags\n"
+          "WHERE name=\'" + tag + "\'\n"
+          "  AND NOT EXISTS (\n"
+          "    SELECT 1 FROM photos_tags\n"
+          "    WHERE tags_id = (\n"
+          "      SELECT id FROM tags WHERE name=\' +  tag+ \'\n"
+          "    )"
+          ");";
 
-  if(sqlite3_exec(database, query.c_str(), NULL, NULL, NULL) == SQLITE_OK)
-    return true;
-
-  reportErrors(query.c_str());
-  return false;
+  return executeQuery(query);
 }
 bool SQLiteConnector::getPhotosWithTags(
 const set<string> &tags, std::vector<PhotoPath> &photos) {
@@ -675,6 +676,8 @@ bool SQLiteConnector::getAllTags(set<string> &tags) {
   sqlite3_stmt *stmt;
   string query = "SELECT name FROM tags;";
 
+  tags.clear();
+
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0)) != SQLITE_OK) {
     reportErrors(query);
     return false;
@@ -687,4 +690,5 @@ bool SQLiteConnector::getAllTags(set<string> &tags) {
   sqlite3_finalize(stmt);
 
   return !reportErrors(query);
+ 
 }

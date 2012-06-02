@@ -151,13 +151,15 @@ public:
   virtual bool addTagsToPhoto(
     const PhotoPath &photo, const std::set<std::string> &tags) = 0; //tested
   virtual bool deleteTagsFromPhoto(
-    const PhotoPath &photo, const std::set<std::string> &tags) = 0;
+    const PhotoPath &photo, const std::set<std::string> &tags) = 0; //tested
+  virtual bool deleteTagFromPhoto(
+    const boost::filesystem::path &, const std::string &) = 0; //tested
   virtual bool getPhotosWithTags(
     const std::set<std::string> &tags,
-    std::vector<PhotoPath> &photos_output) = 0;
+    std::vector<PhotoPath> &photos_output) = 0; //TODO
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output) = 0; //tested
-  virtual bool getAllTags( std::set<std::string> &tags_output) = 0;
+  virtual bool getAllTags( std::set<std::string> &tags_output) = 0; //tested
 
   virtual bool getDirectoriesFromDB(
     std::vector<boost::filesystem::path> &dirs) const = 0; //tested
@@ -218,6 +220,8 @@ public:
     const std::set<std::string> &tags);
   virtual bool deleteTagsFromPhoto(
     const PhotoPath &photo, const std::set<std::string> &tags);
+  virtual bool deleteTagFromPhoto(
+    const boost::filesystem::path &, const std::string &);
   virtual bool getPhotosWithTags(
     const std::set<std::string> &tags,
     std::vector<PhotoPath> &photos_output);
@@ -298,7 +302,6 @@ private:
     const DirectoriesPath &dir,
     std::vector<DirectoriesPath> &subdirs) const;
   bool getChecksumFromDB(int &checksum) const;
-  bool deleteTagFromPhoto(const PhotoPath &, const std::string &);
 
   int calculateChecksum() const;
   bool getPhotosFromDB(std::vector<boost::filesystem::path> &photos) const;
