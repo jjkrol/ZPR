@@ -257,7 +257,7 @@ int SQLiteConnector::calculateChecksum() const{
       i != directories.end(); ++i) {
   
     //add make a hash from every photo from directory to checksum
-    vector<path> photo_paths = disk->getPhotosPaths(*i);
+    vector<path> photo_paths = disk->getAbsolutePhotosPaths(*i);
     for(vector<path>::iterator j = photo_paths.begin();
         j != photo_paths.end() ; j++) {
       checksum_tmp += hash(j->string().c_str());
@@ -347,7 +347,7 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
   //add photos which are located directly in this directory
   {
     //get photos which are located in this directory
-    vector<PhotoPath> photos = disk->getPhotosPaths(dir);
+    vector<PhotoPath> photos = disk->getAbsolutePhotosPaths(dir);
 
     //add each photo to database
     for(vector<PhotoPath>::const_iterator i = photos.begin();
@@ -422,7 +422,6 @@ bool SQLiteConnector::addPhoto(const path &photo) {
   //inserting NULL as an id value is used for autoincrementing id numbers
   //add a photo with an appropriate parent's id
   string parents_id, parents_path;
-
   parents_path = photo.parent_path().string();
   parents_id = "NULL";
 
