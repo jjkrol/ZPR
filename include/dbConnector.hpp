@@ -152,16 +152,13 @@ public:
     std::vector<PhotoPath> &photos_output) = 0;
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output) = 0;
+  virtual bool getAllTags( std::vector<boost::filesystem::path> &out) = 0;
 
   virtual bool getDirectoriesFromDB(
     std::vector<boost::filesystem::path> &dirs) const = 0;
-
-  //Methods used for testing purposes only
-  virtual void showTags(std::ostream &) = 0;
-  virtual void showPhotos(std::ostream &) = 0;
-  virtual void showDirectories(std::ostream &) = 0;
-  virtual void showPhotosTags(std::ostream &) = 0;
-  
+  virtual bool getPhotosFromDirectory(
+    const boost::filesystem::path &directory,
+    std::vector<boost::filesystem::path> &photos) const = 0;
 
 protected:
   virtual ~DBConnector(){};
@@ -219,14 +216,13 @@ public:
     std::vector<PhotoPath> &photos_output);
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output);
+  virtual bool getAllTags( std::vector<boost::filesystem::path> &out);
 
   virtual bool getDirectoriesFromDB(
     std::vector<boost::filesystem::path> &dirs) const;
-  //Methods used for testing purposes only
-  virtual void showTags(std::ostream &);
-  virtual void showPhotos(std::ostream &);
-  virtual void showDirectories(std::ostream &);
-  virtual void showPhotosTags(std::ostream &);
+  virtual bool getPhotosFromDirectory(
+    const boost::filesystem::path &directory, 
+    std::vector<boost::filesystem::path> &photos) const;
 
 private:
   SQLiteConnector(){
@@ -301,6 +297,6 @@ private:
 
   int calculateChecksum() const;
   bool getPhotosFromDB(std::vector<boost::filesystem::path> &photos) const;
-  bool executeQuery(std::string query);
+  bool executeQuery(std::string query) const;
   inline bool reportErrors(std::string query) const;
 };

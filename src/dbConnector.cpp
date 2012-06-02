@@ -138,7 +138,8 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
   while(sqlite3_step(stmt) == SQLITE_ROW) {
     //photos.push_back(*static_cast<const path *>(sqlite3_column_blob(stmt,1)));
     string path_string = reinterpret_cast<const char*>
-                        (sqlite3_column_text(stmt,0));
+                         (sqlite3_column_text(stmt,0));
+    cout << "Pobrano z BD sciezke:"<< path_string << endl;
     photos.push_back(path(path_string));
   }
 
@@ -290,17 +291,14 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   //4. Delete directory from directories table.
 
   //deleting photos from this folder
+  cout<<"Usuwam foleder: " << dir.string() <<endl;;
   sqlite3_stmt *stmt;
   string query = "DELETE FROM photos WHERE parent_dir"
                   "IN (SELECT id FROM directories WHERE path="
                   + dir.string() + ");";
   
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
-      != SQLITE_OK)
+  if(! executeQuery(query))
     return false;
-
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
 
   //getting subdirectories of directory which is being deleted
   vector<DirectoriesPath> subdirs;
@@ -388,37 +386,25 @@ bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
 }
 
 bool SQLiteConnector::deletePhoto(const path &photos_path) {
-  sqlite3_stmt *stmt;
-
+  cout << "Usuwam zdjecie o sciezce:" << photos_path.string() <<endl;
   //Firstly, connection between the photo and corresponding tags is deleted
-  string query = "DELETE FROM photos_tags WHERE photos_id IN ("
-                 "SELECT id FROM photos WHERE path=" + photos_path.string()
-                 + " )";
+  string query = "DELETE FROM photos_tags WHERE photos_id IN (\n"
+                 "  SELECT id FROM photos WHERE path=\'" + photos_path.string()+
+                 "\'\n)";
 
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
-      != SQLITE_OK)
+  if(!executeQuery(query)) {
+    cout << "Nie udalo sie usunac zdjecia z tabeli powiazan" << endl;
     return false;
-
-  //sqlite3_bind_blob(stmt, 1, &photos_path, sizeof(photos_path), SQLITE_STATIC);
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
-  if(reportErrors(query.c_str()))
-    return false;
+  }
 
   //Secondly, photo should be deleted from the table of photos
-  query = "DELETE FROM photos WHERE path=" + photos_path.string() + " ;";
-  stmt = 0;
+  query = "DELETE FROM photos WHERE path=\'" + photos_path.string() + "\' ;";
 
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
-      != SQLITE_OK)
+  if(!executeQuery(query)) {
+    cout << "Nie udalo sie usunac zdjecia z tabeli zdjec" << endl;
     return false;
-
-  //sqlite3_bind_blob(stmt, 1, &photos_path, sizeof(photos_path), SQLITE_STATIC);
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
-  return !reportErrors(query.c_str());
+  }
+  return true;
 }
 
 bool SQLiteConnector::addPhoto(const path &photo) {
@@ -493,6 +479,16 @@ vector<DirectoriesPath> &directories) const {
   sqlite3_finalize(stmt);
 
   return !reportErrors(query);
+}
+
+bool SQLiteConnector::getPhotosFromDirectory(
+  const path &directory, vector<path> &out) const{
+  string query = "SELECT path FROM photos\n"
+                 "WHERE parents_id = (\n"
+                 "  SELECT id FROM directories\n"
+                 "  WHERE path=\'" + directory.string() + "\'"
+                 ");";
+  return(executeQuery(query));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -652,80 +648,7 @@ const set<string> &tags, std::vector<PhotoPath> &photos) {
   return !reportErrors(query.c_str());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//  Methods and functions used for testig purposes
-////////////////////////////////////////////////////////////////////////////////
-void SQLiteConnector::showTags(std::ostream &out) {
-  sqlite3_stmt *stmt;
-  const char* query = "SELECT * FROM tags;";
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK)
-    return;
-
-  out << "id\t| name" <<std::endl;
-  while(sqlite3_step(stmt) == SQLITE_ROW) {
-    out << static_cast<const int>(sqlite3_column_int(stmt,0)) << "\t  "
-        << static_cast<const unsigned char *>(sqlite3_column_text(stmt,1))
-        << std::endl;
-  }
-  sqlite3_finalize(stmt);
-}
-
-void SQLiteConnector::showPhotosTags(std::ostream &out) {
-  sqlite3_stmt *stmt;
-  const char* query = "SELECT * FROM photos_tags;";
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
-    reportErrors(query);
-    return;
-  }
-
-  out << "photos_id\t| tags_id" <<std::endl;
-  while(sqlite3_step(stmt) == SQLITE_ROW) {
-    out << static_cast<const int>(sqlite3_column_int(stmt,0)) << "\t  "
-        << static_cast<const int>(sqlite3_column_int(stmt,1)) << std::endl;
-  }
-  sqlite3_finalize(stmt);
-}
-
-void SQLiteConnector::showPhotos(std::ostream &out) {
-  sqlite3_stmt *stmt;
-  const char* query = "SELECT * FROM photos;";
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
-    reportErrors(query);
-    return;
-  }
-
-  out << "id\t| path\t\t\t| parents_id " <<std::endl;
-  while(sqlite3_step(stmt) == SQLITE_ROW) {
-    out << static_cast<const int>(sqlite3_column_int(stmt,0)) << "\t  "
-        << *static_cast<const path *>(sqlite3_column_blob(stmt,1)) << "\t\t\t  "
-        << static_cast<const int>(sqlite3_column_int(stmt,2)) << std::endl;
-  }
-  sqlite3_finalize(stmt);
-}
-
-//funkcja testowa
-void SQLiteConnector::showDirectories(std::ostream &out) {
-  sqlite3_stmt *stmt;
-  const char* query = "SELECT * FROM directories;";
-
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, 0)) != SQLITE_OK) {
-    reportErrors(query);
-    return;
-  }
-
-  out << "id\t|" << " path\t\t\t| parents_id " <<std::endl;
-  while(sqlite3_step(stmt) == SQLITE_ROW) {
-    out << static_cast<const int>(sqlite3_column_int(stmt,0)) << "\t  "
-        << *static_cast<const path *>(sqlite3_column_blob(stmt,1)) << "\t\t\t  "
-        << static_cast<const int>(sqlite3_column_int(stmt,2)) << std::endl;
-  }
-  sqlite3_finalize(stmt);
-}
-
-bool SQLiteConnector::executeQuery(string query) {
+bool SQLiteConnector::executeQuery(string query) const{
   sqlite3_stmt *stmt;
   if(sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, 0) != SQLITE_OK){
     reportErrors(query);
@@ -736,4 +659,8 @@ bool SQLiteConnector::executeQuery(string query) {
   sqlite3_finalize(stmt);
 
   return !reportErrors(query);
+}
+
+bool SQLiteConnector::getAllTags(vector<path> &out) {
+  return false;
 }
