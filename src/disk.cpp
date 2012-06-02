@@ -108,6 +108,7 @@ void Disk::deletePhoto(path photoPath){
 }
 
     bool Disk::exists(boost::filesystem::path file) {
+      cout << "Disk: sprawdzanie sciezki: " << makeSystemAbsolutePath(file).string()<<endl;
       return boost::filesystem::exists(makeSystemAbsolutePath(file));
     } 
 

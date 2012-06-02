@@ -1,5 +1,6 @@
 #define BOOST_TEST_MAIN
 
+#include <fstream>
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
@@ -74,6 +75,8 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
     using std::vector;
     using boost::filesystem::path;
+    using std::cout;
+    using std::endl;
 
     CoreController* core = CoreController::getInstance("test.cfg");
     Disk *disk = Disk::getInstance();
@@ -100,13 +103,37 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /******************************************/
   /*    ADDING AND DELETING PHOTOS          */
   /******************************************/
+    //adding photos from directories
     vector<path> dirs = disk->getSubdirectoriesPaths(path("/"));
-    BOOST_CHECK(sqlconnector->addPhotosFromDirectories(dirs) == true);
-    sqlconnector->close();
+    BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(dirs) == true);
+    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
+    BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
+
+    //getting directories from database
+    vector<path> dirs2;
+    BOOST_REQUIRE(sqlconnector->getDirectoriesFromDB(dirs2) == true );
+    {
+      vector<path>::const_iterator i, j;
+      i = dirs.begin();
+      j = dirs2.begin();
+ 
+      while( i != dirs.end())
+        BOOST_CHECK (*(i++) == *(j++));
+    }
+
+    //checking compatibility
+    //std::fstream f;
+    //f.open("./test/test_tree/empty_test_file.txt", std::ios::out);
+    //f << std::flush;
+    //f.close();
+    sqlconnector->checkCompatibility();
+    //if(sqlconnector->checkCompatibility())
+    //  cout << "kompatybilne" << endl;
+
+    //hasChanged
+    //isEmpty
 
 
-  //adding photos from directories
-  //addPhotosFromDirectories(di)
   
   }
 

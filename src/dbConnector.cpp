@@ -85,8 +85,11 @@ int SQLiteConnector::open(const string filename) {
 
 int SQLiteConnector::close() {
   //return a FAILURE flag if a connection is closed or you can't save settings
-  if( !database ||  !saveSettings() )
+  if( !database ||  !saveSettings() ) {
+    //cout<< "Blad podczas zamykania: baza juz zamknieta" << endl
+    //    << "lub nie udalo sie zapisac konfiguracji do bazy danych" <<endl;
     return FAILURE;
+  }
 
   sqlite3_close(database);
   database = 0;
@@ -114,8 +117,11 @@ bool SQLiteConnector::checkCompatibility() const{
 
   for(vector<path>::const_iterator i = photos.begin() ;
       i != photos.end() ; ++i) {
-    if(!disk->exists(*i))
+    cout<<"Sprawdzanie czy istnieje sciezka: " << (*i).string() << endl;
+    if(!disk->exists((*i))) {
+      cout << "Sciezka " << i->string() << " nie istnieje" <<endl;
       return false;
+    }
   }
 
   return true;
@@ -132,7 +138,7 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
   while(sqlite3_step(stmt) == SQLITE_ROW) {
     //photos.push_back(*static_cast<const path *>(sqlite3_column_blob(stmt,1)));
     string path_string = reinterpret_cast<const char*>
-                        (sqlite3_column_text(stmt,1));
+                        (sqlite3_column_text(stmt,0));
     photos.push_back(path(path_string));
   }
 
