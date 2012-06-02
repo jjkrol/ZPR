@@ -54,9 +54,9 @@ class CoreController {
     Glib::RefPtr<Gtk::TreeStore> getDirectoryTree();
 
     /**
-     * @returns an object representing the database directory tree 
+     * @returns an object representing the directory tree for DB manager
      */
-    Glib::RefPtr<Gtk::TreeStore> getDatabaseTree();
+    Glib::RefPtr<Gtk::TreeStore> getFilesystemTree();
 
     void expandDirectory(const Gtk::TreeModel::iterator &iter,
                          const Gtk::TreeModel::Path &path);
@@ -125,12 +125,7 @@ class CoreController {
        * @returns all tags
        */
 
-      std::vector<std::string> getAllTags();
-
-      /**
-       *@returns tags similar to the query
-       */
-      std::vector<std::string> getTagsLike(std::string query);
+      Glib::RefPtr<Gtk::ListStore> getTagsList();
 
       /**
        *
@@ -180,10 +175,12 @@ class CoreController {
       boost::thread guiThread;
 
       //GTK folder trees
-      Glib::RefPtr<Gtk::TreeStore> directory_model;
-      Glib::RefPtr<Gtk::TreeStore> database_model;
-      DirTreeColumns dir_columns;
-      DbTreeColumns db_columns;
+      Glib::RefPtr<Gtk::TreeStore> directory_tree;
+      Glib::RefPtr<Gtk::TreeStore> database_tree;
+      Glib::RefPtr<Gtk::ListStore> tags_list;
+      DirectoryTreeColumns dir_columns;
+      FilesystemTreeColumns fs_columns;
+      TagsListColumns tags_columns;
       
       //containers for comminucating with DBManager
       std::vector<Gtk::TreeModel::iterator> added_folders;

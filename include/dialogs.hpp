@@ -26,11 +26,7 @@ class DBManagerDialog : public Gtk::Dialog {
     //directory tree
     Glib::RefPtr<Gtk::TreeStore> directory_model;
     Gtk::TreeView directory_tree;
-    DirTreeColumns dir_columns;
-
-    //included folders list
-    Glib::RefPtr<Gtk::TreeStore> included_model;
-    Gtk::TreeView included_list;
+    FilesystemTreeColumns dir_columns;
 
     //signal handlers
     void selectFolder();

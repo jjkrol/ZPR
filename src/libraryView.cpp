@@ -12,8 +12,8 @@ LibraryView::LibraryView(MainWindow *w) : window(w),
   core = CoreController::getInstance();
 
   //organising widgets
-  window->notebook.append_page(database_tree, "Folders");
-  window->notebook.append_page(tags_label, "Tags");
+  window->notebook.append_page(directory_view, "Folders");
+  window->notebook.append_page(tags_view, "Tags");
   window->display.add(images);
 
   //refreshing the view
@@ -47,10 +47,10 @@ void LibraryView::refreshView() {
 /// @fn void LibraryView::fillDirectoryTree()
 /// @brief Method responsible for loading directory tree from library.
 void LibraryView::fillDatabaseTree() {
-  database_model = core->getDatabaseTree();
-  database_tree.set_model(database_model);
-  database_tree.append_column("", db_columns.name);
-  database_tree.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
+  directory_tree = core->getDirectoryTree();
+  directory_view.set_model(directory_tree);
+  directory_view.append_column("", dir_columns.name);
+  directory_view.signal_row_activated().connect(sigc::mem_fun(*this, &LibraryView::loadImages));
 }
 
 /// @fn void LibraryView::loadImages()
@@ -59,14 +59,14 @@ void LibraryView::fillDatabaseTree() {
 /// @param path Path to selected row, provided by signal system.
 /// @param column Clicked column, provided by signal system, not used.
 void LibraryView::loadImages(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
-  Gtk::TreeModel::iterator row = database_model->get_iter(path);
+  Gtk::TreeModel::iterator row = directory_tree->get_iter(path);
   std::stack<Glib::ustring> buffer;
   boost::filesystem::path dir_path;
   if(!row) return;
 
   //storing directory path
   while(row) {
-    buffer.push((*row)[db_columns.name]);
+    buffer.push((*row)[dir_columns.name]);
     row = row->parent();
   }
 

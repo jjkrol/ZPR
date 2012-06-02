@@ -8,17 +8,25 @@ struct PhotoData {
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 };
 
-class DbTreeColumns : public Gtk::TreeModel::ColumnRecord {
+class TagsListColumns : public Gtk::TreeModel::ColumnRecord {
   public:
-    DbTreeColumns() {
+    TagsListColumns() {
       add(name);
     }
     Gtk::TreeModelColumn<Glib::ustring> name;
 };
 
-class DirTreeColumns : public Gtk::TreeModel::ColumnRecord {
+class DirectoryTreeColumns : public Gtk::TreeModel::ColumnRecord {
   public:
-    DirTreeColumns() {
+    DirectoryTreeColumns() {
+      add(name);
+    }
+    Gtk::TreeModelColumn<Glib::ustring> name;
+};
+
+class FilesystemTreeColumns : public Gtk::TreeModel::ColumnRecord {
+  public:
+    FilesystemTreeColumns() {
       add(name);
       add(path);
       add(stock_id);

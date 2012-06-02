@@ -133,7 +133,6 @@ class EditView : public WindowContent {
  *  @brief Uses Decorator pattern to switch MainWindow to library view
  *         and handles tasks associated with this view.
  */
-
 class LibraryView : public WindowContent {
   public:
     friend class MainWindow;
@@ -157,10 +156,15 @@ class LibraryView : public WindowContent {
     //database prompt
     Gtk::InfoBar *db_prompt;
 
-    //images database tree
-    Glib::RefPtr<Gtk::TreeStore> database_model;
-    Gtk::TreeView database_tree;
-    DbTreeColumns db_columns;
+    //directory tree
+    Glib::RefPtr<Gtk::TreeStore> directory_tree;
+    Gtk::TreeView directory_view;
+    DirectoryTreeColumns dir_columns;
+
+    //tags list
+    Glib::RefPtr<Gtk::ListStore> tags_list;
+    Gtk::TreeView tags_view;
+    TagsListColumns tags_columns;
 
     //signal handlers
     void loadImages(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
