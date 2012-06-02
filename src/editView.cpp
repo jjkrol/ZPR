@@ -79,7 +79,7 @@ EditView::~EditView() {
 /// @fn EditView::refreshView()
 /// @brief EditView method for refreshing the view.
 void EditView::refreshView() {
-  //TODO
+  loadImage();
 }
 
 /// @fn void EditView::loadImage()

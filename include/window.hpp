@@ -14,7 +14,6 @@ class Directory;
  *         view), and WindowContent Decorator, which defines type of view and
  *         is responsible of handling view-specific tasks and properties.
  */
-
 class MainWindow : public Gtk::Window {
   public:
     friend class UserInterface;

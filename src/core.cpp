@@ -15,7 +15,6 @@ CoreController* CoreController::getInstance(string forcedConfigPath){
   if(instance == NULL){
     instance = new CoreController(forcedConfigPath);
   }
-
   return instance;
 }
 
@@ -44,24 +43,27 @@ void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDatabaseTree(){
   if(database_model) return database_model;
   database_model = Gtk::TreeStore::create(dir_columns);
+
+  //getting folders from database
   vector<path> paths;
   db->getDirectoriesFromDB(paths);
-  vector<path>::iterator it;
-  for(it = paths.begin(); it != paths.end(); ++it){
-    std::cout<<(*it).string()<<std::endl;
-  }
 
-
-  Directory* rootDir = new Directory("");
-  std::vector<Directory*> dirs = rootDir->getSubdirectories();
-  Gtk::TreeModel::Row row;
+  //getting library path
+  path library_path = configManager->getStringValue("library.directory");
+  //std::cout<<library_path.string()<<std::endl;
 
   //filling tree
-  for(std::vector<Directory*>::iterator it = dirs.begin(); it!=dirs.end(); ++it) {
-    row = *(database_model->append());
-    row[dir_columns.name] = (*it)->getName();             //adding label
-    addSubdirectories(*it, row, -1);                      //adding subdirectories
+  //@TODO - fix if condition in loop; add folders lower in hierarchy
+  //uncomment couts and if to see the problem
+  Gtk::TreeModel::Row row;
+  for(vector<path>::iterator it = paths.begin(); it != paths.end(); ++it) {
+    //if(it->parent_path() == library_path) {
+      row = *(database_model->append());
+      row[dir_columns.name] = it->parent_path().filename().string();    //adding label
+    //}
+    //std::cout<<(*it).parent_path().string()<<std::endl;
   }
+
   return database_model;
 }
 
@@ -80,6 +82,7 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
     row[dir_columns.path] = (*it)->getPath().string();
     addAbsoluteSubdirectories(*it, row, 0);               //adding subdirectories
   }
+
   return directory_model;
 }
 
@@ -143,12 +146,10 @@ struct find_photo : std::unary_function<Photo*, bool> {
   }
 };
 
-
 void CoreController::setCurrentPhoto(boost::filesystem::path photoPath){
   currentPhoto = find_if(currentPhotoSet.begin(), currentPhotoSet.end(),
       find_photo(photoPath));
 }
-
 
 void CoreController::setCurrentDirectory(boost::filesystem::path directoryPath){
   currentDirectory = new Directory(directoryPath);
