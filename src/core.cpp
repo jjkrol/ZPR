@@ -60,21 +60,78 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   //@TODO - add folders lower in hierarchy
   Gtk::TreeModel::Row row;
   for(vector<path>::iterator it = paths.begin(); it != paths.end(); ++it) {
-    //if(it->parent_path() == library_path) {
+    path temp_path = it->parent_path();
+    if(temp_path == library_path.parent_path()) {
+      //ommit the main directory
+    }
+    else if(temp_path.parent_path() == library_path.parent_path()){
       row = *(database_tree->append());
       row[dir_columns.name] = it->parent_path().filename().string();    //adding label
-    //}
-    //std::cout<<(*it).parent_path().string()<<std::endl;
-  }
+    }
+    else{
+      vector<path> temp_paths;
+      //go to library path
+      while(temp_path != library_path.parent_path()){
+        temp_paths.push_back(temp_path.filename());
+        temp_path = temp_path.parent_path();
+      }
+      //descend
+      Gtk::TreeModel::Row temp_row;
+      bool alreadyInserted = false;
 
+      //check first
+      path popped_path = temp_paths.back();
+      temp_paths.pop_back();
+
+      Gtk::TreeModel::Children::iterator ch_it;
+      Gtk::TreeModel::Children children = database_tree->children();
+      for(ch_it = children.begin(); ch_it != children.end(); ++ch_it){
+        if((*ch_it)[dir_columns.name] == popped_path.string()){
+          alreadyInserted = true;
+          break;
+        }
+      }
+      if(alreadyInserted){
+        temp_row = *ch_it;
+      }
+      else{
+        temp_row = *(database_tree->append());
+        temp_row[dir_columns.name] = popped_path.string();    //adding label
+      }
+
+      //check the rest
+      while(temp_paths.size() > 0){
+        alreadyInserted = false;
+        popped_path = temp_paths.back();
+        temp_paths.pop_back();
+        children = temp_row.children();
+        for(ch_it = children.begin(); ch_it != children.end(); ++ch_it){
+          if((*ch_it)[dir_columns.name] == popped_path.string()){
+            alreadyInserted = true;
+            break;
+          }
+        }
+        if(alreadyInserted){
+          temp_row = *ch_it;
+        }
+        else{
+          temp_row = *(database_tree->append(temp_row.children()));
+          temp_row[dir_columns.name] = popped_path.string();    //adding label
+        }
+
+      }
+    }
+  }
   return database_tree;
 }
 
+
+//@TODO change for paths?
 Glib::RefPtr<Gtk::TreeStore> CoreController::getFilesystemTree(){
   if(filesystem_tree) return filesystem_tree;
   filesystem_tree = Gtk::TreeStore::create(fs_columns);
 
-  Directory* rootDir = new Directory("");
+  Directory* rootDir = new Directory("/");
   std::vector<Directory*> dirs = rootDir->getAbsoluteSubdirectories();
   Gtk::TreeModel::Row row;
 
@@ -93,7 +150,7 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getFilesystemTree(){
 }
 
 void CoreController::expandDirectory(const Gtk::TreeModel::iterator &parent,
-                                     const Gtk::TreeModel::Path &tree_path){
+    const Gtk::TreeModel::Path &tree_path){
   Gtk::TreeModel::Children children = parent->children();
   Gtk::TreeModel::Children::iterator child = children.begin();
   string path;
@@ -293,8 +350,8 @@ void CoreController::addSubdirectories(Directory *dir,
     childrow[fs_columns.name] = (*it)->getName();              //adding label
     if(depth != 0)
       addSubdirectories(*it, childrow, depth-1);               //adding subdirectories
-    }
   }
+}
 
 void CoreController::addAbsoluteSubdirectories(Directory *dir,
     const Gtk::TreeModel::Row &row, int depth) {
@@ -342,7 +399,7 @@ void CoreController::removeFolderFromDB(const Gtk::TreeModel::iterator &folder) 
   //unselecting folder
   (*folder)[fs_columns.stock_id] = "";
   (*folder)[fs_columns.included] = false;
- 
+
   //storing changes in container (to handle OK/Cancel/Apply buttons)
   std::vector<Gtk::TreeModel::iterator>::iterator it;
   it = std::find(added_folders.begin(), added_folders.end(), folder);
@@ -374,7 +431,7 @@ void CoreController::sendChangesToDB() {
   db->addPhotosFromDirectories(db_vector);
   added_folders.clear();
   db_vector.clear();
- 
+
   //copying vector and sending it to DB
   for(folder = deleted_folders.begin(); folder != deleted_folders.end(); ++folder) {
     db_vector.push_back((std::string)(**folder)[fs_columns.path]);
@@ -429,13 +486,27 @@ vector<string> CoreController::getPluginNames(){
 }
 
 void CoreController::applyEffectOfSelectedPlugin(){
-Effect * effect =  selectedPlugin->getEffect(new Params());
-
-(*currentPhoto)->putEffect(effect);
+  Effect * effect =  selectedPlugin->getEffect(new Params());
+  (*currentPhoto)->putEffect(effect);
+  std::cout<<"Apply effect"<<std::endl;
+  modifiedPhotos.insert(*currentPhoto);
 }
 
 Gtk::Widget * CoreController::getPluginBox(string name){
-Plugin * plugin = pm->getPluginByName(name);
-selectedPlugin = plugin;
+  Plugin * plugin = pm->getPluginByName(name);
+  selectedPlugin = plugin;
   return selectedPlugin->getWidget();
+}
+
+void CoreController::savePhotos(){
+  cout<<"Save photos"<<endl;
+  set<Photo*>::iterator it;
+  for(it = modifiedPhotos.begin(); it != modifiedPhotos.end(); ++it){
+    (*it)->save();
+  }
+  modifiedPhotos.clear();
+}
+
+bool CoreController::modifiedPhotosExist(){
+  return modifiedPhotos.size() > 0;
 }

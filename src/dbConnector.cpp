@@ -117,9 +117,7 @@ bool SQLiteConnector::checkCompatibility() const{
 
   for(vector<path>::const_iterator i = photos.begin() ;
       i != photos.end() ; ++i) {
-    cout<<"Sprawdzanie czy istnieje sciezka: " << (*i).string() << endl;
-    if(!disk->exists((*i))) {
-      cout << "Sciezka " << i->string() << " nie istnieje" <<endl;
+    if(!disk->absoluteExists((*i))) {
       return false;
     }
   }
@@ -139,7 +137,6 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
     //photos.push_back(*static_cast<const path *>(sqlite3_column_blob(stmt,1)));
     string path_string = reinterpret_cast<const char*>
                          (sqlite3_column_text(stmt,0));
-    cout << "Pobrano z BD sciezke:"<< path_string << endl;
     photos.push_back(path(path_string));
   }
 
