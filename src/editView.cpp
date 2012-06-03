@@ -97,12 +97,12 @@ EditView::~EditView() {
 
 ///
 void EditView::showPluginBox(std::string name){
-  Gtk::Widget *pluginBox = core->getPluginBox("Sample plugin");
-  pluginBox.set_margin_left(2);
-  pluginBox.set_margin_right(2);
-  pluginBox.set_margin_top(1);
-  pluginBox.set_margin_bottom(1);
-  pluginBox.set_spacing(2);
+  Gtk::Box *pluginBox = dynamic_cast<Gtk::Box *>(core->getPluginBox("Sample plugin"));
+  pluginBox->set_margin_left(2);
+  pluginBox->set_margin_right(2);
+  pluginBox->set_margin_top(1);
+  pluginBox->set_margin_bottom(1);
+  pluginBox->set_spacing(2);
   effects_box.remove(plugin_buttons);
   effects_box.remove(edit_buttons);
   effects_box.pack_start(*pluginBox, false, false);
