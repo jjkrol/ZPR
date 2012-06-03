@@ -88,7 +88,7 @@ class CoreController {
     /**
      * sets current tag set, from which next and prev photos are taken
      */
-    void setCurrentTagSet(std::set<std::string> tagSet);
+    void setCurrentTagSet(const std::set<std::string> &tagSet);
 
     /**
      * @returns data of the current photo

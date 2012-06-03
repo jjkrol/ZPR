@@ -212,8 +212,18 @@ void CoreController::setCurrentDirectory(boost::filesystem::path directoryPath){
   currentPhoto = currentPhotoSet.begin();
 }
 
-void CoreController::setCurrentTagSet(set<string> tagSet) {
+void CoreController::setCurrentTagSet(const set<string> &tagSet) {
   //set current photo set
+  vector<path> photosPaths;
+  db->getPhotosWithTags(tagSet, photosPaths);
+
+  currentPhotoSet.clear();
+  for(vector<path>::const_iterator i = photosPaths.begin();
+      i != photosPaths.end() ; ++i ) {
+    currentPhotoSet.push_back(Photo::getInstance(*i));
+  }
+
+  currentPhoto = currentPhotoSet.begin(); 
 }
 
 PhotoData CoreController::getCurrentPhoto(){
