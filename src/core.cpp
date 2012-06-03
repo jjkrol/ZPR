@@ -484,9 +484,8 @@ vector<string> CoreController::getPluginNames(){
 }
 
 void CoreController::applyEffectOfSelectedPlugin(){
-  Effect * effect =  selectedPlugin->getEffect();
+  Effect * effect = selectedPlugin->getEffect();
   (*currentPhoto)->putEffect(effect);
-  std::cout<<"Apply effect"<<std::endl;
   modifiedPhotos.insert(*currentPhoto);
 }
 
@@ -497,11 +496,11 @@ Gtk::Widget * CoreController::getPluginBox(string name){
 }
 
 void CoreController::savePhotos(){
-  cout<<"Save photos"<<endl;
   set<Photo*>::iterator it;
-  for(it = modifiedPhotos.begin(); it != modifiedPhotos.end(); ++it){
+
+  for(it = modifiedPhotos.begin(); it != modifiedPhotos.end(); ++it)
     (*it)->save();
-  }
+
   modifiedPhotos.clear();
 }
 

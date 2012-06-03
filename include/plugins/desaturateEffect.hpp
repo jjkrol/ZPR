@@ -6,7 +6,7 @@ class Photo;
 
 class DesaturateEffect : public Effect {
   public:
-    DesaturateEffect(double amount);
+    DesaturateEffect(double);
     virtual ~DesaturateEffect() {};
     void execute(Photo* photo);
 

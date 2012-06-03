@@ -97,7 +97,7 @@ EditView::~EditView() {
 
 ///
 void EditView::showPluginBox(std::string name) { 
-  Gtk::Box *pluginBox = dynamic_cast<Gtk::Box *>(core->getPluginBox("Sample plugin"));
+  Gtk::Box *pluginBox = dynamic_cast<Gtk::Box *>(core->getPluginBox(name));
   pluginBox->set_margin_left(2);
   pluginBox->set_margin_right(2);
   pluginBox->set_margin_top(1);

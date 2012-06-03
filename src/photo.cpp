@@ -109,6 +109,7 @@ bool      Photo::hasTag(std::string tag){
 }
 
 void Photo::putEffect(Effect * effect){
+  std::cout << "lol" << std::endl;
   effect->execute(this);
 }
 
