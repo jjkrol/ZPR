@@ -371,6 +371,9 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
 
   //checking if library path has not changed
   path library_path = getLibraryDirectoryPath();
+  std::cout << library_path.string() << std::endl;
+  if(library_path.empty())
+    setLibraryPath((std::string)(**folder)[fs_columns.path]);
 
   //expanding and checking for subdirectories
   Gtk::TreeModel::Path path;
