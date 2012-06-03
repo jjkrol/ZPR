@@ -36,8 +36,6 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
         &MainWindow::editPhotoTags));
   save_button.signal_clicked().connect(sigc::mem_fun(core,
         &CoreController::saveCurrentPhoto));
-  //this->signal_delete_event().connect_notify(sigc::mem_fun(*this,
-        //&MainWindow::checkForUnsavedPhotos), true);
 
   //menubar creating
   Gtk::RadioAction::Group view_type;
@@ -132,6 +130,7 @@ void MainWindow::showLibraryView() {
 /// @brief Method responsible for switching to edit view.
 void MainWindow::showEditView() {
   /// @todo set menubar item active
+  if(!core->isCurrentPhotoSet()) return;
   if(content) delete content;
   content = new EditView(this);
   show_all_children();
@@ -172,6 +171,7 @@ void MainWindow::editDatabase() {
 /// @fn void MainWindow::editPhotoTags()
 /// @brief Method responsible for displaying Edit Photo Tags dialog.
 void MainWindow::editPhotoTags() {
+  if(!core->isCurrentPhotoSet()) return;
   TagsDialog *tags_dialog = new TagsDialog(this);
   tags_dialog->run();
   delete tags_dialog;

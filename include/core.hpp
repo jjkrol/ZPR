@@ -209,7 +209,7 @@ class CoreController {
     PluginManager* pm;
     boost::thread guiThread;
 
-    //GTK folder trees
+    //GTK trees
     Glib::RefPtr<Gtk::TreeStore> database_tree;
     Glib::RefPtr<Gtk::TreeStore> filesystem_tree;
     Glib::RefPtr<Gtk::ListStore> tags_list;

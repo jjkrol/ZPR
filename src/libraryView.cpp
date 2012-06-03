@@ -72,7 +72,7 @@ void LibraryView::fillTagsList() {
   Gtk::TreeViewColumn *column = tags_view.get_column(0);
   if(column) column->set_expand(true);
   tags_view.append_column_editable("", tags_columns.selected);
-  tags_view.signal_row_activated().connect(sigc::mem_fun(*this,
+  tags_view.signal_cursor_changed().connect(sigc::mem_fun(*this,
         &LibraryView::loadImagesByTags));
 }
 
@@ -109,12 +109,27 @@ void LibraryView::loadImagesByDirectory(const Gtk::TreeModel::Path &path,
 
 /// @fn void LibraryView::loadImagesByTags()
 /// @brief Method (signal handler) responsible for updating thumbnails in right panel.
-///        Called when directory from directory view is clicked.
+///        Called when tag from tags list is selected.
 /// @param path Path to selected row, provided by signal system.
 /// @param column Clicked column, provided by signal system, not used.
-void LibraryView::loadImagesByTags(const Gtk::TreeModel::Path &path,
-    Gtk::TreeViewColumn *column) {
-  //TODO
+void LibraryView::loadImagesByTags() {
+  Gtk::TreeModel::Children children = tags_list->children();
+  Gtk::TreeModel::Children::iterator iter = children.begin();
+  Gtk::TreeModel::Row row;
+  std::set<std::string> selected_tags;
+
+  //looking for selected tags
+  for(; iter != children.end(); ++iter) {
+    row = *iter;
+    if((*row)[tags_columns.selected])
+      selected_tags.insert((std::string)(*row)[tags_columns.name]);
+  }
+
+  //loading photos
+  if(!selected_tags.empty()) {
+    core->setCurrentTagSet(selected_tags);
+    //window->showEditView();
+  }
 }
  
 

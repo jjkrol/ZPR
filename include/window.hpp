@@ -179,7 +179,7 @@ class LibraryView : public WindowContent {
 
     //signal handlers
     void loadImagesByDirectory(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
-    void loadImagesByTags(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
+    void loadImagesByTags();
 
     //other methods
     void fillTagsList();

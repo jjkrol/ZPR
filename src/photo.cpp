@@ -69,7 +69,8 @@ void Photo::move(boost::filesystem::path destinationPath){
   boost::filesystem::path newPathWithFilename = destinationPath;
   newPathWithFilename /= getFilename();
 
-  db->movePhoto(photoPath, newPathWithFilename);
+  //db->movePhoto(photoPath, newPathWithFilename);
+  //TODO implement this in db
 
   boost::thread moveThread(&Disk::movePhoto, disk, photoPath, newPathWithFilename);
 
