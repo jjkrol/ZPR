@@ -42,7 +42,7 @@ DiskConfigurationManager::DiskConfigurationManager(boost::filesystem::path confi
     std::cout<<"Creating new config file"<<std::endl;
     std::ofstream myfile(configFilePath.string().c_str());
     myfile.close();
-    configTree.put<std::string>("library.directory", "/");
+    configTree.put<std::string>("library.directory", "");
     write_xml(configFilePath.string(), configTree);
   }
   else{

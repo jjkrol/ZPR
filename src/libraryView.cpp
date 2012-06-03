@@ -15,11 +15,14 @@ LibraryView::LibraryView(MainWindow *w) : window(w), db_prompt(NULL) {
   window->notebook.append_page(tags_view, "Tags");
   window->display.add(images);
 
-  fillDatabaseTree();
-  fillTagsList();
   
-  if(!core->hasLibraryPathSet())
+  if(!core->hasLibraryPathSet()){
     promptAboutDatabase();
+  }
+  else{
+    fillDatabaseTree();
+    fillTagsList();
+  }
 }
 
 /// @fn LibraryView::~LibraryView()

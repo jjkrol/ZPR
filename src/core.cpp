@@ -35,7 +35,7 @@ void CoreController::startApplication(int argc, char** argv){
 }
 
 bool CoreController::hasLibraryPathSet(){
-  return !(db->isEmpty()); 
+  return !(db->isEmpty()) && getLibraryDirectoryPath() != ""; 
 }
 
 void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
