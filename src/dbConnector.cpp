@@ -35,7 +35,6 @@ DBConnector* DBConnectorFactory::getInstance(const string type) {
   /** @todo Factory should check the register of creators andn return the
    * desired one.
    */
-  if(type != "sqlite")
 
   return SQLiteConnector::getInstance();
 }
