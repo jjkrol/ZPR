@@ -45,7 +45,6 @@ void CoreController::setLibraryPath(boost::filesystem::path libraryPath){
 }
 
 Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
-  if(database_tree) return database_tree;
   database_tree = Gtk::TreeStore::create(dir_columns);
 
   //getting folders from database
@@ -54,10 +53,8 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
 
   //getting library path
   path library_path = configManager->getStringValue("library.directory");
-  //std::cout<<library_path.string()<<std::endl;
 
   //filling tree
-  //@TODO - add folders lower in hierarchy
   Gtk::TreeModel::Row row;
   for(vector<path>::iterator it = paths.begin(); it != paths.end(); ++it) {
     path temp_path = it->parent_path();
@@ -379,7 +376,6 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
 
   //checking if library path has not changed
   path library_path = getLibraryDirectoryPath();
-  std::cout << library_path.string() << std::endl;
 
   //expanding and checking for subdirectories
   Gtk::TreeModel::Path path;
