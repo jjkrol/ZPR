@@ -75,7 +75,8 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   }*/
 
   BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
-    CoreController* core = CoreController::getInstance("test.cfg");
+    CoreController *core = CoreController::getInstance("test.cfg");
+    path libraryPath = core->getLibraryDirectoryPath();
     Disk *disk = Disk::getInstance();
     //making an instance of a connector which should be tested
     DBConnector *sqlconnector = DBConnectorFactory::getInstance("sqlite");
@@ -98,7 +99,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
 
   /*********************************************************************/
   /* CHECKING COMPATIBILITY AND CHECKING IF DISK STRUCTURE HAS CHANGED */
-  /******************************************************************t pu***/
+  /*********************************************************************/
     //checking compatibility
     //BOOST_CHECK(sqlconnector->checkCompatibility() == true);
     //sqlconnector->hasChanged();
@@ -117,7 +118,11 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /* ADDING AND DELETING PHOTOS AND DIRECTORIES  */
   /***********************************************/
     //adding photos from directories
-    vector<path> paths = disk->getSubdirectoriesPaths(path("/"));
+    vector<path> paths = disk->getAbsoluteSubdirectoriesPaths(libraryPath);
+      
+
+    for(vector<path>::iterator i=paths.begin(); i!= paths.end(); ++i)
+      (*i) = libraryPath / (*i);
 
     BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(paths) == true);
     BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
@@ -138,25 +143,27 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //deleting photos
     string output;
 
-    sqlconnector->getPhotosFromDirectory("alpha", paths);
-    for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i)
+    sqlconnector->getPhotosFromDirectory(paths2[0], paths);
+    for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i) {
       output += i->string() + "\n";
+    }
 
-    BOOST_CHECK(output == "alpha/3.jpg\nalpha/4.jpg\n");
+    BOOST_CHECK(output == libraryPath.string()+"alpha/3.jpg\n"+
+                          libraryPath.string()+"alpha/4.jpg\n");
 
-    sqlconnector->deletePhoto(path("alpha/3.jpg"));
+    sqlconnector->deletePhoto(libraryPath/path("alpha/3.jpg"));
 
-    sqlconnector->getPhotosFromDirectory("alpha", paths);
+    sqlconnector->getPhotosFromDirectory(libraryPath/path("alpha"), paths);
     output.clear();
     for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i)
       output += i->string() + "\n";
 
-    BOOST_CHECK(output == "alpha/4.jpg\n");
+    BOOST_CHECK(output == libraryPath.string()+"alpha/4.jpg\n");
 
     //deleting directory
     sqlconnector->getDirectoriesFromDB(paths);
-    paths.erase(find(paths.begin(), paths.end(), path("alpha")));
-    sqlconnector->deleteDirectory(path("alpha"));
+    paths.erase(find(paths.begin(), paths.end(), libraryPath/path("alpha")));
+    sqlconnector->deleteDirectory(libraryPath/path("alpha"));
     sqlconnector->getDirectoriesFromDB(paths2);
     BOOST_REQUIRE(paths.size() == paths2.size());
     {
@@ -168,17 +175,33 @@ BOOST_AUTO_TEST_SUITE( testSuite )
         BOOST_CHECK (*(i++) == *(j++));
     }
 
+
   /*****************************/
   /*    TAGS MANIPULATION      */
   /*****************************/
     //adding tags
     set<string> tags;
 
-    sqlconnector->addTagToPhoto(path("beta/1.jpg"),"architecture");
-    sqlconnector->getPhotosTags(path("beta/1.jpg"),tags);
+    sqlconnector->addTagToPhoto(libraryPath/path("beta/1.jpg"),"architecture");
+    sqlconnector->addTagToPhoto(libraryPath/path("charlie/1.jpg"),"bed");
+    sqlconnector->addTagToPhoto(libraryPath/path("charlie/1.jpg"),"architecture");
+
+    sqlconnector->getPhotosTags(libraryPath/path("beta/1.jpg"),tags);
     BOOST_CHECK(tags.find("architecture") != tags.end());
+    sqlconnector->getPhotosTags(libraryPath/path("charlie/1.jpg"),tags);
+    BOOST_CHECK(tags.find("architecture") != tags.end() &&
+                tags.find("bed") != tags.end());
+
     sqlconnector->getAllTags(tags);
-    BOOST_CHECK(tags.find("architecture") != tags.end());
+    BOOST_CHECK(tags.find("architecture") != tags.end() &&
+                tags.find("bed") != tags.end());
+
+    //deleting tags
+    sqlconnector->deleteTagFromPhoto(libraryPath/path("charlie/1.jpg"), "bed");
+    sqlconnector->getAllTags(tags);
+    BOOST_CHECK(tags.find("architecture") != tags.end() &&
+                tags.find("bed") == tags.end());
+
 
   }
 
