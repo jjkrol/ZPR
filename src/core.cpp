@@ -221,11 +221,9 @@ void CoreController::setCurrentTagSet(const set<string> &tagSet) {
   for(vector<path>::const_iterator i = photosPaths.begin();
       i != photosPaths.end() ; ++i ) {
     currentPhotoSet.push_back(Photo::getInstance(*i));
-    std::cout << i->string() << std::endl;
   }
 
   currentPhoto = currentPhotoSet.begin(); 
-  std::cout << (*currentPhoto)->getFilename() << std::endl;
 }
 
 PhotoData CoreController::getCurrentPhoto(){

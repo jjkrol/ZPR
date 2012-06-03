@@ -110,12 +110,10 @@ bool      Photo::hasTag(std::string tag){
 }
 
 void Photo::putEffect(Effect * effect){
-  std::cout << "lol" << std::endl;
   effect->execute(this);
 }
 
 void Photo::save(){
-  std::cout<<"Zapisuje photo "<<getAbsolutePath()<<std::endl;
   string extension = getAbsolutePath().extension().string().substr(1);
   string type;
   if(extension == "jpg" || extension == "jpeg"){
