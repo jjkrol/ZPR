@@ -61,156 +61,168 @@ class CoreController {
     Glib::RefPtr<Gtk::TreeStore> getFilesystemTree();
 
     void expandDirectory(const Gtk::TreeModel::iterator &iter,
-                         const Gtk::TreeModel::Path &path);
+        const Gtk::TreeModel::Path &path);
 
     bool hasPhotos(const boost::filesystem::path& directoryPath);
 
-      /**
-       * @returns data of the photos in a given directory
-       */
-      std::vector<PhotoData> getPhotos(boost::filesystem::path directoryPath);
+    /**
+     * @returns data of the photos in a given directory
+     */
+    std::vector<PhotoData> getPhotos(boost::filesystem::path directoryPath);
 
-      /**
-       * @returns data of the thumbnails in a given directory
-       */
-      std::vector<PhotoData> getThumbnails(boost::filesystem::path directoryPath);
+    /**
+     * @returns data of the thumbnails in a given directory
+     */
+    std::vector<PhotoData> getThumbnails(boost::filesystem::path directoryPath);
 
-      /**
-       * sets current photo, should setCurrentDirectory or setCurrentTagSet first
-       */
-      void setCurrentPhoto(boost::filesystem::path photoPath);
+    /**
+     * sets current photo, should setCurrentDirectory or setCurrentTagSet first
+     */
+    void setCurrentPhoto(boost::filesystem::path photoPath);
 
-      /**
-       * sets current directory
-       */
-      void setCurrentDirectory(boost::filesystem::path directoryPath);
+    /**
+     * sets current directory
+     */
+    void setCurrentDirectory(boost::filesystem::path directoryPath);
 
-      /**
-       * sets current tag set, from which next and prev photos are taken
-       */
-      void setCurrentTagSet(std::set<std::string> tagSet);
+    /**
+     * sets current tag set, from which next and prev photos are taken
+     */
+    void setCurrentTagSet(std::set<std::string> tagSet);
 
-      /**
-       * @returns data of the current photo
-       */
-      PhotoData getCurrentPhoto();
+    /**
+     * @returns data of the current photo
+     */
+    PhotoData getCurrentPhoto();
 
-      /**
-       * @returns next photo and sets it as a current photo
-       */
-      PhotoData getNextPhoto();
+    /**
+     * @returns next photo and sets it as a current photo
+     */
+    PhotoData getNextPhoto();
 
-      /**
-       * @returns previous photo and sets it as the current photo
-       */
-      PhotoData getPreviousPhoto();
+    /**
+     * @returns previous photo and sets it as the current photo
+     */
+    PhotoData getPreviousPhoto();
 
 
-      /**
-       * @returns A tree of key-value pairs extracted from the configuration file.
-       */
-      boost::property_tree::ptree getConfiguration();
+    /**
+     * @returns A tree of key-value pairs extracted from the configuration file.
+     */
+    boost::property_tree::ptree getConfiguration();
 
-      /**
-       * @brief Saves configuration stored in a property tree
-       */
-      void putConfiguration(boost::property_tree::ptree config);
+    /**
+     * @brief Saves configuration stored in a property tree
+     */
+    void putConfiguration(boost::property_tree::ptree config);
 
-      /**
-       * @warning Should be used carefully! Access to photos and directories should be
-       * provided by the Disk class.
-       * @returns Absolute path to the LibraryDirectory
-       */
-      boost::filesystem::path getLibraryDirectoryPath();
+    /**
+     * @warning Should be used carefully! Access to photos and directories should be
+     * provided by the Disk class.
+     * @returns Absolute path to the LibraryDirectory
+     */
+    boost::filesystem::path getLibraryDirectoryPath();
 
-      /**
-       * @returns all tags
-       */
+    /**
+     * @returns all tags
+     */
 
-      Glib::RefPtr<Gtk::ListStore> getTagsList();
+    Glib::RefPtr<Gtk::ListStore> getTagsList();
 
-      /**
-       *
-       */
-      photos_t getPhotosWithTags(std::vector<std::string>);
-      void addTagToActivePhoto(std::string tag);
-      void RemoveTagFromActivePhoto(std::string tag);
-      std::vector<std::string> getTagsOfActivePhoto();
+    /**
+     *
+     */
+    photos_t getPhotosWithTags(std::vector<std::string>);
+    void addTagToActivePhoto(std::string tag);
+    void RemoveTagFromActivePhoto(std::string tag);
+    std::vector<std::string> getTagsOfActivePhoto();
 
-      void addFolderToDB(const Gtk::TreeModel::iterator &);
-      void removeFolderFromDB(const Gtk::TreeModel::iterator &);
+    void addFolderToDB(const Gtk::TreeModel::iterator &);
+    void removeFolderFromDB(const Gtk::TreeModel::iterator &);
 
-      void sendChangesToDB();
-      void cancelDBChanges();
+    void sendChangesToDB();
+    void cancelDBChanges();
 
-      void setExternalEditor(std::string name);
+    void setExternalEditor(std::string name);
 
-      /**
-       * Invoke gimp to edit photo
-       */
-      void editInExternalEditor();
+    /**
+     * Invoke gimp to edit photo
+     */
+    void editInExternalEditor();
 
-      /**
-       * Apply selected effect
-       */
+    /**
+     * Apply selected effect
+     */
 
-      void applyEffectOfSelectedPlugin();
+    void applyEffectOfSelectedPlugin();
 
-      /**
-       * @returns a widget for setting plugin parameters
-       */
-      Gtk::Widget * getPluginBox(std::string name);
+    /**
+     * @returns a widget for setting plugin parameters
+     */
+    Gtk::Widget * getPluginBox(std::string name);
 
-      /**
-       * @returns names of all available plugins
-       */
-      std::vector<std::string> getPluginNames();
+    /**
+     * @returns names of all available plugins
+     */
+    std::vector<std::string> getPluginNames();
 
+    /**
+     * saves all modified photos
+     */
+    void savePhotos();
+
+    /**
+     * @returns true if there are photos modified, which are not saved
+     */
+    bool modifiedPhotosExist();
 
   private:
-      CoreController (std::string forcedConfigPath="");
-      CoreController& operator= (const CoreController&);
-      CoreController (const CoreController&);
-      ~CoreController (){};
+    CoreController (std::string forcedConfigPath="");
+    CoreController& operator= (const CoreController&);
+    CoreController (const CoreController&);
+    ~CoreController (){};
 
-      Plugin * selectedPlugin;
-      void manageConfig(std::string);
-      void manageDisk();
-      void manageDatabase();
-      void doSomeLongLastingTask();
+    Plugin * selectedPlugin;
+    void manageConfig(std::string);
+    void manageDisk();
+    void manageDatabase();
+    void doSomeLongLastingTask();
 
-      /**
-       * Method responsible for adding subdirectories to directory tree.
-       *@param dir Directory in which we look for subdirectories.
-       *@param row Tree row to which we append new children.
-       *@param depth How deep should the method go. Set -1 for going deepest
-       */
-      void addSubdirectories(Directory *, const Gtk::TreeModel::Row &, int);
-      void addAbsoluteSubdirectories(Directory *, const Gtk::TreeModel::Row &, int);
+    /**
+     * Method responsible for adding subdirectories to directory tree.
+     *@param dir Directory in which we look for subdirectories.
+     *@param row Tree row to which we append new children.
+     *@param depth How deep should the method go. Set -1 for going deepest
+     */
+    void addSubdirectories(Directory *, const Gtk::TreeModel::Row &, int);
+    void addAbsoluteSubdirectories(Directory *, const Gtk::TreeModel::Row &, int);
 
-      static CoreController* instance;
+    static CoreController* instance;
 
-      std::vector<Photo*>::iterator currentPhoto;
-      Directory* currentDirectory;
-      std::set<std::string> currentTagSet;
-      std::vector<Photo*> currentPhotoSet;
+    std::vector<Photo*>::iterator currentPhoto;
+    Directory* currentDirectory;
+    std::set<std::string> currentTagSet;
+    std::vector<Photo*> currentPhotoSet;
+    std::set<Photo*> modifiedPhotos;
 
-      DBConnector* db;
-      UserInterface *gui;
-      ConfigurationManager* configManager;
-      Disk* disk;
-      PluginManager* pm;
-      boost::thread guiThread;
+    DBConnector* db;
+    UserInterface *gui;
+    ConfigurationManager* configManager;
+    Disk* disk;
+    PluginManager* pm;
+    boost::thread guiThread;
 
-      //GTK folder trees
-      Glib::RefPtr<Gtk::TreeStore> database_tree;
-      Glib::RefPtr<Gtk::TreeStore> filesystem_tree;
-      Glib::RefPtr<Gtk::ListStore> tags_list;
-      DirectoryTreeColumns dir_columns;
-      FilesystemTreeColumns fs_columns;
-      TagsListColumns tags_columns;
-      
-      //containers for comminucating with DBManager
-      std::vector<Gtk::TreeModel::iterator> added_folders;
-      std::vector<Gtk::TreeModel::iterator> deleted_folders;
+    //GTK folder trees
+    Glib::RefPtr<Gtk::TreeStore> database_tree;
+    Glib::RefPtr<Gtk::TreeStore> filesystem_tree;
+    Glib::RefPtr<Gtk::ListStore> tags_list;
+    DirectoryTreeColumns dir_columns;
+    FilesystemTreeColumns fs_columns;
+    TagsListColumns tags_columns;
+
+    //containers for comminucating with DBManager
+    std::vector<Gtk::TreeModel::iterator> added_folders;
+    std::vector<Gtk::TreeModel::iterator> deleted_folders;
+
+
 };

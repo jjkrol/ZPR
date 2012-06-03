@@ -42,7 +42,7 @@ vector <Directory*> Directory::getAbsoluteSubdirectories(){
   //create a vector of pointers to Directory Objects
   for(vector<path>::iterator it = subdirFilenames.begin(); it!=subdirFilenames.end(); it++){
     path subdirPath = directoryPath;
-    subdirectories.push_back(new Directory(subdirPath/=path("/")/=(*it)));
+    subdirectories.push_back(new Directory(subdirPath /= (*it)));
   }
   return subdirectories;
 }

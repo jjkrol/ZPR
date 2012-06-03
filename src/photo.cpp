@@ -46,7 +46,7 @@ Glib::RefPtr<Gdk::Pixbuf> Photo::getThumbnail(){
 
 Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
   if(pixbuf == NULL){
-    pixbuf = disk->getPhotoFile(photoPath);\
+    return disk->getPhotoFile(photoPath);\
   }
 
   return pixbuf;
@@ -113,4 +113,26 @@ bool      Photo::hasTag(std::string tag){
 
 void Photo::putEffect(Effect * effect){
   effect->execute(this);
+}
+
+void Photo::save(){
+  std::cout<<"Zapisuje photo "<<getAbsolutePath()<<std::endl;
+  string extension = getAbsolutePath().extension().string().substr(1);
+  string type;
+  if(extension == "jpg" || extension == "jpeg"){
+    type = "jpeg";
+  }
+  else if(extension == "png"){
+    type = "png";
+  }
+  else{
+    cout<<"Illegal file type - "<<extension<<endl;
+    return;
+  }
+
+  if(pixbuf == NULL){
+    std::cout<<"Photo was not modified"<<std::endl;
+  }
+  pixbuf->save(getAbsolutePath().string(), type);
+
 }

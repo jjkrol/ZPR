@@ -34,6 +34,8 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
         &CoreController::editInExternalEditor));
   tags_button.signal_clicked().connect(sigc::mem_fun(*this,
         &MainWindow::editPhotoTags));
+  save_button.signal_clicked().connect(sigc::mem_fun(core,
+        &CoreController::savePhotos));
 
   //menubar creating
   Gtk::RadioAction::Group view_type;
