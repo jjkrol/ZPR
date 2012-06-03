@@ -12,9 +12,11 @@ class TagsListColumns : public Gtk::TreeModel::ColumnRecord {
   public:
     TagsListColumns() {
       add(name);
+      add(stock_id);
       add(selected);
     }
     Gtk::TreeModelColumn<Glib::ustring> name;
+    Gtk::TreeModelColumn<std::string> stock_id;
     Gtk::TreeModelColumn<bool> selected;
 };
 

@@ -187,24 +187,38 @@ TagsDialog::TagsDialog(Gtk::Window *parent) :
   top_box.pack_start(add_tag_button, false, false);
   scroll.add(tags_view);
 
-  loadTagsList();
+  //creating tags list
+  tags_list = core->getTagsOfActivePhoto();
+  tags_view.set_model(tags_list);
+  tags_view.append_column("", tags_columns.name);
+  Gtk::TreeViewColumn *column = tags_view.get_column(0);
+  if(column) column->set_expand(true);
+  Gtk::CellRendererPixbuf *cell = Gtk::manage(new Gtk::CellRendererPixbuf);
+  tags_view.append_column("", *cell);
+  column = tags_view.get_column(1);
+  if(column)
+    column->add_attribute(cell->property_stock_id(), tags_columns.stock_id);
 
   //connecting signals
   add_tag_button.signal_clicked().connect(sigc::mem_fun(
         *this, &TagsDialog::addTag));
+  tags_view.signal_row_activated().connect(sigc::mem_fun(*this,
+        &TagsDialog::deleteTag));
   
   //displaying dialog
   show_all_children();
 }
 
-void TagsDialog::loadTagsList() {
-  std::vector<std::string> tags = core->getTagsOfActivePhoto();
-  tags_list = core->getTagsList();
-  tags_view.set_model(tags_list);
-  //TODO check some tags
+void TagsDialog::refreshTagsList() {
+  tags_list = core->getTagsOfActivePhoto();
 }
 
 void TagsDialog::addTag() {
   Glib::RefPtr<Gtk::EntryBuffer> buffer = tag_entry.get_buffer();
   core->addTagToActivePhoto(buffer->get_text());
+  refreshTagsList();
+}
+
+void TagsDialog::deleteTag(const Gtk::TreeModel::Path &path,
+    Gtk::TreeViewColumn *column) {
 }

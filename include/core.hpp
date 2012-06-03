@@ -135,7 +135,7 @@ class CoreController {
     photos_t getPhotosWithTags(std::vector<std::string>);
     void addTagToActivePhoto(std::string tag);
     void RemoveTagFromActivePhoto(std::string tag);
-    std::vector<std::string> getTagsOfActivePhoto();
+    Glib::RefPtr<Gtk::ListStore> getTagsOfActivePhoto();
 
     void addFolderToDB(const Gtk::TreeModel::iterator &);
     void removeFolderFromDB(const Gtk::TreeModel::iterator &);

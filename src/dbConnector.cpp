@@ -85,7 +85,7 @@ int SQLiteConnector::open(const string filename) {
 
 int SQLiteConnector::close() {
   //return a FAILURE flag if a connection is closed or you can't save settings
-  if( !database ||  !saveSettings() ) {
+  if( !database /* ||  !saveSettings()*/ ) {
     //cout<< "Blad podczas zamykania: baza juz zamknieta" << endl
     //    << "lub nie udalo sie zapisac konfiguracji do bazy danych" <<endl;
     return FAILURE;
@@ -100,6 +100,10 @@ int SQLiteConnector::close() {
 bool SQLiteConnector::hasChanged() const{
   int originalChecksum;
 
+  //if not all photos from the database exist than database has changed for sure
+  if(!checkCompatibility())
+    return true;
+
   //try to get checksum from a database
   if(! getChecksumFromDB(originalChecksum)) {
     cout<<"SQLiteConnector failed to get checksum from DB" <<endl;
@@ -110,6 +114,40 @@ bool SQLiteConnector::hasChanged() const{
   return (originalChecksum != calculateChecksum());
 }
 
+bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
+  vector<path> photos;
+  if(!getPhotosFromDB(photos))
+    return false;
+
+  checksum = 0;
+  for(vector<path>::const_iterator i = photos.begin() ; i!=photos.end(); ++i) {
+    checksum += hash(i->string().c_str());
+  }
+  return true;
+}
+
+int SQLiteConnector::calculateChecksum() const{ //TODO
+  int checksum_tmp = 0;
+
+  //vector with all directories stored in the database (even nested ones)
+  vector<path> directories;
+  if(!getDirectoriesFromDB(directories))
+    return -1;
+  
+  //take every directory form database
+  for(vector<path>::iterator i = directories.begin();
+      i != directories.end(); ++i) {
+  
+    //add make a hash from every photo from directory to checksum
+    vector<path> photo_paths = disk->getAbsolutePhotosPaths(*i);
+    for(vector<path>::iterator j = photo_paths.begin();
+        j != photo_paths.end() ; j++) {
+      checksum_tmp += hash(j->string().c_str());
+    }
+  }
+
+  return checksum_tmp;
+}
 bool SQLiteConnector::checkCompatibility() const{
   vector<path> photos;
   if(!getPhotosFromDB(photos))
@@ -117,9 +155,7 @@ bool SQLiteConnector::checkCompatibility() const{
 
   for(vector<path>::const_iterator i = photos.begin() ;
       i != photos.end() ; ++i) {
-    cout<<"Sprawdzanie czy istnieje sciezka: " << (*i).string() << endl;
-    if(!disk->exists((*i))) {
-      cout << "Sciezka " << i->string() << " nie istnieje" <<endl;
+    if(!disk->absoluteExists((*i))) {
       return false;
     }
   }
@@ -139,7 +175,6 @@ bool SQLiteConnector::getPhotosFromDB(vector<path> &photos) const{
     //photos.push_back(*static_cast<const path *>(sqlite3_column_blob(stmt,1)));
     string path_string = reinterpret_cast<const char*>
                          (sqlite3_column_text(stmt,0));
-    cout << "Pobrano z BD sciezke:"<< path_string << endl;
     photos.push_back(path(path_string));
   }
 
@@ -151,23 +186,23 @@ bool SQLiteConnector::isEmpty() const{
   sqlite3_stmt *stmt;
   bool result;
   string query = "SELECT EXISTS (\n"
-                 "  SELECT * FROM directories"
+                 "  SELECT 1 FROM directories"
                  ");";
   
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
       != SQLITE_OK) {
     reportErrors(query);
-    return false;
+    return true;
   }
 
   if(sqlite3_step(stmt) != SQLITE_ROW)
-    return false;
+    return true;
   
   result = static_cast<bool>(sqlite3_column_int(stmt,0));
 
   sqlite3_finalize(stmt);
 
-  return result;
+  return !result;
 }
 
 bool SQLiteConnector::createDB() {
@@ -225,47 +260,7 @@ bool SQLiteConnector::saveSettings() {
   return true;
 }
 
-bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
-  sqlite3_stmt *stmt;
-  const char *query = "SELECT checksum FROM settings;";
 
-  if((sqlite3_prepare_v2(database, query, -1, &stmt, NULL)) != SQLITE_OK)
-    return false;
-
-  if(sqlite3_step(stmt) != SQLITE_ROW)
-    return false;
-  
-  //const void *blob = sqlite3_column_blob(stmt,0);
-  //checksum = *(static_cast<const int *>(blob));
-  checksum = sqlite3_column_int(stmt,0);
-
-  sqlite3_finalize(stmt);
-
-  return !reportErrors(query);
-}
-
-int SQLiteConnector::calculateChecksum() const{
-  int checksum_tmp = 0;
-
-  //vector with all directories stored in the database (even nested ones)
-  vector<path> directories;
-  if(!getDirectoriesFromDB(directories))
-    return -1;
-  
-  //take every directory form database
-  for(vector<path>::iterator i = directories.begin();
-      i != directories.end(); ++i) {
-  
-    //add make a hash from every photo from directory to checksum
-    vector<path> photo_paths = disk->getAbsolutePhotosPaths(*i);
-    for(vector<path>::iterator j = photo_paths.begin();
-        j != photo_paths.end() ; j++) {
-      checksum_tmp += hash(j->string().c_str());
-    }
-  }
-
-  return checksum_tmp;
-}
 ////////////////////////////////////////////////////////////////////////////////
 //Methods for adding and removing photos and directories
 ////////////////////////////////////////////////////////////////////////////////
@@ -364,7 +359,6 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
 
 bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
   //add subidirectory with values: autonum, dir.path, id_of_parental_directory 
-  sqlite3_stmt *stmt;
   string parents_path, parents_id, query;
 
   parents_path = dir.parent_path().string();
@@ -378,18 +372,7 @@ bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
     "INSERT INTO directories VALUES(NULL, \'" + dir.string() + "\', "
     + parents_id + ");";
 
-  if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL)) != SQLITE_OK) {
-    reportErrors(query);
-    return false;
-  }
-
-  //sqlite3_bind_blob(stmt, 1, &dir, sizeof(path), SQLITE_STATIC);
-  //path parent = dir.parent_path();
-  //sqlite3_bind_blob(stmt, 2, &parent, sizeof(path), SQLITE_STATIC);
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
-  return !(reportErrors(query));
+  return executeQuery(query);
 }
 
 //TODO
