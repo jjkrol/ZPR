@@ -220,7 +220,10 @@ void CoreController::setCurrentTagSet(const set<string> &tagSet) {
   currentPhotoSet.clear();
   for(vector<path>::const_iterator i = photosPaths.begin();
       i != photosPaths.end() ; ++i ) {
-    currentPhotoSet.push_back(Photo::getInstance(*i));
+    //that is an ugly way to do this
+    int libraryPathLength = getLibraryDirectoryPath().string().length();
+    path photoPath = path((*i).string().substr(libraryPathLength));
+    currentPhotoSet.push_back(Photo::getInstance(photoPath));
   }
 
   currentPhoto = currentPhotoSet.begin(); 
