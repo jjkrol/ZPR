@@ -64,10 +64,6 @@ public:
  *
  *  @fn virtual virtual void close() = 0;
  *  @brief closes the connection with database
- * 
- *  @fn virtual inline bool hasChanged() const = 0;
- *  @brief Tells if database was changed since last usage of imgview
- *  @returns true if database has changed 
  *  
  *  @fn virtual bool checkCompatibility() const = 0;
  *  @brief checks if photos stored in the database exist
@@ -130,9 +126,9 @@ public:
 
   virtual int open(const std::string filename) = 0; //tested
   virtual int close() = 0; //tested
-  virtual bool hasChanged() const = 0; //tested
+  virtual bool update() = 0; //TODO
   virtual bool checkCompatibility() const = 0; //tested
-  virtual bool isEmpty() const = 0; //TODO
+  virtual bool isEmpty() const = 0; //tested
 
   virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs) = 0; //tested
@@ -156,7 +152,7 @@ public:
     const boost::filesystem::path &, const std::string &) = 0; //tested
   virtual bool getPhotosWithTags(
     const std::set<std::string> &tags,
-    std::vector<PhotoPath> &photos_output) = 0; //TODO
+    std::vector<PhotoPath> &photos_output) = 0; //tested
   virtual bool getPhotosTags(
     const PhotoPath &photo, std::set<std::string> &tags_output) = 0; //tested
   virtual bool getAllTags( std::set<std::string> &tags_output) = 0; //tested
@@ -199,7 +195,7 @@ public:
 */
   virtual int open(const std::string filename);
   virtual int close();
-  virtual bool hasChanged() const;
+  virtual bool update();
   virtual bool checkCompatibility() const;
   virtual bool isEmpty() const;
 
@@ -261,26 +257,11 @@ private:
    *  @brief creates tables used in the database
    *  @returns a true value if tables has been created successfully
    *
-   *  @fn bool saveSettings();
-   *  @brief Saves every single setting in a database. Actually the only
-   *  setting hold in a database is a checksum, so nothing more is saved.
-   *
    *  @fn bool getDirectoriesFromDB(
    *        std::vector<boost::filesystem::path> &dirs) const;
    *  @brief Gets a main directory from the database and the vector
    *  of directories that should be excluded form the database.
    *  @returns true if was executed successfully and false otherwise
-   *
-   *  @fn bool getChecksumFromDB(int &checksum) const;
-   *  @brief gets a checksum saved in database
-   *  @returns true if executed successfully and false otherwise
-   *
-   *  @fn int calculateChecksum(
-   *        const boost::filesystem::path main_path
-   *        const std::vector<boost::filesystem::path> &dir_paths) const;
-   *  @brief Takes a path of main directory and a vector of directories that
-   *  should be excluded.
-   *  @returns a checksum
    *
    *  @fn inline bool reportErrors(const char *query) const;
    *  @brief Takes errors from the database and puts them in std::cerr stream
@@ -296,14 +277,11 @@ private:
   bool addDirectoryToDB(const DirectoriesPath &dir);
 
   bool createDB();
-  bool saveSettings();
 
   bool getSubdirectoriesFromDB(
     const DirectoriesPath &dir,
     std::vector<DirectoriesPath> &subdirs) const;
-  bool getChecksumFromDB(int &checksum) const;
 
-  int calculateChecksum() const;
   bool getPhotosFromDB(std::vector<boost::filesystem::path> &photos) const;
   bool executeQuery(std::string query) const;
   inline bool reportErrors(std::string query) const;

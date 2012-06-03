@@ -81,6 +81,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     Disk *disk = Disk::getInstance();
     //making an instance of a connector which should be tested
     DBConnector *sqlconnector = DBConnectorFactory::getInstance("sqlite");
+    string output;
 
   /******************************************/
   /*    OPENING AND CLOSING DATABASE        */
@@ -103,7 +104,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
   /***********************************************/
     //adding photos from directories
     vector<path> paths = disk->getAbsoluteSubdirectoriesPaths(libraryPath);
-      
 
     for(vector<path>::iterator i=paths.begin(); i!= paths.end(); ++i)
       (*i) = libraryPath / (*i);
@@ -127,24 +127,33 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     }
 
     //deleting photos
-    string output;
 
     sqlconnector->getPhotosFromDirectory(paths2[0], paths);
     for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i) {
       output += i->string() + "\n";
     }
 
-    BOOST_CHECK(output == libraryPath.string()+"alpha/3.jpg\n"+
-                          libraryPath.string()+"alpha/4.jpg\n");
+    BOOST_CHECK(output ==
+      libraryPath.string()+"alpha/2011-04-30 00.09.53-2.jpg\n"+
+      libraryPath.string()+"alpha/2011-04-30 00.09.55-2.jpg\n"+
+      libraryPath.string()+"alpha/2011-04-30 00.10.08.jpg\n"+
+      libraryPath.string()+"alpha/2011-04-30 00.10.21.jpg\n"+
+      libraryPath.string()+"alpha/3.jpg\n"+
+      libraryPath.string()+"alpha/4.jpg\n");
 
     sqlconnector->deletePhoto(libraryPath/path("alpha/3.jpg"));
-
     sqlconnector->getPhotosFromDirectory(libraryPath/path("alpha"), paths);
+
     output.clear();
     for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i)
       output += i->string() + "\n";
 
-    BOOST_CHECK(output == libraryPath.string()+"alpha/4.jpg\n");
+    BOOST_CHECK(output ==
+      libraryPath.string()+"alpha/2011-04-30 00.09.53-2.jpg\n"+
+      libraryPath.string()+"alpha/2011-04-30 00.09.55-2.jpg\n"+
+      libraryPath.string()+"alpha/2011-04-30 00.10.08.jpg\n"+
+      libraryPath.string()+"alpha/2011-04-30 00.10.21.jpg\n"+
+      libraryPath.string()+"alpha/4.jpg\n");
 
     //deleting directory
     sqlconnector->getDirectoriesFromDB(paths);
@@ -161,7 +170,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
         BOOST_CHECK (*(i++) == *(j++));
     }
 
-
   /*****************************/
   /*    TAGS MANIPULATION      */
   /*****************************/
@@ -170,7 +178,8 @@ BOOST_AUTO_TEST_SUITE( testSuite )
 
     sqlconnector->addTagToPhoto(libraryPath/path("beta/1.jpg"),"architecture");
     sqlconnector->addTagToPhoto(libraryPath/path("charlie/1.jpg"),"bed");
-    sqlconnector->addTagToPhoto(libraryPath/path("charlie/1.jpg"),"architecture");
+    sqlconnector->addTagToPhoto(libraryPath/path("charlie/1.jpg"),
+                                "architecture");
 
     sqlconnector->getPhotosTags(libraryPath/path("beta/1.jpg"),tags);
     BOOST_CHECK(tags.find("architecture") != tags.end());
@@ -189,6 +198,19 @@ BOOST_AUTO_TEST_SUITE( testSuite )
                 tags.find("bed") == tags.end());
 
     //getting photos with all specified tags
+    vector<path> photos;
+    string test_string;
+    sqlconnector->getPhotosWithTags(tags,photos);
+
+    output.clear();
+    for(vector<path>::const_iterator i = photos.begin() ;
+        i != photos.end() ; ++i) {
+      output += i->string() + "\n";
+    }
+
+    BOOST_CHECK(output == libraryPath.string() + "beta/1.jpg\n"+
+                          libraryPath.string() + "charlie/1.jpg\n");
+
   /*********************************************************************/
   /* CHECKING COMPATIBILITY AND CHECKING IF DISK STRUCTURE HAS CHANGED */
   /*********************************************************************/
@@ -200,27 +222,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     
     //checking if a disk structure of directories from the database has changed
     
-
-
-
-
-
-    
     BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
-
-    //sqlconnector->hasChanged();
-    //std::fstream f;
-    //f.open("./test/test_tree/empty_test_file.txt", std::ios::out);
-    //f << std::flush;
-    //f.close();
-    //if(sqlconnector->checkCompatibility())
-    //  cout << "kompatybilne" << endl;
-
-    //hasChanged
-    //isEmpty
-
-
-
 
   }
 

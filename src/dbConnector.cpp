@@ -13,6 +13,7 @@
 #include "../include/hashFunctions.hpp"
 
 using namespace boost::filesystem;
+using boost::lexical_cast;
 using std::vector;
 using std::string;
 using std::cout;
@@ -56,8 +57,8 @@ DBConnector* SQLiteConnector::getInstance() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //Methods for maintainig a database: opening, closing, checking if is empty,
-//creating, saving settings, checking if has since last opening with imagine,
-//saving and loading checksum
+//creating, saving settings, checking if has changed since last opening with
+//imagine
 ////////////////////////////////////////////////////////////////////////////////
 
 int SQLiteConnector::open(const string filename) {
@@ -96,57 +97,39 @@ int SQLiteConnector::close() {
 
   return CLOSED;
 }
+bool SQLiteConnector::update() {
+  //add those photos
+  //get paths from databasePaths which are not contained in the diskPaths
+  //delete those photos
 
-bool SQLiteConnector::hasChanged() const{
-  int originalChecksum;
-
-  //if not all photos from the database exist than database has changed for sure
-  if(!checkCompatibility())
-    return true;
-
-  //try to get checksum from a database
-  if(! getChecksumFromDB(originalChecksum)) {
-    cout<<"SQLiteConnector failed to get checksum from DB" <<endl;
-    return true;
-  }
-
-  //calculate a checksum and comapre it with the checksum stored in a database
-  return (originalChecksum != calculateChecksum());
-}
-
-bool SQLiteConnector::getChecksumFromDB(int &checksum) const {
-  vector<path> photos;
-  if(!getPhotosFromDB(photos))
+  //get directories paths
+  vector<path> paths;
+  if( !getDirectoriesFromDB(paths))
     return false;
 
-  checksum = 0;
-  for(vector<path>::const_iterator i = photos.begin() ; i!=photos.end(); ++i) {
-    checksum += hash(i->string().c_str());
+  //get photos from every directory from disk to diskPhotos
+  vector<path> diskPaths;
+  for(vector<path>::const_iterator i=paths.begin() ; i!=paths.end() ; ++i) {
+    vector<path> photos_tmp = disk->getAbsolutePhotosPaths(*i);
+    diskPaths.insert(diskPaths.end(), photos_tmp.begin(), photos_tmp.end());
   }
-  return true;
-}
 
-int SQLiteConnector::calculateChecksum() const{ //TODO
-  int checksum_tmp = 0;
+  //get all paths from database to databasePaths
+  vector<path> databasePaths;
+  if(!getPhotosFromDB(databasePaths))
+    return false;
 
-  //vector with all directories stored in the database (even nested ones)
-  vector<path> directories;
-  if(!getDirectoriesFromDB(directories))
-    return -1;
-  
-  //take every directory form database
-  for(vector<path>::iterator i = directories.begin();
-      i != directories.end(); ++i) {
-  
-    //add make a hash from every photo from directory to checksum
-    vector<path> photo_paths = disk->getAbsolutePhotosPaths(*i);
-    for(vector<path>::iterator j = photo_paths.begin();
-        j != photo_paths.end() ; j++) {
-      checksum_tmp += hash(j->string().c_str());
+  //get paths from diskPaths which are not contained in the databasePaths
+  paths.clear();
+  for(vector<path>::const_iterator i = diskPaths.begin();
+      i != diskPaths.end() ; ++i) {
+    if(find(databasePaths.begin(), databasePaths.end(), *i)
+       == databasePaths.end()) {
+      paths.push_back(*i);
     }
   }
 
-  return checksum_tmp;
+  return false;
 }
 bool SQLiteConnector::checkCompatibility() const{
   vector<path> photos;
@@ -192,11 +175,11 @@ bool SQLiteConnector::isEmpty() const{
   if((sqlite3_prepare_v2(database, query.c_str(), -1, &stmt, NULL))
       != SQLITE_OK) {
     reportErrors(query);
-    return true;
+    return false; //TODO exceptions
   }
 
   if(sqlite3_step(stmt) != SQLITE_ROW)
-    return true;
+    return false; //TODO exceptions
   
   result = static_cast<bool>(sqlite3_column_int(stmt,0));
 
@@ -219,10 +202,6 @@ bool SQLiteConnector::createDB() {
         "parents_id INT"
       ");"
 
-      "CREATE TABLE settings ("
-        "checksum INTEGER"
-      ");"
-
       "CREATE TABLE tags ("
         "id INTEGER PRIMARY KEY,"
         "name TEXT UNIQUE"
@@ -242,24 +221,6 @@ bool SQLiteConnector::createDB() {
   reportErrors(query);
   return false;
 }
-
-bool SQLiteConnector::saveSettings() {
-  string query = "DELETE FROM settings;";
-  if(! executeQuery(query)) {
-    cout <<"Nie udalo sie usunac poprzednich ustawien" << endl;
-    return false;
-  }
-  query = "INSERT INTO settings VALUES ("
-          + boost::lexical_cast<string>(calculateChecksum()) + ");";
-
-  if(! executeQuery(query)) {
-    cout << "Nie udalo sie zapisac nowych ustawien" << endl;
-    return false;
-  }
-
-  return true;
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //Methods for adding and removing photos and directories
@@ -549,7 +510,11 @@ bool SQLiteConnector::addTagToPhoto(const PhotoPath &photo, const string &tag) {
           "  WHERE p.path = \'" + photo.string() + "\'\n" +
           "    AND t.name = \'" + tag  + "\'\n;";
 
-  return executeQuery(query);
+  if(!executeQuery(query)) {
+    cout << "Nie udalo sie dodac polaczenia photo-tag" <<endl;
+    return false;
+  }
+  return true;
 }
 
 bool SQLiteConnector::getPhotosTags(
@@ -614,18 +579,25 @@ const set<string> &tags, std::vector<PhotoPath> &photos) {
   if(tags.empty())
     return false;
 
-  //constructing a query
-  set<string>::const_iterator i = tags.begin();
+  string tags_names, query;
 
-  string query = "SELECT path FROM photos p, photos_tags pt, tags t\n"
-                 "WHERE p.id = pt.photos_id\n"
-                 "AND pt.tags_id = t.id\n"
-                 "AND tags.name = " + *(i++); //FIXME
-
-  for(; i != tags.end() ; ++i) {
-    query += " AND tags.name = " + (*i);
+  {
+    set<string>::const_iterator i = tags.begin();
+    tags_names+='\''+ *i +'\'';
+    while(++i != tags.end()) {
+      ;//tags //TODO
+    }
   }
-  query += ";";
+  
+  query = "SELECT p.path\n"
+          "FROM photos p, photos_tags pt, tags t\n"
+          "WHERE p.id = pt.photos_id\n"
+          "  AND pt.tags_id = t.id\n"
+          "  AND t.name IN (" + tags_names + ")\n"
+          "GROUP BY p.path\n"
+          "HAVING count(*) =" + "1" /*tags.size()*/ + ";"; //TODO
+
+  photos.clear();
 
   //executing a query
   sqlite3_stmt *stmt;
@@ -635,7 +607,9 @@ const set<string> &tags, std::vector<PhotoPath> &photos) {
   }
 
   while(sqlite3_step(stmt) == SQLITE_ROW) {
-    photos.push_back( *static_cast<const path *>(sqlite3_column_blob(stmt,0)) );
+    string path_string = reinterpret_cast<const char*>
+                         (sqlite3_column_text(stmt,0));
+    photos.push_back(path(path_string));
   }
 
   sqlite3_finalize(stmt);
