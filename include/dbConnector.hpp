@@ -130,9 +130,9 @@ public:
 
   virtual int open(const std::string filename) = 0; //tested
   virtual int close() = 0; //tested
-  virtual inline bool hasChanged() const = 0;
-  virtual bool checkCompatibility() const = 0;
-  virtual bool isEmpty() const = 0;
+  virtual bool hasChanged() const = 0; //TODO
+  virtual bool checkCompatibility() const = 0; //tested
+  virtual bool isEmpty() const = 0; //TODO
 
   virtual bool addPhotosFromDirectories(
     const std::vector<DirectoriesPath> &dirs) = 0; //tested
