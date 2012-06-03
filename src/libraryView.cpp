@@ -29,6 +29,7 @@ LibraryView::~LibraryView() {
   if(db_prompt) {
     window->right_box.remove(*db_prompt);
     delete db_prompt;
+    db_prompt = NULL;
   }
 }
 
@@ -38,6 +39,7 @@ void LibraryView::refreshView() {
   if(db_prompt) {
     window->right_box.remove(*db_prompt);
     delete db_prompt;
+    db_prompt = NULL;
   }
 
   directory_tree = core->getDirectoryTree();

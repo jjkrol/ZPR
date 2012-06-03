@@ -118,7 +118,6 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   return database_tree;
 }
 
-
 //@TODO change for paths?
 Glib::RefPtr<Gtk::TreeStore> CoreController::getFilesystemTree(){
   if(filesystem_tree) return filesystem_tree;
@@ -295,7 +294,7 @@ void CoreController::RemoveTagFromActivePhoto(std::string tag) {
 Glib::RefPtr<Gtk::ListStore> CoreController::getTagsOfActivePhoto() {
   Glib::RefPtr<Gtk::ListStore> photo_tags_list = Gtk::ListStore::create(tags_columns);
   std::set<std::string> tags;
-  path photo = (*currentPhoto)->getPath();
+  path photo = (*currentPhoto)->getAbsolutePath();
   db->getPhotosTags(photo, tags);
 
   Gtk::TreeModel::Row row;
