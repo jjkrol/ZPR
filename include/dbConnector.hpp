@@ -130,7 +130,7 @@ public:
 
   virtual int open(const std::string filename) = 0; //tested
   virtual int close() = 0; //tested
-  virtual bool hasChanged() const = 0; //TODO
+  virtual bool hasChanged() const = 0; //tested
   virtual bool checkCompatibility() const = 0; //tested
   virtual bool isEmpty() const = 0; //TODO
 

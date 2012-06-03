@@ -108,7 +108,9 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     for(vector<path>::iterator i=paths.begin(); i!= paths.end(); ++i)
       (*i) = libraryPath / (*i);
 
+    BOOST_CHECK(sqlconnector->isEmpty() == true);
     BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(paths) == true);
+    BOOST_CHECK(sqlconnector->isEmpty() == false);
     BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
     BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
 
@@ -195,6 +197,16 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     rename(libraryPath/path("beta/1.jpg"), libraryPath/path("beta/1prim.jpg"));
     BOOST_CHECK(sqlconnector->checkCompatibility() == false);
     rename(libraryPath/path("beta/1prim.jpg"), libraryPath/path("beta/1.jpg"));
+    
+    //checking if a disk structure of directories from the database has changed
+    
+
+
+
+
+
+    
+    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
 
     //sqlconnector->hasChanged();
     //std::fstream f;
