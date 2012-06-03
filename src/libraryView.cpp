@@ -44,6 +44,8 @@ void LibraryView::refreshView() {
     db_prompt = NULL;
   }
 
+  std::cout << "lol" << std::endl;
+
   directory_tree = core->getDirectoryTree();
   directory_view.set_model(directory_tree);
   tags_list = core->getTagsList();
@@ -51,6 +53,8 @@ void LibraryView::refreshView() {
 
   if(!core->hasLibraryPathSet())
     promptAboutDatabase();
+
+  window->show_all_children();
 }
 
 /// @fn void LibraryView::fillDirectoryTree()

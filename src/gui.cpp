@@ -33,6 +33,7 @@ void UserInterface::init() {
 /// @fn void UserInterface::destroy()
 /// @brief Method responsible for destroying UserInterface unique object.
 void UserInterface::destroy() {
+  kit.quit();
   delete main_window;
   delete instance;
   instance = NULL;

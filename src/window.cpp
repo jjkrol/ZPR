@@ -223,7 +223,7 @@ bool MainWindow::on_delete_event(GdkEventAny* event) {
 void MainWindow::managePromptResponse(int response) {
   switch(response) {
     case 0:
-      //TODO
+      UserInterface::getInstance()->destroy();
       break;
     case 1:
       core->savePhotos();
