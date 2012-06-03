@@ -15,11 +15,10 @@ LibraryView::LibraryView(MainWindow *w) : window(w), db_prompt(NULL) {
   window->notebook.append_page(tags_view, "Tags");
   window->display.add(images);
 
-  
-  if(!core->hasLibraryPathSet()){
+  if(!core->hasLibraryPathSet()) {
     promptAboutDatabase();
   }
-  else{
+  else {
     fillDatabaseTree();
     fillTagsList();
   }
@@ -70,6 +69,8 @@ void LibraryView::fillTagsList() {
   tags_list = core->getTagsList();
   tags_view.set_model(tags_list);
   tags_view.append_column("Tags List", tags_columns.name);
+  Gtk::TreeViewColumn *column = tags_view.get_column(0);
+  if(column) column->set_expand(true);
   tags_view.append_column_editable("", tags_columns.selected);
   tags_view.signal_row_activated().connect(sigc::mem_fun(*this,
         &LibraryView::loadImagesByTags));

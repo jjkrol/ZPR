@@ -211,6 +211,7 @@ TagsDialog::TagsDialog(Gtk::Window *parent) :
 
 void TagsDialog::refreshTagsList() {
   tags_list = core->getTagsOfActivePhoto();
+  tags_view.set_model(tags_list);
 }
 
 void TagsDialog::addTag() {
@@ -221,4 +222,8 @@ void TagsDialog::addTag() {
 
 void TagsDialog::deleteTag(const Gtk::TreeModel::Path &path,
     Gtk::TreeViewColumn *column) {
+  if(column != tags_view.get_column(1)) return;
+  Gtk::TreeModel::iterator row = tags_list->get_iter(path);
+  core->removeTagFromActivePhoto((std::string)(*row)[tags_columns.name]);
+  refreshTagsList();
 }

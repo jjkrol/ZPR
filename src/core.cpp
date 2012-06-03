@@ -257,7 +257,6 @@ void CoreController::putConfiguration(boost::property_tree::ptree config){
 // tags
 
 Glib::RefPtr<Gtk::ListStore> CoreController::getTagsList(){
-  if(tags_list) return tags_list;
   tags_list = Gtk::ListStore::create(tags_columns);
   std::set<std::string> tags;
   db->getAllTags(tags);
@@ -287,8 +286,9 @@ void CoreController::addTagToActivePhoto(std::string tag) {
   db->addTagToPhoto(photo, tag);
 }
 
-void CoreController::RemoveTagFromActivePhoto(std::string tag) {
-  //TODO ask DB
+void CoreController::removeTagFromActivePhoto(std::string tag) {
+  path photo = (*currentPhoto)->getAbsolutePath();
+  db->deleteTagFromPhoto(photo, tag);
 }
 
 Glib::RefPtr<Gtk::ListStore> CoreController::getTagsOfActivePhoto() {
@@ -371,7 +371,6 @@ void CoreController::addFolderToDB(const Gtk::TreeModel::iterator &folder) {
 
   //checking if library path has not changed
   path library_path = getLibraryDirectoryPath();
-  std::cout << library_path.string() << std::endl;
   if(library_path.empty())
     setLibraryPath((std::string)(**folder)[fs_columns.path]);
 

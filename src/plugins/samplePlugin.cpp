@@ -11,10 +11,8 @@ SamplePlugin::SamplePlugin() {
 
 Gtk::Widget * SamplePlugin::getWidget(){
   box = new Gtk::Box();
-  checkbox = new Gtk::CheckButton("vertical");
-  button = new Gtk::ToolButton("asd");
+  checkbox = new Gtk::CheckButton("Vertical");
   box->pack_start(*checkbox, false, false);
-  box->pack_start(*button, false, false);
   return box;
 }
 
