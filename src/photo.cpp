@@ -114,7 +114,6 @@ void Photo::putEffect(Effect * effect){
 }
 
 void Photo::save(){
-  std::cout<<"Zapisuje photo "<<getAbsolutePath()<<std::endl;
   string extension = getAbsolutePath().extension().string().substr(1);
   string type;
   if(extension == "jpg" || extension == "jpeg"){

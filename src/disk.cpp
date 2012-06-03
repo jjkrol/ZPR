@@ -108,7 +108,6 @@ void Disk::deletePhoto(path photoPath){
 }
 
     bool Disk::exists(boost::filesystem::path file) {
-      cout << "Disk: sprawdzanie sciezki: " << makeSystemAbsolutePath(file).string()<<endl;
       return boost::filesystem::exists(makeSystemAbsolutePath(file));
     } 
 
@@ -137,7 +136,6 @@ void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPat
   paths_t * subdirectories = new paths_t();
   path absolutePath = makeAbsolutePath(directoryPath);
   paths_t  directoryContents;
-  //std::cout<<"abs: "<<absolutePath.string()<<std::endl;
   directoryContents = getDirectoryContents(absolutePath);
   for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
     if(is_directory(*it) && (*it).filename().string().substr(0,1)!=".")

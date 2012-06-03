@@ -224,7 +224,6 @@ void CoreController::setCurrentTagSet(const set<string> &tagSet) {
   }
 
   currentPhoto = currentPhotoSet.begin(); 
-  std::cout << (*currentPhoto)->getFilename() << std::endl;
 }
 
 PhotoData CoreController::getCurrentPhoto(){
