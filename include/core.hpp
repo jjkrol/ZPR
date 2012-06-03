@@ -129,10 +129,6 @@ class CoreController {
 
     Glib::RefPtr<Gtk::ListStore> getTagsList();
 
-    /**
-     *
-     */
-    photos_t getPhotosWithTags(std::vector<std::string>);
     void addTagToActivePhoto(std::string tag);
     void removeTagFromActivePhoto(std::string tag);
     Glib::RefPtr<Gtk::ListStore> getTagsOfActivePhoto();
@@ -171,6 +167,7 @@ class CoreController {
      */
     void savePhotos();
 
+    void saveCurrentPhoto();
     /**
      * @returns true if there are photos modified, which are not saved
      */
@@ -203,7 +200,6 @@ class CoreController {
 
     std::vector<Photo*>::iterator currentPhoto;
     Directory* currentDirectory;
-    std::set<std::string> currentTagSet;
     std::vector<Photo*> currentPhotoSet;
     std::set<Photo*> modifiedPhotos;
 

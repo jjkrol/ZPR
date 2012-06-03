@@ -7,17 +7,17 @@
 class Photo;
 class Effect;
 
-/// @class SamplePlugin
-/// @brief Responsible for showing the plugin functionality.
-class SamplePlugin : public Plugin {
+/// @class DesaturatePlugin
+/// @brief Class representing plugin which desaturates the photo.
+class DesaturatePlugin : public Plugin {
   public:
-    SamplePlugin();
-    virtual ~SamplePlugin(){};
+    DesaturatePlugin();
+    virtual ~DesaturatePlugin(){};
     Gtk::Widget* getWidget();
     std::string getName();
     Effect* getEffect();
   private:
     Gtk::Box *box;
-    Gtk::CheckButton *checkbox;
+    Gtk::SpinButton *spin_button;
     Gtk::ToolButton *button;
 };

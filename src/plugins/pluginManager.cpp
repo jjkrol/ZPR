@@ -1,6 +1,7 @@
 #include "../../include/plugins/pluginManager.hpp"
 #include "../../include/plugins/plugin.hpp"
 #include "../../include/plugins/samplePlugin.hpp"
+#include "../../include/plugins/desaturatePlugin.hpp"
 
 using namespace std;
 
@@ -8,6 +9,7 @@ PluginManager::PluginManager(){
   //load plugins
   //check for name uniqueness
   plugins.push_back(new SamplePlugin());
+  plugins.push_back(new DesaturatePlugin());
 }
 
 vector<Plugin*> PluginManager::getPluginList(){

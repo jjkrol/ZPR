@@ -67,8 +67,8 @@ EditView::EditView(MainWindow *w) : window(w),
   //loading plugins
   std::vector<std::string> plugin_names = core->getPluginNames();
   std::vector<std::string>::iterator it;
-  for(it = plugin_names.begin(); it != plugin_names.end(); ++it){
-    Gtk::ToolButton * but = new Gtk::ToolButton((*it));
+  for(it = plugin_names.begin(); it != plugin_names.end(); ++it) {
+    Gtk::ToolButton *but = new Gtk::ToolButton((*it));
     but->signal_clicked().connect(sigc::bind(sigc::mem_fun(this, &EditView::showPluginBox),(*it)));
     plugin_map[*it] = but;
     plugin_buttons.pack_start(*but, false, false);
@@ -96,7 +96,7 @@ EditView::~EditView() {
 }
 
 ///
-void EditView::showPluginBox(std::string name){
+void EditView::showPluginBox(std::string name) { 
   Gtk::Box *pluginBox = dynamic_cast<Gtk::Box *>(core->getPluginBox("Sample plugin"));
   pluginBox->set_margin_left(2);
   pluginBox->set_margin_right(2);
@@ -113,7 +113,7 @@ void EditView::showPluginBox(std::string name){
 
 /// @fn void EditView::applyEffect()
 /// @brief applies effect to the current photo
-void EditView::applyEffect(){
+void EditView::applyEffect() {
   core->applyEffectOfSelectedPlugin();
   refreshView();
 }

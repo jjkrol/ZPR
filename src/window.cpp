@@ -35,7 +35,7 @@ MainWindow::MainWindow() : zoom_slider(Gtk::ORIENTATION_HORIZONTAL),
   tags_button.signal_clicked().connect(sigc::mem_fun(*this,
         &MainWindow::editPhotoTags));
   save_button.signal_clicked().connect(sigc::mem_fun(core,
-        &CoreController::savePhotos));
+        &CoreController::saveCurrentPhoto));
 
   //menubar creating
   Gtk::RadioAction::Group view_type;
@@ -170,7 +170,6 @@ void MainWindow::editDatabase() {
 /// @fn void MainWindow::editPhotoTags()
 /// @brief Method responsible for displaying Edit Photo Tags dialog.
 void MainWindow::editPhotoTags() {
-  std::cout << "lol!" << std::endl;
   TagsDialog *tags_dialog = new TagsDialog(this);
   tags_dialog->run();
   delete tags_dialog;

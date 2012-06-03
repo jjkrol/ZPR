@@ -36,6 +36,8 @@ plugins = [
   'src/plugins/pluginManager.cpp',
   'src/plugins/samplePlugin.cpp',
   'src/plugins/sampleEffect.cpp',
+  'src/plugins/desaturatePlugin.cpp',
+  'src/plugins/desaturateEffect.cpp',
 ]
 app = core + gui + database + asynchronous + plugins
 

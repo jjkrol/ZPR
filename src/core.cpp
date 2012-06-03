@@ -212,8 +212,7 @@ void CoreController::setCurrentDirectory(boost::filesystem::path directoryPath){
   currentPhoto = currentPhotoSet.begin();
 }
 
-void CoreController::setCurrentTagSet(set<string> tagSet){
-  currentTagSet = tagSet; 
+void CoreController::setCurrentTagSet(set<string> tagSet) {
   //set current photo set
 }
 
@@ -225,7 +224,7 @@ PhotoData CoreController::getCurrentPhoto(){
 }
 
 bool CoreController::isCurrentPhotoSet(){
-  return (*currentPhoto)!=NULL;
+  return (*currentPhoto) != NULL;
 }
 
 PhotoData CoreController::getNextPhoto(){
@@ -271,17 +270,6 @@ Glib::RefPtr<Gtk::ListStore> CoreController::getTagsList(){
   }
  
   return tags_list;
-}
-
-photos_t CoreController::getPhotosWithTags(vector<string>){
-  //TODO ask DB
-  vector<boost::filesystem::path> paths;
-  vector<boost::filesystem::path>::iterator it;
-  photos_t photosWithTags;
-  for(it = paths.begin(); it!=paths.end(); it++){
-    photosWithTags.push_back(Photo::getInstance((*it)));
-  }
-  return photosWithTags;
 }
 
 void CoreController::addTagToActivePhoto(std::string tag) {
@@ -505,6 +493,10 @@ void CoreController::savePhotos(){
     (*it)->save();
   }
   modifiedPhotos.clear();
+}
+
+void CoreController::saveCurrentPhoto() {
+  (*currentPhoto)->save();
 }
 
 bool CoreController::modifiedPhotosExist(){
