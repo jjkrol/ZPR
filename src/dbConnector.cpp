@@ -242,9 +242,9 @@ const vector<path> &dirs) {
   return true;
 }
 
-bool SQLiteConnector::deleteDirectories(const vector<DirectoriesPath> &dirs) {
+bool SQLiteConnector::deleteDirectories(const vector<path> &dirs) {
   //delete each directory from the vector
-  for(vector<DirectoriesPath>::const_iterator i = dirs.begin() ;
+  for(vector<path>::const_iterator i = dirs.begin() ;
       i != dirs.end() ; ++i) {
     //in case of failure in deleting directories, stop
     if(!deleteDirectory(*i))
@@ -254,7 +254,7 @@ bool SQLiteConnector::deleteDirectories(const vector<DirectoriesPath> &dirs) {
   return true;
 }
 
-bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
+bool SQLiteConnector::deleteDirectory(const path &dir) {
   //1. Delete photos which are directly in this directory.
   //2. Get all subdirectories from the DB.
   //3. Call deleteDirectory for each subdirecory.
@@ -271,13 +271,13 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
     return false;
   }
   //getting subdirectories of directory which is being deleted
-  vector<DirectoriesPath> subdirs;
+  vector<path> subdirs;
   if( !getSubdirectoriesFromDB(dir, subdirs)) {
     cout<<"Nie udalo sie pobrac podkatalogow katalogu: " <<dir.string() << endl;
     return false;
   }
   //deleting each of subdirectories
-  for(vector<DirectoriesPath>::iterator i = subdirs.begin();
+  for(vector<path>::iterator i = subdirs.begin();
       i != subdirs.end() ; ++i) {
     if(!deleteDirectory(*i))
       return false;
@@ -293,7 +293,7 @@ bool SQLiteConnector::deleteDirectory(const DirectoriesPath &dir) {
   return true;
 }
 
-bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
+bool SQLiteConnector::addPhotosFromDirectory(const path &dir){
 
   //add directory's path to database
   if(!addDirectoryToDB(dir)) {
@@ -303,10 +303,10 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
   //add photos which are located directly in this directory
   {
     //get photos which are located in this directory
-    vector<PhotoPath> photos = disk->getAbsolutePhotosPaths(dir);
+    vector<path> photos = disk->getAbsolutePhotosPaths(dir);
 
     //add each photo to database
-    for(vector<PhotoPath>::const_iterator i = photos.begin();
+    for(vector<path>::const_iterator i = photos.begin();
         i != photos.end() ; ++i) {
       if(! addPhoto(dir / (*i))) {
         cout << "Blad przy dodawaniu zdjecia do bazy danych" << endl;
@@ -318,7 +318,7 @@ bool SQLiteConnector::addPhotosFromDirectory(const DirectoriesPath &dir){
   return true;
 }
 
-bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
+bool SQLiteConnector::addDirectoryToDB(const path &dir) {
   //add subidirectory with values: autonum, dir.path, id_of_parental_directory 
   string parents_path, parents_id, query;
 
@@ -334,11 +334,6 @@ bool SQLiteConnector::addDirectoryToDB(const DirectoriesPath &dir) {
     + parents_id + ");";
 
   return executeQuery(query);
-}
-
-//TODO
-bool SQLiteConnector::movePhoto(const path &old_path, const path &new_path) {
-  return false;
 }
 
 bool SQLiteConnector::deletePhoto(const path &photos_path) {
@@ -394,7 +389,7 @@ bool SQLiteConnector::addPhoto(const path &photo) {
 }
 
 bool SQLiteConnector::getSubdirectoriesFromDB(
-const DirectoriesPath &dir, vector<DirectoriesPath> &directories) const {
+const path &dir, vector<path> &directories) const {
   sqlite3_stmt *stmt;
   directories.clear();
   string query = "SELECT path FROM directories WHERE parents_id\n"
@@ -417,7 +412,7 @@ const DirectoriesPath &dir, vector<DirectoriesPath> &directories) const {
 }
 
 bool SQLiteConnector::getDirectoriesFromDB (
-vector<DirectoriesPath> &directories) const {
+vector<path> &directories) const {
   sqlite3_stmt *stmt;
   const char *query = "SELECT path FROM directories;";
   directories.clear();
@@ -487,7 +482,7 @@ bool SQLiteConnector::reportErrors(string query) const {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool SQLiteConnector::addTagsToPhoto(
-const PhotoPath &photo, const set<string> &tags) {
+const path &photo, const set<string> &tags) {
   for(set<string>::const_iterator i = tags.begin() ; i != tags.end() ; ++i) {
     if(!addTagToPhoto(photo,*i))
       return false;
@@ -496,7 +491,7 @@ const PhotoPath &photo, const set<string> &tags) {
   return true;
 }
 
-bool SQLiteConnector::addTagToPhoto(const PhotoPath &photo, const string &tag) {
+bool SQLiteConnector::addTagToPhoto(const path &photo, const string &tag) {
   //inserting a tag into a tags table if a tag has not existed before
   string query = "INSERT OR IGNORE INTO tags VALUES (NULL, \'" + tag + "\');\n";
 
@@ -518,7 +513,7 @@ bool SQLiteConnector::addTagToPhoto(const PhotoPath &photo, const string &tag) {
 }
 
 bool SQLiteConnector::getPhotosTags(
-const PhotoPath &photo, set<string> &tags) {
+const path &photo, set<string> &tags) {
   //Get id of a given photo. Then get ids of tags connected with it.
   //Finally, get names of those tags.
   sqlite3_stmt *stmt;
@@ -544,7 +539,7 @@ const PhotoPath &photo, set<string> &tags) {
 }
 
 bool SQLiteConnector::deleteTagsFromPhoto(
-const PhotoPath &photo, const std::set<std::string> &tags) {
+const path &photo, const std::set<std::string> &tags) {
   for(std::set<std::string>::const_iterator i = tags.begin() ;
       i != tags.end() ; ++i) {
     if(!deleteTagFromPhoto(photo,*i))
@@ -555,7 +550,7 @@ const PhotoPath &photo, const std::set<std::string> &tags) {
 }
 
 bool SQLiteConnector::deleteTagFromPhoto(
-const PhotoPath &photo, const string &tag) {
+const path &photo, const string &tag) {
   string query = "DELETE FROM photos_tags WHERE tags_id = (\n"
                     "SELECT id FROM tags WHERE name=\'" + tag +
                   "\'\n);";
@@ -575,7 +570,7 @@ const PhotoPath &photo, const string &tag) {
   return executeQuery(query);
 }
 bool SQLiteConnector::getPhotosWithTags(
-const set<string> &tags, std::vector<PhotoPath> &photos) {
+const set<string> &tags, std::vector<path> &photos) {
   if(tags.empty())
     return false;
 

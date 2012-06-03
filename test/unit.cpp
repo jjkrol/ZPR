@@ -17,14 +17,14 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE( testSuite )
 
-/*  BOOST_AUTO_TEST_CASE( coreClassTest ){
+  /*BOOST_AUTO_TEST_CASE( coreClassTest ){
     CoreController* core = CoreController::getInstance("test.cfg");
 
     BOOST_CHECK(core->getLibraryDirectoryPath()=="./test/test_tree/");
 
-  }
+  }*/
 
-  BOOST_AUTO_TEST_CASE( photoClassTest ) {
+  /*BOOST_AUTO_TEST_CASE( photoClassTest ) {
     path p("test/zdj.jpg");
     Photo* myphoto = Photo::getInstance(p);
     BOOST_CHECK(myphoto->getPath() == p );
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     BOOST_CHECK(delta->hasPhotos() == true);
     myPhoto->deleteFromLibraryAndDisk();
     BOOST_CHECK(delta->hasPhotos() == false);
-  }*/
+  } */
 
   BOOST_AUTO_TEST_CASE( SQLiteConnectorTest ) {
     CoreController *core = CoreController::getInstance("test.cfg");
@@ -105,8 +105,9 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //adding photos from directories
     vector<path> paths = disk->getAbsoluteSubdirectoriesPaths(libraryPath);
 
-    for(vector<path>::iterator i=paths.begin(); i!= paths.end(); ++i)
+    for(vector<path>::iterator i=paths.begin(); i!= paths.end(); ++i) {
       (*i) = libraryPath / (*i);
+    }
 
     BOOST_CHECK(sqlconnector->isEmpty() == true);
     BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(paths) == true);
@@ -127,7 +128,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     }
 
     //deleting photos
-
     sqlconnector->getPhotosFromDirectory(paths2[0], paths);
     for(vector<path>::const_iterator i=paths.begin() ; i!= paths.end(); ++i) {
       output += i->string() + "\n";
