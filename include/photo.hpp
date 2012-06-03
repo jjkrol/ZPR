@@ -97,7 +97,12 @@ class Photo {
     /**
      * puts specified effect on the photo
      */
-void putEffect(Effect * effect);
+    void putEffect(Effect * effect);
+
+    /**
+     * saves modified fixbuf to disk
+     */
+    void save();
 
   private:
     Photo (boost::filesystem::path argumentPath);
