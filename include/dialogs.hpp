@@ -77,10 +77,12 @@ class TagsDialog : public Gtk::Dialog {
     TagsListColumns tags_columns;
 
     //additional functions
-    void loadTagsList();
+    void refreshTagsList();
 
     //signal handlers
     void addTag();
+    void deleteTag(const Gtk::TreeModel::Path &path,
+        Gtk::TreeViewColumn *column);
 
     //hidden methods
     TagsDialog() {};

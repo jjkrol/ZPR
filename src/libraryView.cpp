@@ -1,6 +1,7 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
 #include "../include/window.hpp"
+#include <iostream>
 
 /// @fn LibraryView::LibraryView(MainWindow *w)
 /// @brief LibraryView constructor - connects to UserInterface and builds library view gui.
@@ -14,8 +15,11 @@ LibraryView::LibraryView(MainWindow *w) : window(w), db_prompt(NULL) {
   window->notebook.append_page(tags_view, "Tags");
   window->display.add(images);
 
-  //refreshing the view
-  refreshView();
+  fillDatabaseTree();
+  fillTagsList();
+  
+  if(!core->hasLibraryPathSet())
+    promptAboutDatabase();
 }
 
 /// @fn LibraryView::~LibraryView()
@@ -36,12 +40,10 @@ void LibraryView::refreshView() {
     delete db_prompt;
   }
 
-  //if(core->hasLibraryPathSet()) {
-  if(true) {
-    fillDatabaseTree();
-    fillTagsList();
-  }
-  else
+  directory_tree = core->getDirectoryTree();
+  directory_view.set_model(directory_tree);
+
+  if(!core->hasLibraryPathSet())
     promptAboutDatabase();
 }
 

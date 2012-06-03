@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "../include/core.hpp"
 #include "../include/photo.hpp"
@@ -97,23 +98,6 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     //are not allowed, so the function should exit with a FAILURE flag)
     BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::FAILURE);
 
-  /*********************************************************************/
-  /* CHECKING COMPATIBILITY AND CHECKING IF DISK STRUCTURE HAS CHANGED */
-  /*********************************************************************/
-    //checking compatibility
-    //BOOST_CHECK(sqlconnector->checkCompatibility() == true);
-    //sqlconnector->hasChanged();
-    //std::fstream f;
-    //f.open("./test/test_tree/empty_test_file.txt", std::ios::out);
-    //f << std::flush;
-    //f.close();
-    //if(sqlconnector->checkCompatibility())
-    //  cout << "kompatybilne" << endl;
-
-    //hasChanged
-    //isEmpty
-
-
   /***********************************************/
   /* ADDING AND DELETING PHOTOS AND DIRECTORIES  */
   /***********************************************/
@@ -124,7 +108,9 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     for(vector<path>::iterator i=paths.begin(); i!= paths.end(); ++i)
       (*i) = libraryPath / (*i);
 
+    BOOST_CHECK(sqlconnector->isEmpty() == true);
     BOOST_REQUIRE(sqlconnector->addPhotosFromDirectories(paths) == true);
+    BOOST_CHECK(sqlconnector->isEmpty() == false);
     BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
     BOOST_CHECK(sqlconnector->open("DB.sqlite") == DBConnector::OPENED);
 
@@ -201,6 +187,39 @@ BOOST_AUTO_TEST_SUITE( testSuite )
     sqlconnector->getAllTags(tags);
     BOOST_CHECK(tags.find("architecture") != tags.end() &&
                 tags.find("bed") == tags.end());
+
+    //getting photos with all specified tags
+  /*********************************************************************/
+  /* CHECKING COMPATIBILITY AND CHECKING IF DISK STRUCTURE HAS CHANGED */
+  /*********************************************************************/
+    //checking compatibility
+    BOOST_CHECK(sqlconnector->checkCompatibility() == true);
+    rename(libraryPath/path("beta/1.jpg"), libraryPath/path("beta/1prim.jpg"));
+    BOOST_CHECK(sqlconnector->checkCompatibility() == false);
+    rename(libraryPath/path("beta/1prim.jpg"), libraryPath/path("beta/1.jpg"));
+    
+    //checking if a disk structure of directories from the database has changed
+    
+
+
+
+
+
+    
+    BOOST_CHECK(sqlconnector->close() == DBConnector::CLOSED);
+
+    //sqlconnector->hasChanged();
+    //std::fstream f;
+    //f.open("./test/test_tree/empty_test_file.txt", std::ios::out);
+    //f << std::flush;
+    //f.close();
+    //if(sqlconnector->checkCompatibility())
+    //  cout << "kompatybilne" << endl;
+
+    //hasChanged
+    //isEmpty
+
+
 
 
   }
