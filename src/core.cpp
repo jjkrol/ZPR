@@ -56,15 +56,17 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
 
   //filling tree
   Gtk::TreeModel::Row row;
+      Gtk::TreeModel::Row temp_row;
   for(vector<path>::iterator it = paths.begin(); it != paths.end(); ++it) {
     path temp_path = it->parent_path();
     if(temp_path == library_path.parent_path()) {
-      //ommit the main directory
-    }
-    else if(temp_path.parent_path() == library_path.parent_path()){
       row = *(database_tree->append());
-      row[dir_columns.name] = it->parent_path().filename().string();    //adding label
+      row[dir_columns.name] = "/";    //adding label
     }
+//    else if(temp_path.parent_path() == library_path.parent_path()){
+//      temp_row = *(database_tree->append(row.children()));
+//      temp_row[dir_columns.name] = it->parent_path().filename().string();    //adding label
+//    }
     else{
       vector<path> temp_paths;
       //go to library path
@@ -73,7 +75,6 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
         temp_path = temp_path.parent_path();
       }
       //descend
-      Gtk::TreeModel::Row temp_row;
       bool alreadyInserted = false;
 
       //check first
@@ -81,7 +82,7 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
       temp_paths.pop_back();
 
       Gtk::TreeModel::Children::iterator ch_it;
-      Gtk::TreeModel::Children children = database_tree->children();
+      Gtk::TreeModel::Children children = row.children();
       for(ch_it = children.begin(); ch_it != children.end(); ++ch_it){
         if((*ch_it)[dir_columns.name] == popped_path.string()){
           alreadyInserted = true;
@@ -92,7 +93,7 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
         temp_row = *ch_it;
       }
       else{
-        temp_row = *(database_tree->append());
+        temp_row = *(database_tree->append(row.children()));
         temp_row[dir_columns.name] = popped_path.string();    //adding label
       }
 
