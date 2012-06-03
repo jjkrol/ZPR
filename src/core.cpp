@@ -58,7 +58,7 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
   Gtk::TreeModel::Row row;
       Gtk::TreeModel::Row temp_row;
   for(vector<path>::iterator it = paths.begin(); it != paths.end(); ++it) {
-    path temp_path = it->parent_path();
+    path temp_path = (*it);
     if(temp_path == library_path.parent_path()) {
       row = *(database_tree->append());
       row[dir_columns.name] = "/";    //adding label
