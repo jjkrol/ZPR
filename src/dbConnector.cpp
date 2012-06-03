@@ -36,7 +36,6 @@ DBConnector* DBConnectorFactory::getInstance(const string type) {
    * desired one.
    */
   if(type != "sqlite")
-    cout << "Prosze sobie nie zartowac"<<endl;
 
   return SQLiteConnector::getInstance();
 }

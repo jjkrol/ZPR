@@ -30,7 +30,7 @@ Photo* Photo::getInstance(boost::filesystem::path argumentPath){
 }
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
-  db = DBConnectorFactory::getInstance("kotek");
+  db = DBConnectorFactory::getInstance("sqlite");
   cache = PhotoCache::getInstance();
   db->getPhotosTags(photoPath.string(), tags);  
   disk = Disk::getInstance();
