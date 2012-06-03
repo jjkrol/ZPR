@@ -26,6 +26,7 @@
 
 class Disk;
 class DBConnector;
+class PhotoCache;
 class Effect;
 
 typedef std::set<std::string> taglist_t;
@@ -112,6 +113,7 @@ class Photo {
 
     Disk* disk;
     DBConnector* db;
+    PhotoCache * cache;
     boost::filesystem::path photoPath;
     std::set<std::string> tags;
 

@@ -2,6 +2,7 @@
 #include "../include/disk.hpp"
 #include "../include/dbConnector.hpp"
 #include "../include/effect.hpp"
+#include "../include/photoCache.hpp"
 
 using namespace boost::gil;
 using namespace std;
@@ -30,7 +31,7 @@ Photo* Photo::getInstance(boost::filesystem::path argumentPath){
 
 Photo::Photo(boost::filesystem::path argumentPath):photoPath(argumentPath){
   db = DBConnectorFactory::getInstance("kotek");
-
+  cache = PhotoCache::getInstance();
   db->getPhotosTags(photoPath.string(), tags);  
   disk = Disk::getInstance();
 }
@@ -45,15 +46,11 @@ Glib::RefPtr<Gdk::Pixbuf> Photo::getThumbnail(){
 }
 
 Glib::RefPtr<Gdk::Pixbuf> Photo::getPixbuf() {
-  if(pixbuf == NULL){
-    return disk->getPhotoFile(photoPath);\
-  }
-
-  return pixbuf;
+    return pixbuf = cache->getPhotoFile(photoPath);
 }
 
 void Photo::setPixbuf(Glib::RefPtr<Gdk::Pixbuf> buf){
-  pixbuf = buf;
+  cache->storePixbuf(photoPath, buf);
 }
 
 boost::filesystem::path Photo::getPath(){

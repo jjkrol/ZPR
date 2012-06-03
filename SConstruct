@@ -7,7 +7,8 @@ core = [
     'src/photo.cpp',
     'src/disk.cpp',
     'src/core.cpp',
-    'src/configurationManager.cpp'
+    'src/configurationManager.cpp',
+    'src/photoCache.cpp',
     ]
 asynchronous = [
     'src/asynchronous.cpp',

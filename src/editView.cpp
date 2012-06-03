@@ -60,8 +60,8 @@ put_effect_button("put effect"){
   put_effect_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::applyEffect));
   zoom_signal = window->zoom_slider.signal_value_changed().connect(
       sigc::mem_fun(this, &EditView::zoomImage));
-  fit_signal = window->signal_size_allocate().connect_notify(
-      sigc::mem_fun(this, &EditView::fitImage));
+  fit_signal = window->display.signal_size_allocate().connect_notify(
+     sigc::mem_fun(this, &EditView::fitImage));
   page_signal = window->notebook.signal_switch_page().connect(
       sigc::mem_fun(this, &EditView::onPageSwitch));
 
