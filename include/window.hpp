@@ -112,7 +112,8 @@ class EditView : public WindowContent {
 
     //plugin widgets
     Gtk::ToolButton sample_button, put_effect_button;
-    std::map<std::string, Gtk::ToolButton*> pluginButtons;
+    std::map<std::string, Gtk::ToolButton*> plugin_map;
+    Gtk::Box plugin_buttons;
 
     //storing current photo
     PhotoData current_photo;

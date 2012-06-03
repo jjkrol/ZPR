@@ -23,7 +23,7 @@ class Plugin{
     /**
      * @returns prepared effect ready to be put on a photo
      */
-    virtual Effect* getEffect(Params * params) = 0;
+    virtual Effect* getEffect() = 0;
 
     /**
      * @returns name of the plugin

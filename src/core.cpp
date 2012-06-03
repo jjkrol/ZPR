@@ -423,7 +423,9 @@ void CoreController::sendChangesToDB() {
 
   //copying vector and sending it to DB
   for(folder = added_folders.begin(); folder != added_folders.end(); ++folder) {
-    db_vector.push_back((std::string)(**folder)[fs_columns.path]);
+    std::string path = (std::string)(**folder)[fs_columns.path];
+    path = path.substr(0, path.size()-1);
+    db_vector.push_back(path);
   }
   db->addPhotosFromDirectories(db_vector);
   added_folders.clear();
@@ -431,7 +433,9 @@ void CoreController::sendChangesToDB() {
 
   //copying vector and sending it to DB
   for(folder = deleted_folders.begin(); folder != deleted_folders.end(); ++folder) {
-    db_vector.push_back((std::string)(**folder)[fs_columns.path]);
+    std::string path = (std::string)(**folder)[fs_columns.path];
+    path = path.substr(0, path.size()-1);
+    db_vector.push_back(path);
   }
   db->deleteDirectories(db_vector);
   deleted_folders.clear();
@@ -483,7 +487,7 @@ vector<string> CoreController::getPluginNames(){
 }
 
 void CoreController::applyEffectOfSelectedPlugin(){
-  Effect * effect =  selectedPlugin->getEffect(new Params());
+  Effect * effect =  selectedPlugin->getEffect();
   (*currentPhoto)->putEffect(effect);
   std::cout<<"Apply effect"<<std::endl;
   modifiedPhotos.insert(*currentPhoto);

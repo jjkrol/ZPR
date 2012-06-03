@@ -19,7 +19,7 @@ Gtk::Widget * SamplePlugin::getWidget(){
   return box;
 }
 
-Effect* SamplePlugin::getEffect(Params * params){
+Effect* SamplePlugin::getEffect(){
 if(checkbox==NULL){
     std::cout<<"Probably no widget created!"<<std::endl;
     return new SampleEffect(SampleEffect::NOOPERATION);
