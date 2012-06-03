@@ -21,6 +21,15 @@ Directory::Directory(path inputPath):directoryPath(inputPath){
 }
 
 Directory::~Directory(){
+  vector<Photo*>::iterator it;
+  for(it = photos.begin(); it != photos.end(); ++it){
+    (*it)->deleteFromLibrary();
+  }
+
+  vector<Directory*>::iterator subit;
+  for(subit = subdirectories.begin(); subit != subdirectories.end(); ++subit){
+    delete (*subit);
+  }
 }
 
 vector <Directory*> Directory::getSubdirectories(){
