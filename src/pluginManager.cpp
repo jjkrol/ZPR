@@ -20,4 +20,5 @@ Plugin * PluginManager::getPluginByName(string name){
     if((*it)->getName() == name)
       return (*it);
   }
+  //return plugins.end();
 }

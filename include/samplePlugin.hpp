@@ -16,7 +16,7 @@ class SamplePlugin : public Plugin{
     virtual  ~SamplePlugin(){};
     Gtk::Widget * getWidget();
     std::string getName();
-    Effect* getEffect(Params * params);
+    Effect* getEffect();
   private:
     Gtk::Box * box;
     Gtk::CheckButton * checkbox;

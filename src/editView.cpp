@@ -8,11 +8,12 @@
 EditView::EditView(MainWindow *w) : window(w),
   left_button(Gtk::Stock::GO_BACK), right_button(Gtk::Stock::GO_FORWARD),
   basic_box(Gtk::ORIENTATION_VERTICAL), colors_box(Gtk::ORIENTATION_VERTICAL),
-  effects_box(Gtk::ORIENTATION_VERTICAL), basic_label("Basic editing"),
+  effects_box(Gtk::ORIENTATION_VERTICAL), plugin_buttons(Gtk::ORIENTATION_VERTICAL),
+  basic_label("Basic editing"),
   colors_label("Colors modification"), effects_label("Other effects"),
   library_button(Gtk::Stock::QUIT), undo_button(Gtk::Stock::UNDO),
   redo_button(Gtk::Stock::REDO), sample_button(Gtk::Stock::GO_FORWARD),
-put_effect_button("put effect"){
+  put_effect_button("Apply effect") {
 
   //obtaining CoreController instance
   core = CoreController::getInstance();
@@ -23,6 +24,11 @@ put_effect_button("put effect"){
   edit_buttons.set_margin_top(1);
   edit_buttons.set_margin_bottom(1);
   edit_buttons.set_spacing(2);
+  plugin_buttons.set_margin_left(2);
+  plugin_buttons.set_margin_right(2);
+  plugin_buttons.set_margin_top(1);
+  plugin_buttons.set_margin_bottom(1);
+  plugin_buttons.set_spacing(2);
 
   //adding tooltips to buttons
   left_button.set_tooltip_text("Load previous photo");
@@ -34,16 +40,9 @@ put_effect_button("put effect"){
   //organising widgets
   edit_buttons.pack_start(undo_button, true, true);
   edit_buttons.pack_start(redo_button, true, true);
-  std::vector<std::string> plugin_names = core->getPluginNames();
-  std::vector<std::string>::iterator it;
-  for(it = plugin_names.begin(); it != plugin_names.end(); ++it){
-    Gtk::ToolButton * but = new Gtk::ToolButton((*it));
-    but->signal_clicked().connect(sigc::bind(sigc::mem_fun(this, &EditView::showPluginBox),(*it)));
-    pluginButtons[*it] = but;
-    basic_box.pack_start(*but, false, false);
-  }
+  basic_box.pack_start(basic_label, true, true);
   colors_box.pack_start(colors_label, true, true);
-  effects_box.pack_start(effects_label, true, true);
+  effects_box.pack_start(plugin_buttons, true, true);
   window->toolbar.pack_end(library_button, false, false);
   window->left_box.pack_start(edit_buttons, false, false);
   window->notebook.append_page(basic_box, "Basic");
@@ -64,6 +63,16 @@ put_effect_button("put effect"){
      sigc::mem_fun(this, &EditView::fitImage));
   page_signal = window->notebook.signal_switch_page().connect(
       sigc::mem_fun(this, &EditView::onPageSwitch));
+
+  //loading plugins
+  std::vector<std::string> plugin_names = core->getPluginNames();
+  std::vector<std::string>::iterator it;
+  for(it = plugin_names.begin(); it != plugin_names.end(); ++it){
+    Gtk::ToolButton * but = new Gtk::ToolButton((*it));
+    but->signal_clicked().connect(sigc::bind(sigc::mem_fun(this, &EditView::showPluginBox),(*it)));
+    plugin_map[*it] = but;
+    plugin_buttons.pack_start(*but, false, false);
+  }
 
   //loading image
   current_photo = core->getCurrentPhoto();
@@ -88,21 +97,22 @@ EditView::~EditView() {
 
 ///
 void EditView::showPluginBox(std::string name){
-  Gtk::Widget * pluginBox = core->getPluginBox("Sample plugin");
+  Gtk::Widget *pluginBox = core->getPluginBox("Sample plugin");
   //remove plugin buttons
-  Gtk::ToolButton * but = pluginButtons[name];
-  basic_box.remove(*but);
-  basic_box.pack_end(*pluginBox, true, true);
-  basic_box.pack_end(put_effect_button, true, true);
+  effects_box.remove(plugin_buttons);
+  effects_box.remove(edit_buttons);
+  effects_box.pack_start(*pluginBox, false, false);
+  effects_box.pack_start(put_effect_button, false, false);
+  effects_box.pack_start(edit_buttons, false, false);
+  //basic_box.pack_end(*pluginBox, false, false);
   basic_box.show_all_children();
 }
-
 
 /// @fn void EditView::applyEffect()
 /// @brief applies effect to the current photo
 void EditView::applyEffect(){
-core->applyEffectOfSelectedPlugin();
-refreshView();
+  core->applyEffectOfSelectedPlugin();
+  refreshView();
 }
 
 /// @fn EditView::refreshView()
