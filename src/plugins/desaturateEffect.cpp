@@ -4,7 +4,6 @@
 #include <iostream>
 
 DesaturateEffect::DesaturateEffect(double value) {
-  std::cout << "KUURHJFDKSFDKJH DZIALAJ" << std::endl;
   amount = (float)value;
 }
 

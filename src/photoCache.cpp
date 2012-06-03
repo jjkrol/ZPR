@@ -17,7 +17,6 @@ disk = Disk::getInstance();
 }
 
 void PhotoCache::storePixbuf(boost::filesystem::path path, Glib::RefPtr<Gdk::Pixbuf> pixbuf){
-  std::cout<<"Photos cache size: "<<photos.size()<<std::endl;
   photos[path] = pixbuf;
 }
 
