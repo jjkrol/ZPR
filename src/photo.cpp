@@ -128,7 +128,7 @@ void Photo::save(){
     return;
   }
 
-  if(pixbuf == NULL){
+  if(!pixbuf){
     std::cout<<"Photo was not modified"<<std::endl;
   }
   pixbuf->save(getAbsolutePath().string(), type);
