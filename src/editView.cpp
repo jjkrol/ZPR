@@ -107,7 +107,7 @@ void EditView::showPluginBox(std::string name){
   effects_box.remove(edit_buttons);
   effects_box.pack_start(*pluginBox, false, false);
   effects_box.pack_start(put_effect_button, false, false);
-  effects_box.pack_start(edit_buttons, false, false);
+  effects_box.pack_end(edit_buttons, false, false);
   effects_box.show_all_children();
 }
 

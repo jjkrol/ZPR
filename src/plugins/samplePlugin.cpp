@@ -1,6 +1,5 @@
-#include "../include/samplePlugin.hpp"
-#include "../include/params.hpp"
-#include "../include/sampleEffect.hpp"
+#include "../../include/plugins/samplePlugin.hpp"
+#include "../../include/plugins/sampleEffect.hpp"
 #include <iostream>
 
 using namespace std;

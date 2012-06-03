@@ -5,10 +5,9 @@
 #include "../include/gui.hpp"
 #include "../include/directory.hpp"
 #include "../include/dbConnector.hpp"
-#include "../include/pluginManager.hpp"
-#include "../include/plugin.hpp"
-#include "../include/effect.hpp"
-#include "../include/params.hpp"
+#include "../include/plugins/pluginManager.hpp"
+#include "../include/plugins/plugin.hpp"
+#include "../include/plugins/effect.hpp"
 
 using namespace std;
 using namespace boost::filesystem;
@@ -285,7 +284,7 @@ photos_t CoreController::getPhotosWithTags(vector<string>){
 }
 
 void CoreController::addTagToActivePhoto(std::string tag) {
-  path photo = (*currentPhoto)->getPath();
+  path photo = (*currentPhoto)->getAbsolutePath();
   db->addTagToPhoto(photo, tag);
 }
 
