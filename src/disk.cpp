@@ -140,7 +140,7 @@ void * Disk::internalGetSubdirectoriesPaths(boost::filesystem::path directoryPat
   //std::cout<<"abs: "<<absolutePath.string()<<std::endl;
   directoryContents = getDirectoryContents(absolutePath);
   for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(is_directory(*it))
+    if(is_directory(*it) && (*it).filename().string().substr(0,1)!=".")
       subdirectories->push_back((*it).filename());
   } 
   return subdirectories;
@@ -169,7 +169,7 @@ void * Disk::internalGetAbsoluteSubdirectoriesPaths(boost::filesystem::path dire
   paths_t  directoryContents = getDirectoryContents(absolutePath);
 
   for(paths_t::const_iterator it (directoryContents.begin()); it != directoryContents.end(); ++it){
-    if(is_directory(*it))
+    if(is_directory(*it) && (*it).filename().string().substr(0,1)!=".")
       subdirectories->push_back((*it).filename());
   } 
 

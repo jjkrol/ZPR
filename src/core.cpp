@@ -63,10 +63,6 @@ Glib::RefPtr<Gtk::TreeStore> CoreController::getDirectoryTree(){
       row = *(database_tree->append());
       row[dir_columns.name] = "/";    //adding label
     }
-//    else if(temp_path.parent_path() == library_path.parent_path()){
-//      temp_row = *(database_tree->append(row.children()));
-//      temp_row[dir_columns.name] = it->parent_path().filename().string();    //adding label
-//    }
     else{
       vector<path> temp_paths;
       //go to library path
