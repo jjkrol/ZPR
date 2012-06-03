@@ -1,4 +1,6 @@
 #include "../include/configurationManager.hpp"
+#include <boost/filesystem.hpp>
+#include <fstream>
 
 using namespace boost::property_tree;
 
@@ -36,6 +38,14 @@ ptree DiskConfigurationManager::getConfigurationTree(){
 }
 
 DiskConfigurationManager::DiskConfigurationManager(boost::filesystem::path configFilePath) : configFilePath(configFilePath){
+  if(!boost::filesystem::exists(configFilePath)){
+    std::cout<<"Creating new config file"<<std::endl;
+    std::ofstream myfile(configFilePath.string().c_str());
+    myfile.close();
+    configTree.put<std::string>("library.directory", "/");
+    write_xml(configFilePath.string(), configTree);
+  }
+  else{
   read_xml(configFilePath.string(), configTree);
-
+  }
 }
