@@ -206,7 +206,7 @@ void CoreController::setCurrentPhoto(boost::filesystem::path photoPath){
       find_photo(photoPath));
 }
 
-void CoreController::setCurrentDirectory(boost::filesystem::path directoryPath){
+void CoreController::setCurrentDirectory(boost::filesystem::path directoryPath) {
   currentDirectory = new Directory(directoryPath);
   currentPhotoSet = currentDirectory->getPhotos();
   currentPhoto = currentPhotoSet.begin();

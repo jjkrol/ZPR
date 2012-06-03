@@ -230,10 +230,12 @@ void MainWindow::managePromptResponse(int response) {
       right_box.remove(*prompt);
       delete prompt;
       prompt = NULL;
+      break;
     case 2:
       right_box.remove(*prompt);
       delete prompt;
       prompt = NULL;
+      break;
     default:
       break;
   }
