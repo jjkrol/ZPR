@@ -219,10 +219,13 @@ void CoreController::setCurrentTagSet(set<string> tagSet){
 
 PhotoData CoreController::getCurrentPhoto(){
   PhotoData retPhoto;
-
   retPhoto.path = (*currentPhoto)->getPath();
   retPhoto.pixbuf = (*currentPhoto)->getPixbuf();
   return retPhoto;
+}
+
+bool CoreController::isCurrentPhotoSet(){
+  return (*currentPhoto)!=NULL;
 }
 
 PhotoData CoreController::getNextPhoto(){

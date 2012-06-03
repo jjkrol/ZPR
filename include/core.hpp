@@ -176,6 +176,8 @@ class CoreController {
      */
     bool modifiedPhotosExist();
 
+    bool isCurrentPhotoSet();
+
   private:
     CoreController (std::string forcedConfigPath="");
     CoreController& operator= (const CoreController&);
