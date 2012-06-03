@@ -423,7 +423,7 @@ void CoreController::sendChangesToDB() {
   //copying vector and sending it to DB
   for(folder = added_folders.begin(); folder != added_folders.end(); ++folder) {
     std::string path = (std::string)(**folder)[fs_columns.path];
-    path.substr(0, path.size()-1);
+    path = path.substr(0, path.size()-1);
     db_vector.push_back(path);
   }
   db->addPhotosFromDirectories(db_vector);
@@ -433,7 +433,7 @@ void CoreController::sendChangesToDB() {
   //copying vector and sending it to DB
   for(folder = deleted_folders.begin(); folder != deleted_folders.end(); ++folder) {
     std::string path = (std::string)(**folder)[fs_columns.path];
-    path.substr(0, path.size()-1);
+    path = path.substr(0, path.size()-1);
     db_vector.push_back(path);
   }
   db->deleteDirectories(db_vector);
