@@ -33,9 +33,9 @@ demo = [
   'test/async_test.cpp'
 ]
 plugins = [
-  'src/pluginManager.cpp',
-  'src/samplePlugin.cpp',
-  'src/sampleEffect.cpp',
+  'src/plugins/pluginManager.cpp',
+  'src/plugins/samplePlugin.cpp',
+  'src/plugins/sampleEffect.cpp',
 ]
 app = core + gui + database + asynchronous + plugins
 

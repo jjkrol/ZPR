@@ -1,6 +1,6 @@
-#include "../include/pluginManager.hpp"
-#include "../include/plugin.hpp"
-#include "../include/samplePlugin.hpp"
+#include "../../include/plugins/pluginManager.hpp"
+#include "../../include/plugins/plugin.hpp"
+#include "../../include/plugins/samplePlugin.hpp"
 
 using namespace std;
 

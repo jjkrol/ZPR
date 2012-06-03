@@ -42,6 +42,8 @@ void LibraryView::refreshView() {
 
   directory_tree = core->getDirectoryTree();
   directory_view.set_model(directory_tree);
+  tags_list = core->getTagsList();
+  tags_view.set_model(tags_list);
 
   if(!core->hasLibraryPathSet())
     promptAboutDatabase();

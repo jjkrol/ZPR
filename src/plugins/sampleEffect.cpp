@@ -1,5 +1,5 @@
-#include "../include/sampleEffect.hpp"
-#include "../include/photo.hpp"
+#include "../../include/plugins/sampleEffect.hpp"
+#include "../../include/photo.hpp"
 #include <gtkmm.h>
 SampleEffect::SampleEffect(Operation operation):
   operation(operation){

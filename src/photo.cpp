@@ -1,7 +1,7 @@
 #include "../include/photo.hpp"
 #include "../include/disk.hpp"
 #include "../include/dbConnector.hpp"
-#include "../include/effect.hpp"
+#include "../include/plugins/effect.hpp"
 #include "../include/photoCache.hpp"
 
 using namespace boost::gil;
