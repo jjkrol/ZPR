@@ -210,7 +210,15 @@ void CoreController::putConfiguration(boost::property_tree::ptree config){
 Glib::RefPtr<Gtk::ListStore> CoreController::getTagsList(){
   if(tags_list) return tags_list;
   tags_list = Gtk::ListStore::create(tags_columns);
-  //TODO ask DB
+  std::set<std::string> tags;
+  db->getAllTags(tags);
+
+  Gtk::TreeModel::Row row;
+  for(std::set<std::string>::iterator it = tags.begin(); it!=tags.end(); it++){
+    row = *(tags_list->append());
+    row[tags_columns.name] = *it;
+  }
+ 
   return tags_list;
 }
 
@@ -226,17 +234,28 @@ photos_t CoreController::getPhotosWithTags(vector<string>){
 }
 
 void CoreController::addTagToActivePhoto(std::string tag) {
-  //TODO ask DB
+  path photo = (*currentPhoto)->getPath();
+  db->addTagToPhoto(photo, tag);
 }
 
 void CoreController::RemoveTagFromActivePhoto(std::string tag) {
   //TODO ask DB
 }
 
-std::vector<std::string> CoreController::getTagsOfActivePhoto() {
-  std::vector<std::string> tags;
-  //TODO ask DB
-  return tags;
+Glib::RefPtr<Gtk::ListStore> CoreController::getTagsOfActivePhoto() {
+  Glib::RefPtr<Gtk::ListStore> photo_tags_list = Gtk::ListStore::create(tags_columns);
+  std::set<std::string> tags;
+  path photo = (*currentPhoto)->getPath();
+  db->getPhotosTags(photo, tags);
+
+  Gtk::TreeModel::Row row;
+  for(std::set<std::string>::iterator it = tags.begin(); it!=tags.end(); it++){
+    row = *(photo_tags_list->append());
+    row[tags_columns.name] = *it;
+    row[tags_columns.stock_id] = Gtk::StockID(Gtk::Stock::DELETE).get_string();
+  }
+ 
+  return photo_tags_list;
 }
 
 //private 
