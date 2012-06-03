@@ -126,7 +126,6 @@ class CoreController {
     /**
      * @returns all tags
      */
-
     Glib::RefPtr<Gtk::ListStore> getTagsList();
 
     void addTagToActivePhoto(std::string tag);

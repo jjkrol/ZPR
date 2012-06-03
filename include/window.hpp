@@ -39,7 +39,7 @@ class MainWindow : public Gtk::Window {
     Gtk::Box left_box, right_box, bottom_box;
     Gtk::ScrolledWindow display;
 
-    //menubar creating
+    //menubar
     Glib::RefPtr<Gtk::UIManager> ui_manager;
     Glib::RefPtr<Gtk::ActionGroup> action_group;
     Glib::RefPtr<Gtk::RadioAction> library_view, edit_view;
@@ -52,6 +52,9 @@ class MainWindow : public Gtk::Window {
     //toolbar
     Gtk::ToolButton save_button, delete_button;
     Gtk::ToolButton edit_button, tags_button;
+
+    //prompt
+    Gtk::InfoBar *prompt;
     
     //constructor and desctructor
     MainWindow();
@@ -66,6 +69,8 @@ class MainWindow : public Gtk::Window {
     void editDatabase();
     void editPhotoTags();
     void showAbout();
+    bool on_delete_event(GdkEventAny* event);
+    void managePromptResponse(int response);
 };
 
 /** @class WindowContent
