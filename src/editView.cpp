@@ -8,12 +8,11 @@
 EditView::EditView(MainWindow *w) : window(w),
   left_button(Gtk::Stock::GO_BACK), right_button(Gtk::Stock::GO_FORWARD),
   basic_box(Gtk::ORIENTATION_VERTICAL), colors_box(Gtk::ORIENTATION_VERTICAL),
-  effects_box(Gtk::ORIENTATION_VERTICAL), plugin_buttons(Gtk::ORIENTATION_VERTICAL),
-  basic_label("Basic editing"),
+  effects_box(Gtk::ORIENTATION_VERTICAL), basic_label("Basic editing"),
   colors_label("Colors modification"), effects_label("Other effects"),
   library_button(Gtk::Stock::QUIT), undo_button(Gtk::Stock::UNDO),
-  redo_button(Gtk::Stock::REDO), sample_button(Gtk::Stock::GO_FORWARD),
-  put_effect_button("Apply effect") {
+  redo_button(Gtk::Stock::REDO), put_effect_button("Apply effect"),
+  plugin_buttons(Gtk::ORIENTATION_VERTICAL) {
 
   //obtaining CoreController instance
   core = CoreController::getInstance();

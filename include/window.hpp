@@ -89,7 +89,6 @@ class WindowContent {
  *  @brief Uses Decorator pattern to switch MainWindow to photo edit view
  *         and handles tasks associated with this view.
  */
-
 class EditView : public WindowContent {
   public:
     friend class MainWindow;
@@ -116,7 +115,7 @@ class EditView : public WindowContent {
     Gtk::Button undo_button, redo_button;
 
     //plugin widgets
-    Gtk::ToolButton sample_button, put_effect_button;
+    Gtk::ToolButton put_effect_button;
     std::map<std::string, Gtk::ToolButton*> plugin_map;
     Gtk::Box plugin_buttons;
 

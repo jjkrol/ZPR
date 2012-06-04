@@ -216,6 +216,8 @@ bool MainWindow::on_delete_event(GdkEventAny* event) {
   right_box.pack_start(*prompt, false, false);
   right_box.pack_start(display, true, true);
   show_all_children();
+
+  return true;
 }
 
 /// @fn void MainWindow::managePromptResponse(int response)

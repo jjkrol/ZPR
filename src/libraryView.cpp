@@ -1,7 +1,6 @@
 #include "../include/gui.hpp"
 #include "../include/core.hpp"
 #include "../include/window.hpp"
-#include <iostream>
 
 /// @fn LibraryView::LibraryView(MainWindow *w)
 /// @brief LibraryView constructor - connects to UserInterface and builds library view gui.
@@ -43,8 +42,6 @@ void LibraryView::refreshView() {
     delete db_prompt;
     db_prompt = NULL;
   }
-
-  std::cout << "lol" << std::endl;
 
   directory_tree = core->getDirectoryTree();
   directory_view.set_model(directory_tree);
@@ -132,7 +129,7 @@ void LibraryView::loadImagesByTags() {
   //loading photos
   if(!selected_tags.empty()) {
     core->setCurrentTagSet(selected_tags);
-    //window->showEditView();
+    window->showEditView();
   }
 }
  

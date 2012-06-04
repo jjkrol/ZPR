@@ -16,7 +16,8 @@ Disk* Disk::getInstance(path libraryDirectoryPath){
   return instance;
 }
 
-Disk::Disk(path libraryDirectoryPath):libraryDirectoryPath(libraryDirectoryPath),Asynchronous(){
+Disk::Disk(path libraryDirectoryPath) : Asynchronous(),
+  libraryDirectoryPath(libraryDirectoryPath) {
 }
 
 paths_t Disk::getSubdirectoriesPaths(path directoryPath){
