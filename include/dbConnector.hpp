@@ -16,7 +16,6 @@
 #include <vector>
 #include <set>
 #include <string>
-#include <ostream> //for testing purposes only
 #include <boost/filesystem.hpp>
 #include <sqlite3.h>
 #include "disk.hpp"
@@ -40,7 +39,7 @@ public:
 */
 class DBConnector {
 public:
-  /** @brief Flags that can be returned as a result of opening database */
+  /// @brief Flags that can be returned as a result of opening database
   enum Flags {
     FAILURE = 0x0,
     OPENED  = 0x1,
@@ -167,7 +166,6 @@ public:
     const boost::filesystem::path &directory,
     std::vector<boost::filesystem::path> &photos) const = 0; //tested
 
-
 protected:
   virtual ~DBConnector(){};
 };
@@ -243,49 +241,60 @@ private:
 
   Disk * disk;
 
-  /*! @var sqlite3 *database;
-   *  @brief holds a pointer to opened database
-   *
-   *  @var std::string filename;
-   *  @brief holds a name of a database file
-   *
-   *  @var static DBConnector *instance;
-   *  @brief holds a pointer to the only existing SQLiteConnector
-   *
-   *  @fn static DBConnector * getInstance();
-   *  @brief Gives an access or creates the SQLiteConnector. Is private because
-   *  only the DBFactory should be able to run this method
-   *  @returns a pointer to the instance of SQLiteConnector
-   *
+  /*!
    *  @fn bool createDB();
    *  @brief creates tables used in the database
    *  @returns a true value if tables has been created successfully
-   *
-   *  @fn bool getDirectoriesFromDB(
-   *        std::vector<boost::filesystem::path> &dirs) const;
-   *  @brief Gets a main directory from the database and the vector
-   *  of directories that should be excluded form the database.
-   *  @returns true if was executed successfully and false otherwise
    *
    *  @fn inline bool reportErrors(const char *query) const;
    *  @brief Takes errors from the database and puts them in std::cerr stream
    *  @returns true if there were some errors and false if there weren't any
   */
 
+  /// @brief holds a pointer to an opened database
   sqlite3 *database;
 
+  /// holds a pointer to the only existing SQLiteConnector
   static DBConnector *instance;
+
+  /// @brief  gives and access or creates the SQLiteConnector. Is private because
+  ///         only the DBFactory (declared as a friend) should be able to run
+  ///         this method
+  /// @return a pointer to the instance of SQLiteConnector
   static DBConnector * getInstance();
 
+  /// @brief  adds directory to directories table but included photos
+  ///         are not added to photos table
+  /// @param  dir  path od directory which should be added to database
+  /// @return true if directory was successfully added to directories table
   bool addDirectoryToDB(const boost::filesystem::path &dir);
 
+  /// @brief  creates all necessary tables
+  /// @return true if tables created successfully
   bool createDB();
 
+  /// @brief      gets subdirectories contained in the database for the directory
+  ///             (also contained in the database)
+  /// @param[in]  dir     path of directory whose subdirectories should be taken
+  /// @param[out] subdirs container for subdirectories that will be filled
+  ///                     with paths
+  /// @return     true if subdirectories where got successfully
   bool getSubdirectoriesFromDB(
     const boost::filesystem::path &dir,
     std::vector<boost::filesystem::path> &subdirs) const;
 
+  /// @brief      gets paths of all photos contained in the database
+  /// @param[out] photos  container for paths of photos contained in database
+  /// @return     true if photos' paths were got successfully
   bool getPhotosFromDB(std::vector<boost::filesystem::path> &photos) const;
+
+  /// @brief  executes a simple query which returns no results
+  /// @param  query  stores a content of a query
+  /// @return true if query was executed successfully
   bool executeQuery(std::string query) const;
-  inline bool reportErrors(std::string query) const;
+
+  /// @brief  reports errors which appeared after the last database operation
+  ///         or does nothing if there were no errors
+  /// @return true if there were some errors and false otherwise
+  bool reportErrors(std::string query) const;
 };
