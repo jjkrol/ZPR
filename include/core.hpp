@@ -63,6 +63,8 @@ class CoreController {
     bool modifiedPhotosExist();
     void editInExternalEditor();
     void applyEffectOfSelectedPlugin();
+    void undoLastEffect();
+    void redoLastEffect();
     std::vector<std::string> getPluginNames();
     Gtk::Widget* getPluginBox(std::string name);
 

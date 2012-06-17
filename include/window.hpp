@@ -75,7 +75,7 @@ class MainWindow : public Gtk::Window {
 
 /** @class WindowContent
  *  @brief Abstract class, parent of LibraryViewContent and EditViewContent,
- *         uses Decorator pattern to define type of view (library/photo edit).
+ *         uses State pattern to define type of view (library/photo edit).
  */
 
 class WindowContent {
@@ -86,7 +86,7 @@ class WindowContent {
 };
 
 /** @class EditView
- *  @brief Uses Decorator pattern to switch MainWindow to photo edit view
+ *  @brief Uses State pattern to switch MainWindow to photo edit view
  *         and handles tasks associated with this view.
  */
 class EditView : public WindowContent {
@@ -141,7 +141,7 @@ class EditView : public WindowContent {
 };
 
 /** @class LibraryView
- *  @brief Uses Decorator pattern to switch MainWindow to library view
+ *  @brief Uses State pattern to switch MainWindow to library view
  *         and handles tasks associated with this view.
  */
 class LibraryView : public WindowContent {

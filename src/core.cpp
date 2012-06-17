@@ -485,6 +485,16 @@ void CoreController::applyEffectOfSelectedPlugin() {
   modifiedPhotos.insert(*currentPhoto);
 }
 
+/// @fn void CoreController::undoLastEffect() {
+/// @brief Method responsible for reverting last change from active photo.
+void CoreController::undoLastEffect() {
+}
+
+/// @fn void CoreController::redoLastEffect() {
+/// @brief Method responsible for applying undone effect one more time.
+void CoreController::redoLastEffect() {
+}
+
 /// @fn vector<string> CoreController::getPluginNames()
 /// @brief 
 vector<string> CoreController::getPluginNames() {

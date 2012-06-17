@@ -54,6 +54,8 @@ EditView::EditView(MainWindow *w) : window(w),
   //connecting signals
   right_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::nextImage));
   left_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::prevImage));
+  undo_button.signal_clicked().connect(sigc::mem_fun(*core, &CoreController::undoLastEffect));
+  redo_button.signal_clicked().connect(sigc::mem_fun(*core, &CoreController::redoLastEffect));
   library_button.signal_clicked().connect(sigc::mem_fun(window, &MainWindow::showLibraryView));
   put_effect_button.signal_clicked().connect(sigc::mem_fun(this, &EditView::applyEffect));
   zoom_signal = window->zoom_slider.signal_value_changed().connect(

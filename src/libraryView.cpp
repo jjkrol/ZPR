@@ -129,7 +129,7 @@ void LibraryView::loadImagesByTags() {
   //loading photos
   if(!selected_tags.empty()) {
     core->setCurrentTagSet(selected_tags);
-    window->showEditView();
+    //window->showEditView();
   }
 }
  
