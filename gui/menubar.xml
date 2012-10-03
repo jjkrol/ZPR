@@ -1,0 +1,18 @@
+<ui>
+  <menubar name='MenuBar'>
+    <menu action='FileMenu'>
+      <menuitem action='FileQuit'/>
+    </menu>
+    <menu action='EditMenu'>
+      <menuitem action='EditPreferences'/>
+      <menuitem action='EditDatabase'/>
+    </menu>
+    <menu action='ViewMenu'>
+      <menuitem action='LibraryView'/>
+      <menuitem action='EditView'/>
+    </menu>
+    <menu action='HelpMenu'>
+      <menuitem action='HelpAbout'/>
+    </menu>
+  </menubar>
+</ui>

@@ -11,3 +11,6 @@ async
 kuba.sh
 *.*.swp
 *.vsd
+gcov
+*.gcno
+*.gcda
